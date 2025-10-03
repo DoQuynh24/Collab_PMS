@@ -1,0 +1,44 @@
+@use "../../assets/styles/theme.scss" as *;
+
+.loadingContainer {
+    height: 100vh;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: gray.500;
+
+    .loadingLogo {
+        color: $color-primary;
+    }
+
+    .loadingText {
+        font-size: 16px;
+        font-weight: $font-weight-base;
+        color: $color-primary;
+        font-family: $font-family-base;
+    }
+}
+
+.loadingFiles {
+    height: 100%;
+    width: 100%;
+    margin-top: 16px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: gray.500;
+
+    .loadingIcon {
+        font-size: 48px;
+        color: $color-secondary;
+    }
+
+    .loadingText {
+        font-size: 20px;
+        font-weight: $font-weight-base;
+        color: $color-primary;
+        font-family: $font-family-base;
+        margin-top: 16px;
+    }
+}

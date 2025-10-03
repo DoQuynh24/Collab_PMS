@@ -1,0 +1,29 @@
+:root {
+    --color-primary: #334371;
+    --color-secondary: #1890ff;
+    --color-success: #52c41a;
+    --color-error: #8b0000;
+    --color-warning: #faad14;
+    --border-radius-base: 4px;
+    --border-radius-button: 0.5em;
+    --font-size-base: 14px;
+    --font-size-label: 15px;
+    --font-size-navigator: 16px;
+    --font-size-form-title: 20px;
+    --font-size-title: 24px;
+    --font-weight-base: 700;
+    --text-color-base: #09090b;
+    --back-ground-base: #fafafa;
+}
+
+* {
+    margin: 0;
+    font-family: "Roboto", sans-serif;
+    font-size: var(--font-size-base);
+}
+
+@media (min-width: 600px) {
+    .css-1h47ne7-MuiToolbar-root {
+        min-height: 50px !important; 
+    }
+}
