@@ -22,14 +22,17 @@ export class GoogleOauthStrategy extends PassportStrategy(GoogleStrategy, 'googl
       clientID,
       clientSecret,
       callbackURL,
-      scope: ['email', 'profile'],
-      passReqToCallback: true,
+      scope: ['openid', 'email', 'profile'],
+      // passReqToCallback: true,
     });
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any, done: any) {
-    const { email, givenName, familyName } = profile._json;
-    const fullName = `${givenName} ${familyName || ''}`.trim();
+    const email = profile._json.email;
+    const givenName = profile._json.given_name || '';
+    const familyName = profile._json.family_name || '';
+    const fullName = `${givenName} ${familyName}`.trim() || profile.displayName || 'User';
+    const picture = profile._json.picture || null;
     const googleId = profile.id;
 
     let user = await this.authService.findByGoogleId(googleId);
@@ -38,6 +41,7 @@ export class GoogleOauthStrategy extends PassportStrategy(GoogleStrategy, 'googl
         name: fullName,
         email,
         google_id: googleId,
+        picture
       });
     }
 

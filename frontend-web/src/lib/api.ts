@@ -1,64 +1,70 @@
 import axios from "axios";
-import { ECUSS_APP_URL } from "@/constant/config";
+import { COLLAB_URL } from "../constant/config";
 
 export const apiClient = axios.create({
-    baseURL: ECUSS_APP_URL,
-    timeout: 1000 * 60 * 30 * 3, // 90 minutes
-    withCredentials: true,
+  baseURL: COLLAB_URL,
+  timeout: 1000 * 60 * 30 * 3, 
+  withCredentials: true,
 });
 
-// REQUEST INTERCEPTOR
 apiClient.interceptors.request.use(
-    function (config) {
-        return config;
-    },
-    function (error) {
-        return Promise.reject(error);
-    },
+  function (config) {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  function (error) {
+    return Promise.reject(error);
+  },
 );
 
-// RESPONSE INTERCEPTOR
 apiClient.interceptors.response.use(
-    function (response) {
-        return response;
-    },
-    async function (error) {
-        const status = error?.response?.status;
+  function (response) {
+    return response;
+  },
+  async function (error) {
+    const status = error?.response?.status;
 
-        if (status === 401) {
-            return Promise.reject({
-                message: "Unauthorized: Invalid or expired token",
-                code: 401,
-                custom: true,
-            });
-        }
+    if (status === 401) {
+      localStorage.removeItem('access_token');
+      window.location.href = '/login'; 
+      return Promise.reject({
+        message: "Unauthorized: Invalid or expired token",
+        code: 401,
+        custom: true,
+      });
+    }
 
-        if (status === 403) {
-            return Promise.reject({
-                message: "No access to ECUSS system",
-                code: 403,
-                custom: true,
-            });
-        }
+    if (status === 403) {
+      return Promise.reject({
+        message: "No access to COLLAB system",
+        code: 403,
+        custom: true,
+      });
+    }
 
-        if (status === 404) {
-            return Promise.reject({
-                message: "Not Found",
-                code: 404,
-                custom: true,
-                data: error.response?.data,
-            });
-        }
+    if (status === 404) {
+      return Promise.reject({
+        message: "Not Found",
+        code: 404,
+        custom: true,
+        data: error.response?.data,
+      });
+    }
 
-        if (status === 500) {
-            return Promise.reject({
-                message: "Internal Server Error",
-                code: 500,
-                custom: true,
-                data: error.response?.data,
-            });
-        }
+    if (status === 500) {
+      return Promise.reject({
+        message: "Internal Server Error",
+        code: 500,
+        custom: true,
+        data: error.response?.data,
+      });
+    }
 
-        return Promise.reject(error);
-    },
+    return Promise.reject(error);
+  },
 );
+
+export default apiClient;

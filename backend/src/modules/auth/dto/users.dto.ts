@@ -28,8 +28,7 @@ export class UsersDto {
   @Type(() => Date) 
   created_at?: Date;
 
-  @IsOptional() 
-  @IsBoolean() 
-  @Type(() => Boolean) 
-  is_active?: boolean;
+  @IsOptional()
+  @IsString()
+  picture?: string;
 }

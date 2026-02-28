@@ -20,6 +20,12 @@ export class AuthController {
   async googleCallback(@Req() req, @Res() res: express.Response) {
     const { access_token } = await this.authService.loginGoogle(req.user);
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-    res.redirect(`${frontendUrl}/dashboard?token=${access_token}`);
+    res.redirect(`${frontendUrl}/home?token=${access_token}`);
+  }
+
+ @Get('me')
+ @UseGuards(AuthGuard('jwt'))
+  async getMe(@Req() req) {
+    return req.user;
   }
 }

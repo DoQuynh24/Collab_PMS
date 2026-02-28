@@ -17,8 +17,13 @@ export const Login = lazyLoad(
   (module) => module.default
 );
 
+export const Account = lazyLoad(
+  () => import('./account/MyAccount'),
+  (module) => module.default
+);
 
 export const routes: RouteConfig[] = [
   { path: '/home', component: Home, title: 'Home' },
   { path: '/login', component: Login, title: 'Login' },
+  { path: '/account', component: Account, title: 'Account' },
 ];
