@@ -4,7 +4,15 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
-import { AuthController } from './modules/auth/auth.controller';
+import { ProjectModule } from './modules/project/project.module';
+import { ProjectMemberModule } from './modules/project-member/project-member.module';
+import { TaskModule } from './modules/tasks/task.module';
+import { TaskStatusModule } from './modules/task-status/task-status.module';
+import { TaskPriorityModule } from './modules/task-priorities/task-priority.module';
+import { DatabaseSeed } from './database/database.seed';
+import { TaskPriority } from './modules/task-priorities/entities/task-priority.entity';
+import { ProjectTaskStatus } from './modules/task-status/entities/task-status.entity';
+import { GlobalTaskStatus } from './modules/task-status/entities/gobal-task-status.entity';
 
 @Module({
   imports: [
@@ -19,9 +27,15 @@ import { AuthController } from './modules/auth/auth.controller';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false, 
     }),
+    TypeOrmModule.forFeature([TaskPriority, ProjectTaskStatus, GlobalTaskStatus]),
     AuthModule,
+    ProjectModule,
+    ProjectMemberModule,
+    TaskModule,
+    TaskStatusModule,
+    TaskPriorityModule,
   ],
-  controllers: [AppController, AuthController],
-  providers: [AppService],
+  controllers: [AppController],
+  providers: [AppService, DatabaseSeed],
 })
 export class AppModule {}
