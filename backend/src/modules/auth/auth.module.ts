@@ -25,6 +25,9 @@ import { User } from './entities/user.entity';
   ],
   providers: [AuthService, GoogleOauthStrategy, JwtStrategy],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [
+    AuthService,
+    TypeOrmModule.forFeature([User]), 
+  ],
 })
 export class AuthModule {}

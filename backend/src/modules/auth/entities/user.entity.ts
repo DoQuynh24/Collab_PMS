@@ -22,4 +22,6 @@ export class User {
 
   @CreateDateColumn()
   created_at: Date;
+  project_members: any;
+  ownedProjects: any;
 }
