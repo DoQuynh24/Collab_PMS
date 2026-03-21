@@ -10,6 +10,7 @@ import {
 import { Home as HomeIcon } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { homeUrl } from '../routes/urls';
+import ProjectList from '../modules/project/component/ProjectList';
 
 const drawerWidth = 230;
 const collapsedWidth = 60;
@@ -70,6 +71,7 @@ export function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => voi
             />
           </ListItemButton>
         ))}
+        <ProjectList open={open} />
       </List>
     </Drawer>
   );
