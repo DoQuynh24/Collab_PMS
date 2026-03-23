@@ -158,16 +158,24 @@ export class ProjectService {
 
   async getTasksByProject(projectId: string, userId: number) {
     const project = await this.projectRepository.findOne({
-      where: { project_id: projectId, owner_id: userId },
+      where: { project_id: projectId },
+      relations: ['project_members'],
     });
 
     if (!project) {
       throw new NotFoundException('Project not found');
     }
 
+    const isOwner = project.owner_id === userId;
+    const isMember = project.project_members.some(m => m.user_id === userId);
+
+    if (!isOwner && !isMember) {
+      throw new UnauthorizedException('You do not have access to this project');
+    }
+
     return this.taskRepo.find({
       where: { project_id: projectId },
-      relations: ['status', 'priority'],
+      relations: ['assignee', 'priority', 'status'],
       order: { order_index: 'ASC' },
     });
   }
