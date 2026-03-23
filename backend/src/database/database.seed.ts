@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { TaskPriority } from '../modules/task-priorities/entities/task-priority.entity';
 import { GlobalTaskStatus } from 'src/modules/task-status/entities/gobal-task-status.entity';
 
@@ -12,11 +12,14 @@ export class DatabaseSeed implements OnModuleInit {
 
     @InjectRepository(GlobalTaskStatus)
     private readonly statusRepo: Repository<GlobalTaskStatus>,
+
+    private readonly connection: Connection,
   ) {}
 
   async onModuleInit() {
     await this.seedPriorities();
     await this.seedStatuses();
+    await this.createAfterProjectInsertTrigger();
   }
 
   private async seedPriorities() {
@@ -42,5 +45,30 @@ export class DatabaseSeed implements OnModuleInit {
         { name: 'DONE' },
       ]);
     }
+  }
+
+  private async createAfterProjectInsertTrigger() {
+    const triggerName = 'after_project_insert';
+
+    const [exists] = await this.connection.query(`
+      SELECT TRIGGER_NAME 
+      FROM information_schema.TRIGGERS 
+      WHERE TRIGGER_SCHEMA = DATABASE() 
+      AND TRIGGER_NAME = ?
+    `, [triggerName]);
+
+    if (exists && exists.TRIGGER_NAME) {
+      return;
+    }
+
+    await this.connection.query(`
+      CREATE TRIGGER ${triggerName}
+      AFTER INSERT ON projects
+      FOR EACH ROW
+      BEGIN
+          INSERT INTO project_members (project_id, user_id, role, created_at)
+          VALUES (NEW.project_id, NEW.owner_id, 'admin', NOW());
+      END
+    `);
   }
 }
