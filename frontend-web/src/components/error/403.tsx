@@ -1,10 +1,10 @@
 import React from "react";
 import { Box, Button, Typography } from "@mui/material";
-import { ECUSS_APP_URL } from "@/constant/config";
+import { COLLAB_URL } from "../../constant/config";
 
 const Error403: React.FC = () => {
   const handleRedirect = () => {
-    window.location.href = ECUSS_APP_URL;
+    window.location.href = COLLAB_URL;
   };
 
   return (

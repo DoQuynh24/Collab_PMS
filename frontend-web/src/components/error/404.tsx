@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Button, Typography, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { homeUrl } from "@/routes/urls";
+import { homeUrl } from "../../routes/urls";
 
 export function Error404() {
   const navigate = useNavigate();

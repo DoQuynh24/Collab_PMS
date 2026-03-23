@@ -1,6 +1,6 @@
-import { homeUrl } from "@/routes/urls";
 import { Box, Button, Typography, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { homeUrl } from "../../routes/urls";
 
 export function Error500() {
   const navigate = useNavigate();

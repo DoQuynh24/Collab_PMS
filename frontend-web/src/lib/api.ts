@@ -29,14 +29,12 @@ apiClient.interceptors.response.use(
 
     if (status === 401) {
       localStorage.removeItem('access_token');
-      window.location.href = '/login'; 
-      return Promise.reject({
-        message: "Unauthorized: Invalid or expired token",
-        code: 401,
-        custom: true,
-      });
+      const currentPath = window.location.pathname;
+      if (!currentPath.startsWith('/invitations')) {
+        window.location.href = '/login';
+      }
     }
-
+      
     if (status === 403) {
       return Promise.reject({
         message: "No access to COLLAB system",
