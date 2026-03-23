@@ -13,6 +13,8 @@ import { DatabaseSeed } from './database/database.seed';
 import { TaskPriority } from './modules/task-priorities/entities/task-priority.entity';
 import { ProjectTaskStatus } from './modules/task-status/entities/task-status.entity';
 import { GlobalTaskStatus } from './modules/task-status/entities/gobal-task-status.entity';
+import { ProjectInvitationModule } from './modules/project-invitation/project-invitation.module';
+import { MailModule } from './modules/project-invitation/mail/mail.module';
 
 @Module({
   imports: [
@@ -31,9 +33,11 @@ import { GlobalTaskStatus } from './modules/task-status/entities/gobal-task-stat
     AuthModule,
     ProjectModule,
     ProjectMemberModule,
+    ProjectInvitationModule,
     TaskModule,
     TaskStatusModule,
     TaskPriorityModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseSeed],
