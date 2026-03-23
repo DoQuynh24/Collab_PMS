@@ -39,4 +39,13 @@ export class AuthService {
   async loginGoogle(user: User) {
     return this.generateToken(user);
   }
+
+  async searchUsers(q: string): Promise<User[]> {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.email LIKE :q OR user.name LIKE :q', { q: `%${q}%` })
+      .select(['user.user_id', 'user.name', 'user.email', 'user.picture'])
+      .limit(10)
+      .getMany();
+  }
 }
