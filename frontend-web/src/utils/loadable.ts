@@ -1,4 +1,4 @@
-import { lazy, ComponentType } from 'react';
+import { lazy, type ComponentType,  } from 'react';
 
 export const lazyLoad = <T extends ComponentType<any>>(
   loader: () => Promise<{ default: T } | { [key: string]: T }>,

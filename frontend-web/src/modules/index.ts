@@ -22,8 +22,19 @@ export const Account = lazyLoad(
   (module) => module.default
 );
 
+export const ProjetDetail = lazyLoad(
+  () => import('./project/ProjectDetail'),
+  (module) => module.default
+);
+
+export const InvitationAccept = lazyLoad(
+  () => import('./project-member/component/InvitationAccept'),
+  (module) => module.default
+);
+
 export const routes: RouteConfig[] = [
   { path: '/home', component: Home, title: 'Home' },
   { path: '/login', component: Login, title: 'Login' },
   { path: '/account', component: Account, title: 'Account' },
+  { path: '/projects/:projectId', component: ProjetDetail, title: 'Project Detail' },
 ];

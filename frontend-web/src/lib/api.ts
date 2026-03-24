@@ -28,11 +28,12 @@ apiClient.interceptors.response.use(
     const status = error?.response?.status;
 
     if (status === 401) {
-      localStorage.removeItem('access_token');
       const currentPath = window.location.pathname;
-      if (!currentPath.startsWith('/invitations')) {
-        window.location.href = '/login';
+      if (currentPath.startsWith('/invitations')) {
+        return Promise.reject(error); 
       }
+      localStorage.removeItem('access_token');
+      window.location.href = '/login';
     }
       
     if (status === 403) {
