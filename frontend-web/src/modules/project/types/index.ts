@@ -9,6 +9,19 @@ export interface IProject {
   owner_id: number;
   created_at: string;
   updated_at?: string;
+  project_members?: Array<{
+    member_id: number;
+    project_id: string;
+    user_id: number;
+    role: 'admin' | 'member';
+    created_at: string;
+    user?: {
+      user_id: number;
+      name: string;
+      picture?: string;
+      email: string;
+    };
+  }>;
 }
 
 export type CreateProjectPayload = Omit<
