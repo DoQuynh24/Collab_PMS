@@ -13,8 +13,8 @@ import { useParams } from "react-router-dom";
 import { useGetProjectById } from "./api/get-project-id";
 import styles from "./ProjectDetail.module.scss";
 import { useGetProjectTaskStatuses } from "../task-status/api/get-project-task-status";
-import AddTaskInline from "../task-status/component/AddTaskInline";
-import TaskCard from "../task-status/component/TaskCard";
+import AddTaskInline from "../task/component/AddTaskInline";
+import TaskCard from "../task/component/TaskCard";
 import { useCreateTask } from "../task/api/add-task";
 import { useGetTasksByProject } from "../task/api/get-task-by-project";
 import { toDateString } from "../../utils/formatDate";
@@ -46,7 +46,15 @@ export function ProjectDetail() {
   if (isLoading) return <Typography>Đang tải...</Typography>;
   
 
-  const handleCreateTask = (title: string, statusId: number,  priorityId: number, deadline?: Date | null) => {
+ const projectMembers = project?.project_members || [];
+
+  const handleCreateTask = (
+    title: string,
+    statusId: number,
+    priorityId: number,
+    deadline?: Date | null,
+    assigneeId?: number | null
+  ) => {
     if (!projectId) return;
 
     createTask({
@@ -55,6 +63,7 @@ export function ProjectDetail() {
       status_id: statusId,
       priority_id: priorityId,
       deadline: deadline ? toDateString(deadline) : undefined,
+      assignee_id: assigneeId ?? undefined,   // ← thêm dòng này
     });
   };
 
@@ -161,8 +170,9 @@ export function ProjectDetail() {
                   {openAdd === status.id && (
                     <AddTaskInline
                       statusId={status.id}
-                      onSubmit={(title, statusId, priorityId, deadline) => {
-                        handleCreateTask(title, statusId, priorityId, deadline);
+                      projectMembers={projectMembers}           // ← truyền xuống
+                      onSubmit={(title, statusId, priorityId, deadline, assigneeId) => {
+                        handleCreateTask(title, statusId, priorityId, deadline, assigneeId);
                         setOpenAdd(null);
                       }}
                       onClose={() => setOpenAdd(null)}
@@ -172,9 +182,9 @@ export function ProjectDetail() {
                   {columnTasks.map((task) => (
                     <TaskCard
                       key={task.task_id}
-                      title={task.title}
-                      code={`TASK-${task.task_id}`}
-                      priorityId={task.priority_id}
+                      task={task}                    
+                      projectMembers={projectMembers}   
+                      projectId={projectId}   
                     />
                   ))}
                 </Box>
