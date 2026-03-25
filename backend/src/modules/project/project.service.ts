@@ -175,7 +175,7 @@ export class ProjectService {
 
     return this.taskRepo.find({
       where: { project_id: projectId },
-      relations: ['assignee', 'priority', 'status'],
+      relations: ['assignee', 'priority', 'status', 'creator'],
       order: { order_index: 'ASC' },
     });
   }
