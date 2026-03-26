@@ -77,30 +77,26 @@ export class TaskService {
     });
   }
 
-  async update(
-    taskId: number,
-    dto: UpdateTaskDto,
-    userId: number,
-  ) {
+  async update(taskId: number, dto: UpdateTaskDto, userId: number) {
     const task = await this.taskRepo.findOne({
       where: { task_id: taskId },
     });
+    if (!task) throw new NotFoundException('Task not found');
 
-    if (!task)
-      throw new NotFoundException('Task not found');
+    const project = await this.projectRepo.findOne({
+      where: { project_id: task.project_id },
+    });
+    const isMember = await this.memberRepo.findOne({
+      where: { project_id: task.project_id, user_id: userId },
+    });
+    const isOwner = project?.owner_id === userId;
 
-    if (
-      task.created_by !== userId &&
-      task.assignee_id !== userId
-    )
-      throw new UnauthorizedException(
-        'Only creator can update task',
-      );
+    if (!isMember && !isOwner) {
+      throw new UnauthorizedException('Only project members can update task');
+    }
 
     Object.assign(task, dto);
-
-    if (dto.deadline)
-      task.deadline = new Date(dto.deadline);
+    if (dto.deadline) task.deadline = new Date(dto.deadline);
 
     return this.taskRepo.save(task);
   }
