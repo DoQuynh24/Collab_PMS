@@ -63,7 +63,7 @@ export function ProjectDetail() {
       status_id: statusId,
       priority_id: priorityId,
       deadline: deadline ? toDateString(deadline) : undefined,
-      assignee_id: assigneeId ?? undefined,   // ← thêm dòng này
+      assignee_id: assigneeId ?? undefined,   
     });
   };
 
@@ -170,7 +170,7 @@ export function ProjectDetail() {
                   {openAdd === status.id && (
                     <AddTaskInline
                       statusId={status.id}
-                      projectMembers={projectMembers}           // ← truyền xuống
+                      projectMembers={projectMembers}           
                       onSubmit={(title, statusId, priorityId, deadline, assigneeId) => {
                         handleCreateTask(title, statusId, priorityId, deadline, assigneeId);
                         setOpenAdd(null);

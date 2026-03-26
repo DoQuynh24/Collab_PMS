@@ -7,7 +7,7 @@ import { URL_API_GET_TASK } from "../../../constant/config";
 export interface UpdateTaskPayload {
   title?: string;
   description?: string;
-  deadline?: string;
+  deadline?: string | null;
   assignee_id?: number | null;
   priority_id?: number;
   status_id?: number;

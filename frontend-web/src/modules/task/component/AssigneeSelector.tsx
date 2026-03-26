@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import SearchIcon from "@mui/icons-material/Search";
+import { useGetCurrentUser } from "../../login/api/auth";
 
 interface Props {
   assignee?: any;
@@ -33,6 +34,7 @@ export default function AssigneeSelector({
   showTooltip = false,
   tooltipTitle = "Phân công",
 }: Props) {
+  const { data: currentUser } = useGetCurrentUser();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [search, setSearch] = useState("");
 
@@ -79,16 +81,30 @@ export default function AssigneeSelector({
           {showText && <Typography fontSize={13}>{assignee.name}</Typography>}
         </>
       ) : (
-        <>
-          <Avatar sx={{ width: 22, height: 22, bgcolor: "#e0e0e0" }}>
-            <PersonOutlineIcon fontSize="small" />
-          </Avatar>
-          {showUnassignedText && (                     
-            <Typography fontSize={13} color="#9ca3af">
-              Chưa phân công
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Avatar sx={{ width: 22, height: 22, bgcolor: "#e0e0e0" }}>
+              <PersonOutlineIcon fontSize="small" />
+            </Avatar>
+            {showUnassignedText && (
+              <Typography fontSize={13} color="#9ca3af">Chưa phân công</Typography>
+            )}
+          </Box>
+          {showUnassignedText && (
+            <Typography
+              fontSize={12}
+              color="primary"
+              sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+              onClick={(e) => {
+                e.stopPropagation();
+                const me = projectMembers.find(m => m.user_id === currentUser?.user_id);
+                if (me) onAssigneeChange(me.user_id);
+              }}
+            >
+              Phân công cho tôi
             </Typography>
           )}
-        </>
+        </Box>
       )}
     </Box>
   );
@@ -126,7 +142,6 @@ export default function AssigneeSelector({
             InputProps={{
               startAdornment: <SearchIcon sx={{ mr: 1, color: "#9ca3af" }} />,
             }}
-            sx={{ mb: 1 }}
           />
 
           <List sx={{ maxHeight: 320, overflow: "auto" }}>
@@ -145,23 +160,30 @@ export default function AssigneeSelector({
               <ListItemText primary="Bỏ phân công" />
             </ListItemButton>
 
-            {filteredMembers.map((member: any) => (
-              <ListItemButton
-                key={member.user_id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAssigneeChange(member.user_id);
-                  handleClose();
-                }}
-              >
-                <ListItemAvatar>
-                  <Avatar src={member.user?.picture}>
-                    {member.user?.name?.charAt(0)}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={member.user?.name} />
-              </ListItemButton>
-            ))}
+           {filteredMembers.map((member: any) => (
+            <ListItemButton
+              key={member.user_id}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAssigneeChange(member.user_id);
+                handleClose();
+              }}
+            >
+              <ListItemAvatar>
+                <Avatar src={member.user?.picture}>
+                  {member.user?.name?.charAt(0)}
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText 
+                primary={
+                  member.user_id === currentUser?.user_id 
+                    ? `${member.user?.name} (Phân công cho tôi)` 
+                    : member.user?.name
+                }
+                secondary={member.user?.email}
+              />
+            </ListItemButton>
+          ))}
           </List>
         </Box>
       </Popover>
