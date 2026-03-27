@@ -1,17 +1,35 @@
-CollabPMS - Frontend
-CollabPMS là hệ thống quản lý dự án và công việc nhóm dành cho sinh viên, hỗ trợ làm việc nhóm hiệu quả, minh bạch và tiện lợi.
+# CollabPMS - Hệ thống quản lý dự án và công việc nhóm dành cho sinh viên
 
-Frontend được xây dựng bằng React + TypeScript + Vite, giao diện responsive với Material-UI, tích hợp xác thực Google OAuth và dashboard quản lý dự án.
+## Tính năng nổi bật
+- Đăng nhập bằng Google OAuth
+- Quản lý dự án (Private / Public)
+- Kéo thả task giữa các cột trạng thái (Drag & Drop)
+- Kanban Board quản lý nhiệm vụ
+- Phân công thành viên, ưu tiên, deadline
+- Bình luận và đính kèm tài liệu
+- Mời thành viên qua email
 
-Công nghệ sử dụng
-Vite + React 18 + TypeScript
-Material-UI (MUI) v5 – giao diện hiện đại, theme tùy chỉnh (#5663ee)
-React Router v6 – điều hướng (App Router)
-Axios hoặc fetch – gọi API backend
-React Hooks (useState, useEffect, useNavigate, useSearchParams) – quản lý state và routing
-ESLint + Prettier – code sạch, nhất quán
-Vite Plugin React – Fast Refresh (Hot Module Replacement)
-Cài đặt và chạy local
-1. Clone the repository
-git clone https://github.com/your-username/collab-pms.git
-cd collab-pms
+## Công nghệ sử dụng
+
+**Backend**: NestJS + TypeScript + TypeORM + MySQL + JWT + Google OAuth  
+**Frontend**: React 19 + TypeScript + Vite + Material-UI + React Query + Dnd kit
+
+## Hướng dẫn chạy dự án
+
+### Yêu cầu hệ thống
+- Node.js ≥ 18
+- MySQL ≥ 8.0
+- Git
+
+## Cấu trúc dự án
+```
+Collab_PMS/
+├── backend/        # NestJS API server — xem backend/README.md
+└── frontend-web/   # React client     — xem frontend-web/README.md
+```
+
+### 1. Clone repository
+```bash
+git clone https://github.com/DoQuynh24/Collab_PMS.git
+cd Collab_PMS
+```
