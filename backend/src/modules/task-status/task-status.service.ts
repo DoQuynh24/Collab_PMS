@@ -24,7 +24,15 @@ export class TaskStatusService {
   }
 
   async create(dto: CreateTaskStatusDto) {
-    const status = this.repo.create(dto);
+    const count = await this.repo.count({
+      where: { project_id: dto.project_id },
+    });
+  
+    const status = this.repo.create({
+      ...dto,
+      order_index: count,
+    });
+  
     return this.repo.save(status);
   }
 
@@ -45,4 +53,16 @@ export class TaskStatusService {
     await this.repo.remove(status);
     return { message: 'Status deleted' };
   }
+
+  async reorder(projectId: string, orderedIds: number[]) {
+    const updates = orderedIds.map((id, index) =>
+      this.repo.update(id, { order_index: index })
+    );
+    await Promise.all(updates);
+    return this.repo.find({
+      where: { project_id: projectId },
+      order: { order_index: 'ASC' },
+    });
+  }
+ 
 }

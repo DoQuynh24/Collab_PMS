@@ -42,4 +42,11 @@ export class TaskStatusController {
   remove(@Param('id') id: string) {
     return this.service.remove(Number(id));
   }
+
+  @Patch('reorder')
+    reorder(
+      @Body() dto: { project_id: string; ordered_ids: number[] }
+    ) {
+      return this.service.reorder(dto.project_id, dto.ordered_ids);
+  }
 }
