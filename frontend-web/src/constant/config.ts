@@ -8,5 +8,7 @@ export const URL_API_SEARCH_USER = `${COLLAB_URL}/auth`;
 export const URL_API_GET_PROJECT = `${COLLAB_URL}/projects`;
 //Tasks
 export const URL_API_GET_TASK = `${COLLAB_URL}/tasks`;
+//Task Status
+export const URL_API_GET_PROJECT_TASK = `${COLLAB_URL}/project-task-statuses`;
 //Invitations
 export const URL_API_GET_INVITATION = `${COLLAB_URL}/invitations`;
