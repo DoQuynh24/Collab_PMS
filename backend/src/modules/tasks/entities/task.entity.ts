@@ -45,6 +45,9 @@ export class Task {
   @Column({ default: 0 })
   order_index: number;
 
+  @Column({ type: 'tinyint', default: 0 })
+  is_archived: boolean = false;
+
   @ManyToOne(() => Project, (project) => project.tasks, {
     onDelete: 'CASCADE',
   })

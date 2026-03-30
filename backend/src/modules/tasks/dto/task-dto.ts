@@ -4,6 +4,7 @@ import {
   IsString,
   Length,
   IsDateString,
+  IsBoolean,
 } from 'class-validator';
 
 export class TaskDto {
@@ -31,4 +32,9 @@ export class TaskDto {
 
   @IsInt()
   status_id: number;
+
+  @IsOptional()
+  @IsBoolean()
+  is_archived?: boolean;
+  
 }
