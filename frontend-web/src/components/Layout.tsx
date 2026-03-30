@@ -22,6 +22,11 @@ export function Layout() {
           flexGrow: 1,
           p: 3,
           pt: 10,
+          overflow: "auto",
+          minWidth: 0, 
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Outlet />

@@ -39,25 +39,32 @@
   padding: 16px;
   min-height: 140px;
   position: relative;
+  max-height: calc(100vh - 270px); 
+  display: flex;
+  flex-direction: column;
 
-    &:hover .createTask {
-      opacity: 1;
-      border-radius: 8px;
-      background-color: white;
-      margin-bottom: 8px;
-      padding: 8px;
-    }
+  &:hover .createTask {
+    opacity: 1;
+    border-radius: 8px;
+    background-color: white;
+    margin-bottom: 8px;
+    padding: 8px;
   }
+}
 
   .columnTitle {
     font-size: 13px;
     font-weight: 700;
     color: #6b6f76;
     margin-bottom: 8px;
+    flex-shrink: 0; 
   }
 
   .taskList {
-    margin-top: 10px;
+    overflow-y: auto;  
+    flex: 1;
+    min-height: 0;
+    scrollbar-width: none;
 
     .createTask {
     margin-top: 8px;
@@ -81,6 +88,6 @@
     padding: 8px;
   }
   }
-  
+
 }
 

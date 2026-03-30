@@ -152,13 +152,13 @@ export function ProjectDetail() {
     : null;
 
   return (
-    <Box>
+    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", minWidth: 0 }}>
       <ProjectHeader projectName={project?.name} projectId={projectId} />
       <ProjectNav projectId={projectId} />
 
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ flexShrink: 0, px: 2, pt: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2} className={styles.boardHeader}>
-          <TextField size="small" placeholder="Tìm kiếm" />
+          <TextField size="small" placeholder="Tìm kiếm nhiệm vụ" />
 
           <Stack direction="row" spacing={-1} alignItems="center">
             {project?.project_members?.slice(0, 5).map((member) => (
@@ -198,7 +198,9 @@ export function ProjectDetail() {
             </Tooltip>
           </Box>
         </Stack>
-
+      </Box>
+        
+      <Box sx={{ flex: 1,  overflowX: "auto",  overflowY: "hidden", minHeight: 0, px: 2, pb: 2,  scrollbarWidth: "none" }}>
         <DndContext
           sensors={sensors}
           collisionDetection={activeColumnId ? closestCenter : closestCorners}
