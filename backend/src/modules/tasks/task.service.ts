@@ -69,9 +69,12 @@ export class TaskService {
     return this.taskRepo.save(task);
   }
 
-  async findByProject(projectId: string) {
+  async findByProject(projectId: string, includeArchived: boolean = false) {
     return this.taskRepo.find({
-      where: { project_id: projectId },
+      where: { 
+        project_id: projectId,
+        is_archived: false
+      },
       relations: ['assignee', 'priority', 'status', 'creator'],
       order: { order_index: 'ASC' },
     });
@@ -101,21 +104,51 @@ export class TaskService {
     return this.taskRepo.save(task);
   }
 
+  async archive(taskId: number, userId: number) {
+    const task = await this.taskRepo.findOne({
+      where: { task_id: taskId },
+      relations: ['project'],
+    });
+
+    if (!task) throw new NotFoundException('Task not found');
+
+    const isMember = await this.memberRepo.findOne({
+      where: { project_id: task.project_id, user_id: userId },
+    });
+
+    if (!isMember && task.project.owner_id !== userId) {
+      throw new UnauthorizedException('Only project members can archive task');
+    }
+
+    task.is_archived = true;
+    await this.taskRepo.save(task);
+
+    return { message: 'Task has been archived' };
+  }
+
   async remove(taskId: number, userId: number) {
     const task = await this.taskRepo.findOne({
       where: { task_id: taskId },
+      relations: ['project'],
     });
 
-    if (!task)
-      throw new NotFoundException('Task not found');
+    if (!task) throw new NotFoundException('Task not found');
 
-    if (task.created_by !== userId)
-      throw new UnauthorizedException(
-        'Only creator can delete task',
-      );
+    const isOwner = task.project.owner_id === userId;
+    const isAdmin = await this.memberRepo.findOne({
+      where: { 
+        project_id: task.project_id, 
+        user_id: userId, 
+        role: 'admin' 
+      },
+    });
+
+    if (!isOwner && !isAdmin) {
+      throw new UnauthorizedException('Only project owner or admin can permanently delete this task');
+    }
 
     await this.taskRepo.remove(task);
-    return { message: 'Task deleted' };
+    return { message: 'Task has been permanently deleted' };
   }
 
   async move(taskId: number, dto: MoveTaskDto) {

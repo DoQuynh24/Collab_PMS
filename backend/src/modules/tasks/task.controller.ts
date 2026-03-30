@@ -8,6 +8,7 @@ import {
   Body,
   Req,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 
@@ -23,18 +24,22 @@ export class TaskController {
   constructor(private readonly service: TaskService) {}
 
   @Post()
-create(
-  @Body() dto: CreateTaskDto,
-  @Req() req: Request & { user: { sub: string } },
-) {
-  const userId = Number(req.user.sub);
+  create(
+    @Body() dto: CreateTaskDto,
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    const userId = Number(req.user.sub);
 
-  return this.service.create(dto, userId);
-}
+    return this.service.create(dto, userId);
+  }
 
   @Get('project/:projectId')
-  findByProject(@Param('projectId') projectId: string) {
-    return this.service.findByProject(projectId);
+  findByProject(
+    @Param('projectId') projectId: string,
+    @Query('archived') archived?: string
+  ) {
+    const includeArchived = archived === 'true';
+    return this.service.findByProject(projectId, includeArchived);
   }
 
   @Patch(':id')
@@ -56,6 +61,14 @@ create(
     @Body() dto: MoveTaskDto
   ) {
     return this.service.move(taskId, dto);
+  }
+
+  @Patch(':id/archive')
+  archive(
+    @Param('id') id: string,
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    return this.service.archive(Number(id), Number(req.user.sub));
   }
 
   @Delete(':id')

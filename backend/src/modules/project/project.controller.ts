@@ -9,6 +9,7 @@ import {
   Req,
   UseGuards,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -94,10 +95,14 @@ export class ProjectController {
   async getTasksByProject(
     @Param('projectId') projectId: string,
     @Req() req: Request & { user: { sub: string } },
+    @Query('archived') archived?: string,     
   ) {
+    const includeArchived = archived === 'true';
+    
     return this.projectService.getTasksByProject(
       projectId,
       Number(req.user.sub),
+      includeArchived
     );
   }
 

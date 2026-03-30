@@ -156,7 +156,7 @@ export class ProjectService {
     };
   }
 
-  async getTasksByProject(projectId: string, userId: number) {
+  async getTasksByProject(projectId: string, userId: number, is_archived: boolean = false) {
     const project = await this.projectRepository.findOne({
       where: { project_id: projectId },
       relations: ['project_members'],
@@ -174,7 +174,10 @@ export class ProjectService {
     }
 
     return this.taskRepo.find({
-      where: { project_id: projectId },
+      where: { 
+        project_id: projectId,
+        is_archived: false
+      },
       relations: ['assignee', 'priority', 'status', 'creator'],
       order: { order_index: 'ASC' },
     });
