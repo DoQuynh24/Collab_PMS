@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Dialog,
@@ -30,6 +30,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { toDateString } from "../../utils/formatDate";
+import styles from "./TaskDetailModal.module.scss";
 
 interface Props {
   open: boolean;
@@ -38,24 +39,6 @@ interface Props {
   projectMembers: any[];
   projectId?: string;
 }
-
-const DETAIL_ROW_SX = {
-  display: "flex",
-  alignItems: "center",
-  py: 0.75,
-  px: 1,
-  borderRadius: "6px",
-  "&:hover": { bgcolor: "#f4f5f7" },
-  cursor: "pointer",
-  minHeight: 36,
-};
-
-const LABEL_SX = {
-  fontSize: 13,
-  color: "#6b7280",
-  width: 110,
-  flexShrink: 0,
-};
 
 export default function TaskDetailModal({
   open,
@@ -83,7 +66,11 @@ export default function TaskDetailModal({
   );
   const [openDatePicker, setOpenDatePicker] = useState(false);
   
-
+  useEffect(() => {
+    setTitle(task.title);
+    setDescription(task.description || "");
+    setDeadline(task.deadline ? new Date(task.deadline) : null);
+  }, [task.task_id, task.title, task.description, task.deadline]);
 
   const handleTitleSave = () => {
     const trimmed = title.trim();
@@ -426,8 +413,8 @@ export default function TaskDetailModal({
             </Box>
 
             <Box sx={{ px: 2, py: 1 }}>
-              <Box sx={DETAIL_ROW_SX}>
-                <Typography sx={LABEL_SX}>Người thực hiện</Typography>
+              <Box className={styles.detailRow}>
+                <Typography className={styles.detailLabel}>Người thực hiện</Typography>
                 <AssigneeSelector
                   assignee={assignee}
                   projectMembers={projectMembers}
@@ -442,8 +429,8 @@ export default function TaskDetailModal({
                 />
               </Box>
 
-              <Box sx={DETAIL_ROW_SX}>
-                <Typography sx={LABEL_SX}>Độ ưu tiên</Typography>
+              <Box className={styles.detailRow}>
+                <Typography className={styles.detailLabel}>Độ ưu tiên</Typography>
                 <PrioritySelector
                   priority={priority}
                   onPriorityChange={(priorityId) =>
@@ -456,8 +443,8 @@ export default function TaskDetailModal({
                 />
               </Box>
               
-              <Box sx={DETAIL_ROW_SX}>
-                <Typography sx={LABEL_SX}>Ngày tạo</Typography>
+              <Box className={styles.detailRow}>
+                <Typography className={styles.detailLabel}>Ngày tạo</Typography>
                 <Typography fontSize={13} color="#111827">
                   {task.created_at 
                     ? new Date(task.created_at).toLocaleDateString("vi-VN", { 
@@ -469,8 +456,8 @@ export default function TaskDetailModal({
                 </Typography>
               </Box>
 
-              <Box sx={DETAIL_ROW_SX} onClick={() => setOpenDatePicker(true)}>
-                <Typography sx={LABEL_SX}>Hạn hoàn thành</Typography>
+              <Box className={styles.detailRow} onClick={() => setOpenDatePicker(true)}>
+                <Typography className={styles.detailLabel}>Hạn hoàn thành</Typography>
                 
                 {deadline ? (
                   <Box
@@ -542,8 +529,8 @@ export default function TaskDetailModal({
                 />
               </LocalizationProvider>
 
-              <Box sx={DETAIL_ROW_SX}>
-                <Typography sx={LABEL_SX}>Người tạo</Typography>
+              <Box className={styles.detailRow}>
+                <Typography className={styles.detailLabel}>Người tạo</Typography>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   {task.creator ? (
                     <>

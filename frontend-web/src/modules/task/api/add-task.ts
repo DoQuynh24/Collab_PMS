@@ -1,17 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { URL_API_GET_PROJECT } from "../../../constant/config";
+import { URL_API_GET_TASK } from "../../../constant/config";
 import type { ITask, CreateTaskPayload } from "../types";
 import type { MutationConfig } from "../../../lib/react-query";
 import apiClient from "../../../lib/api";
 
-export const createTask = async (
-  data: CreateTaskPayload
-): Promise<ITask> => {
-  const { project_id, ...payload } = data;
-  const response = await apiClient.post(
-    `${URL_API_GET_PROJECT}/${project_id}/tasks`,
-    payload
-    );
+export const createTask = async (data: CreateTaskPayload): Promise<ITask> => {
+  const response = await apiClient.post(URL_API_GET_TASK, data);
   return response.data;
 };
 
@@ -25,7 +19,7 @@ export const useCreateTask = ({ config }: UseCreateTaskOptions = {}) => {
   return useMutation({
     mutationFn: createTask,
 
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["tasks"],
       });

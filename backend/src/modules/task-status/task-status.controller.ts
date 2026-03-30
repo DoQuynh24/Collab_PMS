@@ -30,6 +30,13 @@ export class TaskStatusController {
     return this.service.create(dto);
   }
 
+  @Patch('reorder')
+  reorder(
+    @Body() dto: { project_id: string; ordered_ids: number[] }
+  ) {
+    return this.service.reorder(dto.project_id, dto.ordered_ids);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -43,10 +50,4 @@ export class TaskStatusController {
     return this.service.remove(Number(id));
   }
 
-  @Patch('reorder')
-    reorder(
-      @Body() dto: { project_id: string; ordered_ids: number[] }
-    ) {
-      return this.service.reorder(dto.project_id, dto.ordered_ids);
-  }
 }
