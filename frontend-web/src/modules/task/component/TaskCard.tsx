@@ -8,7 +8,6 @@ import {
   TextField,
   CircularProgress,
 } from "@mui/material";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
@@ -22,6 +21,7 @@ import type { ITask } from "../types";
 import { useUpdateTask } from "../api/update-task";
 import TaskDetailModal from "../TaskDetailModal";
 import { toSortableId } from "./useBoardDnd";
+import TaskCardMenu from "./TaskCardMenu";
 
 interface Props {
   task: ITask;
@@ -219,12 +219,9 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
                       </IconButton>
                     </Tooltip>
                   )}
-                  <Tooltip title="Tùy chọn">
-                    <IconButton size="small"
-                      sx={{ transition: "transform 0.2s ease", "&:hover": { background: "transparent", transform: "scale(1.15)" } }}>
-                      <MoreHorizIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
+                  <TaskCardMenu 
+                    task={task}
+                    onOpenDetail={() => setModalOpen(true)}/>
                 </Box>
               </>
             )}

@@ -15,6 +15,7 @@ export interface ITask {
   priority_id: number;
   status_id: number;
   order_index: number;
+  is_archived?: boolean;
   created_at:string;
 }
 
