@@ -1,6 +1,8 @@
-import { IsEmail, IsEnum } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class InvitationDto {
+  @IsOptional()
+  @IsString()
   project_id: string;
 
   @IsEmail()

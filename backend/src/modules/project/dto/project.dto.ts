@@ -25,8 +25,7 @@ export class ProjectDto {
   start_date: string;
 
   @IsOptional()
-  @IsDateString()
-  end_date?: string;
+  end_date?: string | null;
 
   @IsEnum(['private', 'public'])
   access: 'private' | 'public';
