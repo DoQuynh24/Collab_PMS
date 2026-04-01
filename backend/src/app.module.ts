@@ -15,6 +15,7 @@ import { ProjectTaskStatus } from './modules/task-status/entities/task-status.en
 import { GlobalTaskStatus } from './modules/task-status/entities/gobal-task-status.entity';
 import { ProjectInvitationModule } from './modules/project-invitation/project-invitation.module';
 import { MailModule } from './modules/project-invitation/mail/mail.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MailModule } from './modules/project-invitation/mail/mail.module';
     TaskStatusModule,
     TaskPriorityModule,
     MailModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseSeed],
