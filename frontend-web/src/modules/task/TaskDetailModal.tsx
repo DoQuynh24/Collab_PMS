@@ -31,6 +31,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { toDateString } from "../../utils/formatDate";
 import styles from "./TaskDetailModal.module.scss";
+import { useGetComments } from "../comment/api/get-comment";
+import { useAddComment } from "../comment/api/add-comment";
+import CommentCard from "../comment/component/CommentCard";
+import { useGetCurrentUser } from "../login/api/auth";
 
 interface Props {
   open: boolean;
@@ -50,9 +54,14 @@ export default function TaskDetailModal({
   const [editingTitle, setEditingTitle] = useState(false);
   const [description, setDescription] = useState(task.description || "");
   const [editingDesc, setEditingDesc] = useState(false);
+  const [newComment, setNewComment] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "comments" | "history" | "worklog">("comments");
 
+  const { data: currentUser } = useGetCurrentUser();
   const { mutate: updateTask, isPending } = useUpdateTask();
+  const { data: comments = [] } = useGetComments(task.task_id);
+  const { mutate: addComment } = useAddComment();
+  
   const assigneeMember = projectMembers.find(
     (m: any) => m.user_id === task.assignee_id
   );
@@ -90,6 +99,15 @@ export default function TaskDetailModal({
       { taskId: task.task_id, payload: { description } },
       { onSuccess: () => setEditingDesc(false) }
     );
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
+    addComment({
+      taskId: task.task_id,
+      content: newComment.trim(),
+    });
+    setNewComment("");
   };
 
   return (
@@ -349,33 +367,66 @@ export default function TaskDetailModal({
             ))}
           </Stack>
 
-          <Stack direction="row" spacing={1.5} alignItems="flex-start">
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "#ef4444", fontSize: 13 }}>U</Avatar>
-            <Box sx={{ flex: 1 }}>
-              <TextField
-                fullWidth
-                multiline
-                rows={2}
-                placeholder="Thêm bình luận..."
-                variant="outlined"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    fontSize: 13,
-                    borderRadius: "8px",
-                    bgcolor: "#f9fafb",
-                    "& fieldset": { borderColor: "#e5e7eb" },
-                    "&:hover fieldset": { borderColor: "#9ca3af" },
-                    "&.Mui-focused fieldset": { borderColor: "#5663ee" },
-                  },
-                }}
-              />
-              <Typography fontSize={11} color="#9ca3af" mt={0.5}>
-                Mẹo: nhấn <strong>M</strong> để bình luận
-              </Typography>
-            </Box>
-          </Stack>
-        </Box>
+          {(activeTab === "comments" || activeTab === "all") && (
+            <Box>
+              <Stack direction="row" spacing={1.5} alignItems="flex-start" mb={3}>
+                <Avatar 
+                  src={currentUser?.picture} 
+                  sx={{ width: 32, height: 32, bgcolor: "#5663ee" }}
+                >
+                  {currentUser?.name?.charAt(0) || "U"}
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    placeholder="Thêm bình luận..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    variant="outlined"
+                  />
+                  <Stack direction="row" spacing={2} sx={{ mt: 1.5, justifyContent: "flex-end" }}>
+                    <Button
+                      variant="text"
+                      onClick={() => setNewComment("")}
+                      sx={{ color: "#6b7280", textTransform: "none", fontWeight: 500 }}
+                    >
+                      Hủy
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={handleAddComment}
+                      disabled={!newComment.trim()}
+                      sx={{
+                        bgcolor: "#2563eb",
+                        "&:hover": { bgcolor: "#1d4ed8" },
+                        textTransform: "none",
+                        px: 4,
+                      }}
+                    >
+                      Bình luận
+                    </Button>
+                  </Stack>
+                </Box>
+              </Stack>
 
+              {comments.map((comment: any) => (
+                <CommentCard 
+                  key={comment.comment_id} 
+                  comment={comment} 
+                  taskId={task.task_id} 
+                />
+              ))}
+
+              {comments.length === 0 && (
+                <Typography color="#9ca3af" textAlign="center" py={4}>
+                  Chưa có bình luận nào.
+                </Typography>
+              )}
+            </Box>
+          )}
+        </Box>
         <Box
           sx={{
             width: 360,

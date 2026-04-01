@@ -12,3 +12,5 @@ export const URL_API_GET_TASK = `${COLLAB_URL}/tasks`;
 export const URL_API_GET_PROJECT_TASK = `${COLLAB_URL}/project-task-statuses`;
 //Invitations
 export const URL_API_GET_INVITATION = `${COLLAB_URL}/invitations`;
+//Comments
+export const URL_API_GET_COMMENT = `${COLLAB_URL}/comments`;

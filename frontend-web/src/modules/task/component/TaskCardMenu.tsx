@@ -158,7 +158,7 @@ export default function TaskCardMenu({ task, onOpenDetail }: Props) {
             message={
                 <>Bạn sắp xóa vĩnh viễn nhiệm vụ này cùng các bình luận, tệp đính kèm và toàn bộ dữ liệu liên quan. 
                 <br />
-                Thao tác này không thể hoàn tác.
+                Hành động này không thể hoàn tác.
                 </>
             }
             titleButton="Xóa"
