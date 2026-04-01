@@ -33,6 +33,7 @@ export class CommentService {
       user_id: userId,
       content: dto.content,
       file_url: dto.file_url,
+      parent_id: dto.parent_id,
     });
 
     return this.commentRepo.save(comment);
@@ -41,7 +42,11 @@ export class CommentService {
   async findByTask(taskId: number) {
     return this.commentRepo.find({
       where: { task_id: taskId },
-      relations: ['user'],
+      relations: [
+      'user',           
+      'parent',         
+      'parent.user'    
+    ],
       order: { created_at: 'ASC' },
     });
   }

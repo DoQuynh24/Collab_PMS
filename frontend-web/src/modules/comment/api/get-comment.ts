@@ -13,5 +13,13 @@ export const useGetComments = (taskId: number) => {
     queryKey: ["comments", taskId],
     queryFn: () => getComments(taskId),
     enabled: !!taskId,
+    select: (data: any[]) => 
+      data.map((comment) => ({
+        ...comment,
+        parent: comment.parent ? {
+          ...comment.parent,
+          user: comment.parent.user || null,
+        } : null,
+      })),
   });
 };

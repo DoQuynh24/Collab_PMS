@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class CommentDto {
   @IsString()
@@ -7,4 +7,8 @@ export class CommentDto {
   @IsOptional()
   @IsString()
   file_url?: string;
+
+  @IsOptional()
+  @IsNumber()
+  parent_id?: number;
 }

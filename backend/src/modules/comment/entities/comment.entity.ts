@@ -10,6 +10,9 @@ export class Comment {
   @Column()
   task_id: number;
 
+  @Column({ nullable: true })
+  parent_id?: number;          
+
   @Column()
   user_id: number;
 
@@ -22,6 +25,10 @@ export class Comment {
   @ManyToOne(() => Task, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'task_id' })
   task: Task;
+
+  @ManyToOne(() => Comment, { nullable: true, onDelete: 'CASCADE' })   
+  @JoinColumn({ name: 'parent_id' })
+  parent?: Comment;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

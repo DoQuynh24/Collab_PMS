@@ -1,10 +1,21 @@
 import { useState } from "react";
-import { Box, Avatar, Typography, IconButton, Tooltip } from "@mui/material";
+import { 
+  Box, 
+  Avatar, 
+  Typography, 
+  IconButton, 
+  Tooltip, 
+  TextField, 
+  Button, 
+  Stack 
+} from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import RepeatIcon from '@mui/icons-material/Repeat';
 import { useDeleteComment } from "../api/delete-comment";
 import { useGetCurrentUser } from "../../login/api/auth";
 import type { IComment } from "../type";
 import { ModalConfirm } from "../../../components/modal/modalConfirm";
+import { useAddComment } from "../api/add-comment";
 
 interface Props {
   comment: IComment;
@@ -12,11 +23,13 @@ interface Props {
 }
 
 export default function CommentCard({ comment, taskId }: Props) {
-  const [hovered, setHovered] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
+  const [showReply, setShowReply] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
 
   const { data: currentUser } = useGetCurrentUser();
   const { mutate: deleteComment } = useDeleteComment();   
+  const { mutate: addComment } = useAddComment();
 
   const isOwner = currentUser?.user_id === comment.user_id;
 
@@ -35,16 +48,32 @@ export default function CommentCard({ comment, taskId }: Props) {
   };
 
   const handleConfirmDelete = () => {
-    deleteComment(comment.comment_id);   
+    deleteComment(comment.comment_id);
     setOpenConfirm(false);
+  };
+
+  const handleReplySubmit = () => {
+    if (!replyContent.trim()) return;
+
+    addComment({
+      taskId: taskId,
+      content: replyContent.trim(),
+      parent_id: comment.comment_id,      
+    });
+
+    setReplyContent("");
+    setShowReply(false);
   };
 
   return (
     <>
       <Box
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        sx={{ display: "flex", gap: 1.5, mb: 2 }}
+        sx={{ 
+          display: "flex", 
+          gap: 1.5, 
+          mb: 2,
+          pl: comment.parent_id ? 7 : 0,     
+        }}
       >
         <Avatar
           src={comment.user?.picture}
@@ -58,16 +87,33 @@ export default function CommentCard({ comment, taskId }: Props) {
             <Typography fontSize={13} fontWeight={600} color="#111827">
               {comment.user?.name}
             </Typography>
-            <Typography fontSize={12} color="#9ca3af">
+
+            {comment.parent && comment.parent.user && (
+              <Typography fontSize={13} color="#6b7280">
+                đã trả lời @{comment.parent.user.name}
+              </Typography>
+            )}
+
+            <Typography fontSize={12} color="#9ca3af" sx={{ ml: "auto" }}>
               {formatDate(comment.created_at)}
             </Typography>
 
-            {isOwner && hovered && (
+            <Tooltip title="Trả lời">
+              <IconButton
+                size="small"
+                onClick={() => setShowReply(!showReply)}
+                sx={{ color: "#2563eb" }}
+              >
+                <RepeatIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
+            {isOwner && (
               <Tooltip title="Xóa bình luận">
                 <IconButton
                   size="small"
                   onClick={handleDeleteClick}
-                  sx={{ ml: "auto", color: "#9ca3af", "&:hover": { color: "#e53935" } }}
+                  sx={{ color: "#e53935" }}
                 >
                   <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
@@ -90,6 +136,59 @@ export default function CommentCard({ comment, taskId }: Props) {
           >
             {comment.content}
           </Box>
+
+          {showReply && (
+            <Box sx={{ mt: 2, }}>
+              <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                <Avatar 
+                  src={currentUser?.picture} 
+                  sx={{ width: 32, height: 32 }}
+                >
+                  {currentUser?.name?.charAt(0) || "U"}
+                </Avatar>
+
+                <Box sx={{ flex: 1 }}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    minRows={1}
+                    placeholder={`Trả lời ${comment.user?.name}...`}
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    variant="outlined"
+                    size="small"
+                  />
+                  <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={handleReplySubmit}
+                      disabled={!replyContent.trim()}
+                      sx={{
+                        bgcolor: "#2563eb",
+                        "&:hover": { bgcolor: "#1d4ed8" },
+                        textTransform: "none",
+                        px: 4,
+                      }}
+                    >
+                      Trả lời
+                    </Button>
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={() => {
+                        setReplyContent("");
+                        setShowReply(false);
+                      }}
+                      sx={{ color: "#6b7280", textTransform: "none", fontWeight: 500 }}
+                    >
+                      Hủy
+                    </Button>
+                  </Stack>
+                </Box>
+              </Stack>
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -97,7 +196,7 @@ export default function CommentCard({ comment, taskId }: Props) {
         open={openConfirm}
         setOpen={setOpenConfirm}
         title="Xóa bình luận"
-        message={<>Bạn có chắc chắn muốn xóa bình luận này không? 
+        message={<>Bạn có chắc chắn muốn xóa bình luận này không?
                 <br/>
                 Hành động này không thể hoàn tác.</>}
         titleButton="Xóa"

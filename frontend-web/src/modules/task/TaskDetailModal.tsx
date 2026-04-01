@@ -389,6 +389,7 @@ export default function TaskDetailModal({
                   <Stack direction="row" spacing={2} sx={{ mt: 1.5, justifyContent: "flex-end" }}>
                     <Button
                       variant="text"
+                      size="small"
                       onClick={() => setNewComment("")}
                       sx={{ color: "#6b7280", textTransform: "none", fontWeight: 500 }}
                     >
@@ -396,6 +397,7 @@ export default function TaskDetailModal({
                     </Button>
                     <Button
                       variant="contained"
+                      size="small"
                       onClick={handleAddComment}
                       disabled={!newComment.trim()}
                       sx={{
