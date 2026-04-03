@@ -84,7 +84,7 @@ export function HeaderMenu() {
       >
         Create
       </IconButton>
-      <ProjectFormModal open={openModal} onClose={handleCloseModal} /> {/* Sử dụng component modal */}
+      <ProjectFormModal open={openModal} onClose={handleCloseModal} />
     </Box>
   );
 }

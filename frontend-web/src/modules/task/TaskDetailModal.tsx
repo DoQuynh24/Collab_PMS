@@ -35,6 +35,7 @@ import { useGetComments } from "../comment/api/get-comment";
 import { useAddComment } from "../comment/api/add-comment";
 import CommentCard from "../comment/component/CommentCard";
 import { useGetCurrentUser } from "../login/api/auth";
+import ChangeStatusSelector from "../task-status/component/ChangeStatusSelector";
 
 interface Props {
   open: boolean;
@@ -49,6 +50,7 @@ export default function TaskDetailModal({
   onClose,
   task,
   projectMembers,
+  projectId,
 }: Props) {
   const [title, setTitle] = useState(task.title);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -441,6 +443,19 @@ export default function TaskDetailModal({
             "&::-webkit-scrollbar-thumb": { bgcolor: "#d1d5db", borderRadius: 3 },
           }}
         >
+          <Box sx={{ mb: 1}}>
+            <ChangeStatusSelector
+              currentStatusId={task.status_id}
+              currentStatusName={task.status?.name}
+              projectId={projectId!}
+              onStatusChange={(statusId) =>
+                updateTask({
+                  taskId: task.task_id,
+                  payload: { status_id: statusId },
+                })
+              }
+            />
+          </Box>
 
           <Box
             sx={{
