@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import AddTaskInline from "./AddTaskInline";
 import TaskCard from "./TaskCard";
 import type { ITask } from "../types";
-import { toSortableId } from "./useBoardDnd";
+import { toSortableId } from "../hook/useBoardDnd";
 import styles from "../../project/ProjectDetail.module.scss";
 
 interface ProjectMember {

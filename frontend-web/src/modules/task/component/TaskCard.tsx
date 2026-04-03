@@ -20,7 +20,7 @@ import { PRIORITIES } from "../../../constant/index";
 import type { ITask } from "../types";
 import { useUpdateTask } from "../api/update-task";
 import TaskDetailModal from "../TaskDetailModal";
-import { toSortableId } from "./useBoardDnd";
+import { toSortableId } from "../hook/useBoardDnd";
 import TaskCardMenu from "./TaskCardMenu";
 
 interface Props {

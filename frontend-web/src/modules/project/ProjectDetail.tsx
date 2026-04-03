@@ -9,7 +9,6 @@ import {
   Button,
   Tooltip,
 } from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import TuneIcon from "@mui/icons-material/Tune";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -33,7 +32,7 @@ import { useGetProjectById } from "./api/get-project-id";
 import { useGetProjectTaskStatuses } from "../task-status/api/get-project-task-status";
 import { useGetTasksByProject } from "../task/api/get-task-by-project";
 import { useCreateTask } from "../task/api/add-task";
-import { useBoardDnd } from "../task/component/useBoardDnd";
+import { useBoardDnd } from "../task/hook/useBoardDnd";
 import { BoardColumn, toColumnSortableId } from "../task/component/BoardColumn";
 import { ProjectHeader } from "./component/ProjectHeader";
 import { ProjectNav } from "./component/ProjectNav";
@@ -42,6 +41,8 @@ import styles from "./ProjectDetail.module.scss";
 import { useMoveStatus } from "../task-status/api/move-task-status";
 import type { ITaskStatus } from "../task-status/types";
 import { AddStatusColumn } from "../task-status/component/AddStatusColumn";
+import { FilterModal } from "./component/FilterModal";
+import { useTaskFilter } from "../task/hook/useTaskFilter";
 
 const isColumnId = (id: string | number) => String(id).startsWith("col-");
 const parseColumnId = (id: string | number) =>
@@ -60,6 +61,8 @@ export function ProjectDetail() {
   const [localStatuses, setLocalStatuses] = useState<ITaskStatus[]>([]);
   const [openAdd, setOpenAdd] = useState<number | null>(null);
   const [activeColumnId, setActiveColumnId] = useState<number | null>(null);
+
+  const { setFilters, filterTasks } = useTaskFilter(tasks);
 
   useEffect(() => {
     if (statusData?.data) {
@@ -181,10 +184,11 @@ export function ProjectDetail() {
             )}
           </Stack>
 
-          <IconButton className={styles.filterButton}>
-            <FilterListIcon />
-            <Typography fontSize={14} color="#545454">Bộ lọc</Typography>
-          </IconButton>
+          <FilterModal
+            projectMembers={projectMembers}
+            onFilterChange={setFilters}
+            statuses={statuses}    
+          />
 
           <Box className={styles.rightActions}>
             <Button variant="outlined" size="small" endIcon={<KeyboardArrowDownIcon />} className={styles.groupButton}>
@@ -213,11 +217,7 @@ export function ProjectDetail() {
           >
             <Stack direction="row" spacing={2} className={styles.boardColumns}>
               {statuses.map((status) => {
-                const columnTasks = tasks
-                  .filter((t) => t.status_id === status.id)
-                  .sort((a, b) => a.order_index - b.order_index);
-
-
+                const columnTasks = filterTasks(status.id);
                 return (
                   <BoardColumn
                     key={status.id}
