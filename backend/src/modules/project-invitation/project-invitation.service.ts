@@ -55,6 +55,7 @@ export class ProjectInvitationService {
       invited_email: dto.invited_email,
       token,
       expires_at,
+      role: dto.role
     });
     await this.invitationRepo.save(invitation);
 
@@ -99,7 +100,7 @@ export class ProjectInvitationService {
       const member = this.memberRepo.create({
         project_id: invitation.project_id,
         user_id: user.user_id,
-        role: 'member',
+        role: invitation.role,
       });
       await this.memberRepo.save(member);
     }

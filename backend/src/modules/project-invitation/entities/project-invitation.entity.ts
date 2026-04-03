@@ -22,6 +22,13 @@ export class ProjectInvitation {
   @Column({ type: 'enum', enum: ['pending', 'accepted', 'rejected'], default: 'pending' })
   status: 'pending' | 'accepted' | 'rejected';
 
+  @Column({
+    type: 'enum',
+    enum: ['admin', 'member'],
+    default: 'member'
+  })
+  role: 'admin' | 'member';
+
   @CreateDateColumn({ type: 'datetime' })
   created_at: Date;
 

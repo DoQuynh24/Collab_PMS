@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { useInviteMember } from '../api/add-member';
 import { useSearchUsers } from '../api/search-users';
 import { AddMemberSuccessModal } from './SuccessModal';
+import { ROLES, type RoleKey } from '../../../constant';
 
 interface UserSearchResult {
   user_id: number;
@@ -28,7 +29,7 @@ interface Props {
 
 export function AddMemberModal({ open, onClose, projectName, projectId }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [role, setRole] = useState<'admin' | 'member'>('member');
+  const [role, setRole] = useState<RoleKey>('member');
 
   const { data: options = [] } = useSearchUsers(searchQuery);
   const { mutate: addMember, isPending } = useInviteMember(projectId!);
@@ -44,7 +45,8 @@ export function AddMemberModal({ open, onClose, projectName, projectId }: Props)
     Promise.all(
       selectedUsers.map(user =>
         new Promise((resolve) => addMember(
-          { invited_email: user.email, role },
+          { invited_email: user.email,
+            role: role },
           { onSuccess: resolve }
         ))
       )
@@ -141,19 +143,22 @@ export function AddMemberModal({ open, onClose, projectName, projectId }: Props)
             Vai trò <span style={{ color: 'red' }}>*</span>
           </Typography>
           <FormControl fullWidth size="small">
-            <Select value={role} onChange={(e) => setRole(e.target.value as 'admin' | 'member')}>
-              <MenuItem value="member">
-                <Box>
-                  <Typography fontSize={14} fontWeight={500}>Thành viên</Typography>
-                  <Typography fontSize={12} color="#888">Có thể xem, thêm và chỉnh sửa công việc trong dự án.</Typography>
-                </Box>
-              </MenuItem>
-              <MenuItem value="admin">
-                <Box>
-                  <Typography fontSize={14} fontWeight={500}>Quản trị viên</Typography>
-                  <Typography fontSize={12} color="#888">Có thể quản lý dự án, thêm thành viên và chỉnh sửa cài đặt.</Typography>
-                </Box>
-              </MenuItem>
+            <Select
+              value={role}
+              onChange={(e) => setRole(e.target.value as RoleKey)}
+            >
+              {ROLES.map(r => (
+                <MenuItem key={r.key} value={r.key}>
+                  <Box>
+                    <Typography fontSize={14} fontWeight={500}>{r.label}</Typography>
+                    <Typography fontSize={12} color="#888">
+                      {r.key === 'member'
+                        ? 'Có thể xem, thêm và chỉnh sửa công việc trong dự án.'
+                        : 'Có thể quản lý dự án, thêm thành viên và chỉnh sửa cài đặt.'}
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>

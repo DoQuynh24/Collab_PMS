@@ -42,9 +42,10 @@ export function Login() {
         <Box className={styles.bannerContent}>
           <img src="/images/logo.jpg" alt="Banner" />
           <Typography variant="body1">
-            With Collab you can easily create, duplicate and assign a worker to
-            a specific shift or event. Every new shift will be added to your
-            calendar where you can manage it.
+            Collab giúp bạn dễ dàng quản lý dự án.
+            <br/> 
+            Bạn có thể nhanh chóng tạo, sao chép và phân công nhiệm vụ cho thành viên. 
+            Mọi nhiệm vụ đều được cập nhật trên bảng công việc, theo dõi tiến độ mọi lúc.
           </Typography>
         </Box>
       </Box>
@@ -55,15 +56,15 @@ export function Login() {
             <img src="/images/banner1.jpg" alt="Banner" />
           </Box>
           <Typography variant="h5" className={styles.title}>
-            Get Started With Collab
+            Bắt đầu cùng với Collab
           </Typography>
           <Typography className={styles.subtitle}>
-            Enter your details below
+            Nhập thông tin của bạn bên dưới
           </Typography>
 
           <TextField
             fullWidth
-            label="Enter Your Email"
+            label="Nhập email của bạn"
             variant="outlined"
             margin="normal"
           />
@@ -73,15 +74,15 @@ export function Login() {
             variant="contained"
             color="primary"
             className={styles.getStartedButton}
-            onClick={() => navigate('/')}
+            onClick={startGoogleLogin} 
           >
-            Get Started For Free
+            Bắt đầu miễn phí
           </Button>
 
           <Box className={styles.dividerContainer}>
             <Divider className={styles.divider} />
             <Typography className={styles.dividerText} variant="body2">
-              Or continue with
+              Hoặc tiếp tục với
             </Typography>
             <Divider className={styles.divider} />
           </Box>
@@ -98,7 +99,7 @@ export function Login() {
             onClick={startGoogleLogin} 
             className={styles.googleButton}
           >
-            Sign in with Google
+            Đăng nhập bằng Google
           </Button>
         </Paper>
       </Box>

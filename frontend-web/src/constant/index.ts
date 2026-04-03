@@ -9,3 +9,11 @@ export const FILTER_TABS = [
   { key: "priority", label: "Độ ưu tiên", placeholder: "Tìm độ ưu tiên..." },
   { key: "status",   label: "Trạng thái", placeholder: "Tìm trạng thái..." },
 ];
+
+export type RoleKey = 'admin' | 'member';
+
+export const ROLES: { key: RoleKey; label: string }[] = [
+  { key: 'admin', label: 'Quản trị viên' },
+  { key: 'member', label: 'Thành viên' },
+];
+
