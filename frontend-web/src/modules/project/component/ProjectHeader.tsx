@@ -6,6 +6,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { AddMemberModal } from '../../project-member/component/AddMemberFormModal';
+import ProjectSettingsMenu from './setting/ProjectSettingMenu';
 
 interface Props {
   projectName?: string;
@@ -20,6 +21,8 @@ export function ProjectHeader({ projectName, projectId }: Props) {
     const [openAddMember, setOpenAddMember] = useState(false);
 
     const [copied, setCopied] = useState(false);
+    
+    const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
 
     const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -119,17 +122,28 @@ export function ProjectHeader({ projectName, projectId }: Props) {
             <PersonAddIcon fontSize="small" onClick={() => setOpenAddMember(true)}/>
           </IconButton>
         </Tooltip>
-        <Tooltip title="Cài đặt">
-          <IconButton size="small" sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px',color: '#626469' }}>
+        <Tooltip title="Cài đặt dự án">
+          <IconButton 
+            size="small" 
+            sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#626469' }}
+            onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
+          >
             <SettingsIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
-       <AddMemberModal
-        open={openAddMember}
-        onClose={() => setOpenAddMember(false)}
-        projectName={projectName}
-        projectId={projectId}
+        <AddMemberModal
+          open={openAddMember}
+          onClose={() => setOpenAddMember(false)}
+          projectName={projectName}
+          projectId={projectId}
+        />
+        
+        <ProjectSettingsMenu
+          anchorEl={settingsAnchorEl}
+          onClose={() => setSettingsAnchorEl(null)}
+          projectId={projectId}
+          projectName={projectName}
         />
     </Box>
   );

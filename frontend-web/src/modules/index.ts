@@ -32,9 +32,21 @@ export const InvitationAccept = lazyLoad(
   (module) => module.default
 );
 
+export const ProjectDetailSetting = lazyLoad(
+  () => import('./project/component/setting/ProjectDetailSetting'),
+  (module) => module.default
+);
+
+export const ProjectMemberSetting = lazyLoad(
+  () => import('./project/component/setting/ProjectMemberSetting'),
+  (module) => module.default
+);
+
 export const routes: RouteConfig[] = [
   { path: '/home', component: Home, title: 'Home' },
   { path: '/login', component: Login, title: 'Login' },
   { path: '/account', component: Account, title: 'Account' },
   { path: '/projects/:projectId', component: ProjetDetail, title: 'Project Detail' },
+  { path: '/projects/:projectId/settings/details', component: ProjectDetailSetting, title: 'Project Settings' },
+  { path: '/projects/:projectId/settings/members', component: ProjectMemberSetting, title: 'Project Members' },
 ];

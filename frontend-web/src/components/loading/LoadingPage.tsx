@@ -23,7 +23,7 @@ const LoadingPage: React.FC<LoadingPageProps> = ({ loadFiles }) => {
         >
             <CircularProgress size={40} className={styles.loadingLogo} />
             <Typography variant="body1" className={styles.loadingText} sx={{ mt: 2 }}>
-                Loading...
+                Đang tải...
             </Typography>
         </Box>
     );

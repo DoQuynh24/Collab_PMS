@@ -43,6 +43,7 @@ import type { ITaskStatus } from "../task-status/types";
 import { AddStatusColumn } from "../task-status/component/AddStatusColumn";
 import { FilterModal } from "./component/FilterModal";
 import { useTaskFilter } from "../task/hook/useTaskFilter";
+import LoadingPage from "../../components/loading/LoadingPage";
 
 const isColumnId = (id: string | number) => String(id).startsWith("col-");
 const parseColumnId = (id: string | number) =>
@@ -79,7 +80,7 @@ export function ProjectDetail() {
     handleDragEnd: handleTaskDragEnd,
   } = useBoardDnd(tasks);
 
-  if (isLoading) return <Typography>Đang tải...</Typography>;
+  if (isLoading) return <LoadingPage />;
 
   const projectMembers = project?.project_members || [];
 
