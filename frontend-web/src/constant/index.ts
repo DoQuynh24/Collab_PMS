@@ -17,3 +17,24 @@ export const ROLES: { key: RoleKey; label: string }[] = [
   { key: 'member', label: 'Thành viên' },
 ];
 
+export const PROJECT_ACCESS = {
+  PRIVATE: 'private' as const,
+  PUBLIC: 'public' as const,
+} as const;
+
+export type ProjectAccessType = typeof PROJECT_ACCESS[keyof typeof PROJECT_ACCESS];
+
+export const PROJECT_ACCESS_OPTIONS = [
+  {
+    value: PROJECT_ACCESS.PRIVATE,
+    label: 'Riêng tư',
+    icon: '🔒',
+    description: 'Chỉ admin và thành viên được thêm mới có thể truy cập.',
+  },
+  {
+    value: PROJECT_ACCESS.PUBLIC,
+    label: 'Công khai',
+    icon: '🌍',
+    description: 'Mọi người có thể xem, tạo và chỉnh sửa công việc trong dự án.',
+  },
+];

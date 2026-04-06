@@ -3,6 +3,8 @@ import { PersonAdd as PersonAddIcon, Star as StarIcon, Delete as DeleteIcon,
   Settings as SettingsIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import { AddMemberModal } from '../../project-member/component/AddMemberFormModal';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../routes/urls';
 
 interface Props {
   anchorEl: null | HTMLElement;
@@ -13,8 +15,13 @@ interface Props {
 }
 
 export function ProjectOptionsMenu({ anchorEl, onClose, projectId, projectName }: Props) {
-
+  const navigate = useNavigate();
   const [openAddMember, setOpenAddMember] = useState(false);
+
+  const handleSettingsClick = () => {
+    onClose();
+    navigate(ROUTES.projectDetailsSettings(projectId));
+  };
   
   return (
     <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}
@@ -33,7 +40,7 @@ export function ProjectOptionsMenu({ anchorEl, onClose, projectId, projectName }
         <StarIcon fontSize="small" sx={{ mr: 1.5 }} /> Thêm vào yêu thích
       </MenuItem>
 
-      <MenuItem onClick={onClose} sx={{ py: 1.2 }}>
+      <MenuItem onClick={handleSettingsClick} sx={{ py: 1.2 }}>
         <SettingsIcon fontSize="small" sx={{ mr: 1.5 }} /> Cài đặt dự án
       </MenuItem>
 

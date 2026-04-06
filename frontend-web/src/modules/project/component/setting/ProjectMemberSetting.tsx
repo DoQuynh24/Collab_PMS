@@ -30,6 +30,7 @@ import { ROLES, type RoleKey } from "../../../../constant";
 import { ToastContext } from "../../../../components/notification/NotifiProvider";
 import { ModalConfirm } from "../../../../components/modal/modalConfirm";
 import LoadingPage from "../../../../components/loading/LoadingPage";
+import { ROUTES } from "../../../../routes/urls";
 
 export function ProjectMemberSettings() {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export function ProjectMemberSettings() {
   const { showToast } = useContext(ToastContext)!;
 
   const handleBack = () => {
-    navigate(`/projects/${projectId}`);
+    navigate(ROUTES.projectDetail(projectId!));
   };
 
   const handleDeleteClick = (member: any) => {

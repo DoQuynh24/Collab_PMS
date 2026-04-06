@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -11,93 +12,136 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import { useGetProjectById } from "../../api/get-project-id";
 import { useGetCurrentUser } from "../../../login/api/auth";
 import { useUpdateProject } from "../../api/update-project";
-import { useNavigate, useParams } from "react-router-dom";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { ToastContext } from "../../../../components/notification/NotifiProvider";
 import { PROJECT_ACCESS, PROJECT_ACCESS_OPTIONS, type ProjectAccessType } from "../../../../constant";
 import LoadingPage from "../../../../components/loading/LoadingPage";
-
+import { ROUTES } from "../../../../routes/urls";
 
 export function ProjectDetailSettings() {
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
-  
+
   const { data: project, isLoading } = useGetProjectById(projectId!);
   const { data: currentUser } = useGetCurrentUser();
-  const { mutate: updateProject } = useUpdateProject(projectId!);
+  const { mutate: updateProject, isPending } = useUpdateProject(projectId!);
+
+  const { showToast } = useContext(ToastContext)!;
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [access, setAccess] = useState<ProjectAccessType>(PROJECT_ACCESS.PRIVATE); 
+  const [access, setAccess] = useState<ProjectAccessType>(PROJECT_ACCESS.PRIVATE);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const isOwner = project?.owner_id === currentUser?.user_id;
+  const canEdit = isOwner || project?.project_members?.some(
+    (m: any) => m.user_id === currentUser?.user_id && m.role === "admin"
+  );
+
+  const hasChanges = 
+    name !== (project?.name || "") ||
+    description !== (project?.description || "") ||
+    access !== (project?.access || PROJECT_ACCESS.PRIVATE) ||
+    startDate !== (project?.start_date ? project.start_date.split("T")[0] : "") ||
+    endDate !== (project?.end_date ? project.end_date.split("T")[0] : "");
 
   useEffect(() => {
     if (project) {
       setName(project.name || "");
       setDescription(project.description || "");
       setAccess(project.access || PROJECT_ACCESS.PRIVATE);
+      setStartDate(project.start_date ? project.start_date.split("T")[0] : "");
+      setEndDate(project.end_date ? project.end_date.split("T")[0] : "");
     }
   }, [project]);
 
   const handleSave = () => {
-    updateProject({ 
-      name, 
-      description, 
-      access 
-    });
+    updateProject(
+      {
+        name,
+        description,
+        access,
+        start_date: startDate,
+        end_date: endDate || undefined,
+      },
+      {
+        onSuccess: () => showToast("Cập nhật dự án thành công", "success"),
+        onError: () => showToast("Cập nhật dự án thất bại", "error"),
+      }
+    );
   };
 
   const handleBack = () => {
-    navigate(`/projects/${projectId}`);
+    navigate(ROUTES.projectDetail(projectId!));
+  };
+
+  const handleCancel = () => {
+    setName(project?.name || "");
+    setDescription(project?.description || "");
+    setAccess(project?.access || PROJECT_ACCESS.PRIVATE);
+    setStartDate(project?.start_date ? project.start_date.split("T")[0] : "");
+    setEndDate(project?.end_date ? project.end_date.split("T")[0] : "");
   };
 
   if (isLoading) return <LoadingPage />;
 
   return (
     <Paper elevation={0} >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-        <Tooltip title="Quay lại">
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Tooltip title="Quay lại dự án">
           <IconButton onClick={handleBack}>
             <ArrowBackIcon />
           </IconButton>
         </Tooltip>
-        <Typography variant="h6" fontWeight={600}>Cài đặt chung</Typography>
+        <Typography variant="h5" fontWeight={700}>
+          Chi tiết dự án
+        </Typography>
       </Box>
 
-      <Stack spacing={3} sx={{ width:"800px", margin:"0px auto" }}>
+      <Stack spacing={3.5} sx={{ border: "1px solid #e5e7eb", borderRadius: "12px", p: 4 }}>
         <Box>
           <Typography fontWeight={600} mb={1}>Tên dự án</Typography>
-          <TextField fullWidth value={name} onChange={(e) => setName(e.target.value)} disabled={!isOwner} />
+          <TextField
+            fullWidth
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={!canEdit}
+          />
         </Box>
 
         <Box>
           <Typography fontWeight={600} mb={1}>Mô tả</Typography>
-          <TextField fullWidth multiline rows={4} value={description} onChange={(e) => setDescription(e.target.value)} disabled={!isOwner} />
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Thêm mô tả dự án..."
+            disabled={!canEdit}
+          />
         </Box>
 
         <Box>
-          <Typography fontSize={13} fontWeight={500} color="#555" mb={1}>
-            Quyền truy cập dự án
-          </Typography>
+          <Typography fontWeight={600} mb={1}>Quyền truy cập</Typography>
           <Select
             fullWidth
-            size="small"
             value={access}
-            onChange={(e) => setAccess(e.target.value as typeof PROJECT_ACCESS.PRIVATE | typeof PROJECT_ACCESS.PUBLIC)}
-            sx={{ mb: 2, borderRadius: '6px' }}
-            disabled={!isOwner}
+            onChange={(e) => setAccess(e.target.value as ProjectAccessType)}
+            disabled={!canEdit}
           >
             {PROJECT_ACCESS_OPTIONS.map((option) => (
               <MenuItem key={option.value} value={option.value}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                  <span>{option.icon}</span>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  {option.icon}
                   <Box>
-                    <Typography fontSize={14} fontWeight={500}>{option.label}</Typography>
-                    <Typography fontSize={12} color="#888">{option.description}</Typography>
+                    <Typography fontWeight={500}>{option.label}</Typography>
+                    <Typography fontSize={12} color="#666">{option.description}</Typography>
                   </Box>
                 </Box>
               </MenuItem>
@@ -105,27 +149,62 @@ export function ProjectDetailSettings() {
           </Select>
         </Box>
 
-        <Box>
-          <Typography fontWeight={600} mb={1}>Ngày bắt đầu</Typography>
-          <Typography>
-            {project?.start_date
-              ? new Date(project.start_date).toLocaleDateString("vi-VN")
-              : "—"}
-          </Typography>
-        </Box>
+        <Stack direction="row" spacing={2}>
+          <Box sx={{ flex: 1 }}>
+            <Typography fontWeight={600} mb={1}>Ngày bắt đầu</Typography>
+            <TextField
+              fullWidth
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              disabled={!canEdit}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <Typography fontWeight={600} mb={1}>Ngày kết thúc</Typography>
+            <TextField
+              fullWidth
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              disabled={!canEdit}
+              InputLabelProps={{ shrink: true }}
+            />
+            <Typography 
+              fontSize={13} 
+              color="#d32f2f" 
+              sx={{ mt: 1, fontStyle: 'italic' }}
+            >
+              * Khi tới ngày kết thúc, dự án sẽ được chuyển vào kho lưu trữ. 
+              Tất cả các hoạt động sẽ được tạm dừng. Bạn có thể khôi phục lại dự án ở Kho lưu trữ.
+            </Typography>
+          </Box>
+          
+        </Stack>
 
-        {isOwner && (
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            sx={{ bgcolor: "#5663ee", "&:hover": { bgcolor: "#4451d4" }, mt: 2 }}
-          >
-            Lưu thay đổi
-          </Button>
+        {canEdit && (
+          <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ mt: 4 }}>
+            <Button
+              variant="outlined"
+              onClick={handleCancel}
+              disabled={isPending}
+              sx={{ px: 4 }}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={!hasChanges || isPending}
+              sx={{ bgcolor: "#5663ee", "&:hover": { bgcolor: "#4451d4" }, px: 4 }}
+            >
+              {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+            </Button>
+          </Stack>
         )}
       </Stack>
     </Paper>
   );
 }
-
 export default ProjectDetailSettings;

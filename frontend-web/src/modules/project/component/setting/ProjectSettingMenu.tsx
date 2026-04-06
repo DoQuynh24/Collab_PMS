@@ -13,6 +13,7 @@ import {
   Flag as FlagIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../../routes/urls';
 
 interface Props {
   anchorEl: null | HTMLElement;
@@ -28,8 +29,13 @@ export default function ProjectSettingsMenu({ anchorEl, onClose, projectId, proj
   const handleNavigate = (subPath: string) => {
     onClose();
     if (projectId) {
-      navigate(`/projects/${projectId}/settings${subPath}`);
-  }}
+      if (subPath === "/details") {
+        navigate(ROUTES.projectDetailsSettings(projectId));
+      } else if (subPath === "/members") {
+        navigate(ROUTES.projectMembersSettings(projectId));
+      }
+    }
+  };
 
   return (
     <Menu
@@ -49,7 +55,7 @@ export default function ProjectSettingsMenu({ anchorEl, onClose, projectId, proj
     >
       <Box sx={{ px: 2, py: 1.5 }}>
         <Typography variant="inherit" fontWeight={600} color="#333">
-          Cài đặt dự án cá nhân
+          Cài đặt dự án
         </Typography>
         <Typography variant="caption" fontSize={13} color="#666">
           {projectName}
