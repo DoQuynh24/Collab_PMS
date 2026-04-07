@@ -6,79 +6,26 @@ import {
   List, 
   Box,
   Tooltip,
-  IconButton,
 } from '@mui/material';
 import { 
   ExpandLess, ExpandMore, Add as AddIcon,
-  MoreHoriz as MoreHorizIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
 
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import apiClient from '../../../lib/api';
-import { ProjectFormModal } from '../component/ProjectFormModal'; 
-import { ProjectOptionsMenu } from './ProjectOptionsMenu';
+import { ProjectFormModal } from '../modal/ProjectFormModal'; 
+import { ProjectItem } from './ProjectItem';
+import { useGetProjects } from '../../api/get-project';
+import { ROUTES } from '../../../../routes/urls';
 
-function ProjectItem({ project, isSelected, onNavigate }: { 
-  project: any; 
-  isSelected: boolean; 
-  onNavigate: () => void;
-  }) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  return (
-    <>
-      <ListItemButton
-        selected={isSelected}
-        onClick={onNavigate}
-        sx={{ pl: 4, pr: 1, '&:hover .moreBtn': { opacity: 1 } }}
-      >
-        <ListItemText
-          primary={project.name}
-          primaryTypographyProps={{ noWrap: true, fontSize: '0.875rem' }}
-        />
-        <Tooltip title="Tùy chọn" arrow>
-          <IconButton
-            size="small"
-            className="moreBtn"
-            onClick={(e) => { e.stopPropagation(); setAnchorEl(e.currentTarget); }}
-            sx={{ opacity: anchorEl ? 1 : 0, transition: "transform 0.2s ease", 
-              "&:hover": {
-                background: "transparent",
-                transform: "scale(1.15)", 
-              }  }}
-          >
-            <MoreHorizIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </ListItemButton>
-
-      <ProjectOptionsMenu
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        projectId={project.project_id}
-        projectName={project.name}
-      />
-    </>
-  );
-}
 export default function ProjectList({ open }: { open: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [projectsOpen, setProjectsOpen] = useState(true);
   const [hovered, setHovered] = useState(false);
   const [openModal, setOpenModal] = useState(false); 
-
-  const { data: projects = [], isLoading } = useQuery({
-    queryKey: ['projects'],
-    queryFn: async () => {
-      const res = await apiClient.get('/projects');
-      return res.data;
-    },
-    enabled: !!localStorage.getItem('access_token') && open, 
-  });
-
+  const { data: projects = [], isLoading } = useGetProjects();
+  
   return (
     <>
       <ListItemButton
@@ -129,8 +76,8 @@ export default function ProjectList({ open }: { open: boolean }) {
               <ProjectItem
                 key={project.project_id}
                 project={project}
-                isSelected={location.pathname === `/projects/${project.project_id}`}
-                onNavigate={() => navigate(`/projects/${project.project_id}`)}
+                isSelected={location.pathname === ROUTES.projectDetail(project.project_id)}
+                onNavigate={() => navigate(ROUTES.projectDetail(project.project_id))}
               />
             ))
           )}

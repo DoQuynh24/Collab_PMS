@@ -1,7 +1,7 @@
 import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { useState } from 'react';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { ProjectFormModal } from '../modules/project/component/ProjectFormModal'; 
+import { ProjectFormModal } from '../modules/project/component/modal/ProjectFormModal'; 
 interface MenuItemConfig {
   name: string;
   items: { name: string; status?: string }[];

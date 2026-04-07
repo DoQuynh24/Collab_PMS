@@ -6,9 +6,8 @@ interface UpdateProjectPayload {
   access?: 'public' | 'private';
   name?: string;
   description?: string;
-  start_date:string;
+  start_date?:string;
   end_date?: string;
-  status?: 'active' | 'archived';
 }
 
 const updateProject = async (projectId: string, payload: UpdateProjectPayload) => {

@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { FILTER_TABS, PRIORITIES } from "../../../constant/index";
+import { FILTER_TABS, PRIORITIES } from "../../../../constant";
 
 interface ProjectMember {
   user_id: number;

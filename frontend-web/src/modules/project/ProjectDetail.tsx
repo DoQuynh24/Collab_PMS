@@ -41,7 +41,7 @@ import styles from "./ProjectDetail.module.scss";
 import { useMoveStatus } from "../task-status/api/move-task-status";
 import type { ITaskStatus } from "../task-status/types";
 import { AddStatusColumn } from "../task-status/component/AddStatusColumn";
-import { FilterModal } from "./component/FilterModal";
+import { FilterModal } from "./component/modal/FilterModal";
 import { useTaskFilter } from "../task/hook/useTaskFilter";
 import LoadingPage from "../../components/loading/LoadingPage";
 

@@ -9,9 +9,9 @@ import {
 import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { createProjectSchema, type CreateProjectFormData } from "../rules/add-project.rules";
-import { useCreateProject } from "../api/add-project";
-import { ToastContext } from "../../../components/notification/NotifiProvider";
+import { createProjectSchema, type CreateProjectFormData } from "../../rules/add-project.rules";
+import { useCreateProject } from "../../api/add-project";
+import { ToastContext } from "../../../../components/notification/NotifiProvider";
 
 interface ProjectFormModalProps {
   open: boolean;
