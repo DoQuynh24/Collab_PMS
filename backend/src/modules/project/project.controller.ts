@@ -119,6 +119,17 @@ export class ProjectController {
     );
   }
 
+  @Patch(':projectId/archive')
+  async archive(
+    @Param('projectId') projectId: string,
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    return this.projectService.archiveProject(
+      projectId,
+      Number(req.user.sub),
+    );
+  }
+
   @Delete(':projectId')
   async remove(
     @Param('projectId') projectId: string,

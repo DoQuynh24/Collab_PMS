@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -209,26 +210,49 @@ export class ProjectService {
     return this.projectRepository.save(project);
   }
 
+  async archiveProject(projectId: string, userId: number) {
+    const project = await this.projectRepository.findOne({
+      where: { project_id: projectId },
+      relations: ['project_members'],
+    });
+
+    if (!project) {
+      throw new NotFoundException(`Project with ID ${projectId} not found`);
+    }
+
+    const isOwner = project.owner_id === userId;
+    const isAdmin = project.project_members.some(
+      (member) => member.user_id === userId && member.role === 'admin'
+    );
+
+    if (!isOwner && !isAdmin) {
+      throw new UnauthorizedException('Only owner or admin can archive this project');
+    }
+
+    if (project.status === 'archived') {
+      throw new BadRequestException('Project is already archived');
+    }
+
+    project.status = 'archived';
+
+    return this.projectRepository.save(project);
+  }
+
   async remove(projectId: string, userId: number) {
     const project = await this.projectRepository.findOne({
       where: { project_id: projectId },
     });
 
     if (!project) {
-      throw new NotFoundException(
-        `Project with ID ${projectId} not found`,
-      );
+      throw new NotFoundException(`Project with ID ${projectId} not found`);
     }
 
     if (project.owner_id !== userId) {
-      throw new UnauthorizedException(
-        'Only owner can archive project',
-      );
+      throw new UnauthorizedException('Only owner can delete project');
     }
 
-    project.status = 'archived';
-
-    return this.projectRepository.save(project);
+    await this.projectRepository.remove(project);
+    return { message: 'Project deleted successfully' };
   }
 
   private generateProjectId(): string {

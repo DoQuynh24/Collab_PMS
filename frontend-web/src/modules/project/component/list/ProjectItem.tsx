@@ -2,6 +2,7 @@ import { ListItemButton, ListItemText, Tooltip, IconButton } from '@mui/material
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material';
 import { useState } from 'react';
 import { ProjectOptionsMenu } from '../ProjectOptionsMenu';
+import { useGetCurrentUser } from '../../../login/api/auth';
 
 interface Props {
   project: any;
@@ -11,6 +12,7 @@ interface Props {
 
 export function ProjectItem({ project, isSelected, onNavigate }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { data: currentUser } = useGetCurrentUser();
 
   return (
     <>
@@ -43,6 +45,8 @@ export function ProjectItem({ project, isSelected, onNavigate }: Props) {
         onClose={() => setAnchorEl(null)}
         projectId={project.project_id}
         projectName={project.name}
+        project={project}
+        currentUser={currentUser} 
       />
     </>
   );
