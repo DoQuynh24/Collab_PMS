@@ -3,15 +3,7 @@ import {
   Box,
   Typography,
   Stack,
-  TextField,
-  Avatar,
-  IconButton,
-  Button,
-  Tooltip,
 } from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import TuneIcon from "@mui/icons-material/Tune";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { useParams } from "react-router-dom";
 
 import {
@@ -41,13 +33,9 @@ import styles from "./ProjectBoardView.module.scss";
 import { useMoveStatus } from "../task-status/api/move-task-status";
 import type { ITaskStatus } from "../task-status/types";
 import { AddStatusColumn } from "../task-status/component/AddStatusColumn";
-import { FilterModal } from "./component/modal/FilterModal";
 import { useTaskFilter } from "../task/hook/useTaskFilter";
 import LoadingPage from "../../components/loading/LoadingPage";
-
-const isColumnId = (id: string | number) => String(id).startsWith("col-");
-const parseColumnId = (id: string | number) =>
-  Number(String(id).replace("col-", ""));
+import { ProjectToolbar } from "./component/ProjectToolbar";
 
 export function ProjectBoardView() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -64,6 +52,11 @@ export function ProjectBoardView() {
   const [activeColumnId, setActiveColumnId] = useState<number | null>(null);
 
   const { setFilters, filterTasks } = useTaskFilter(tasks);
+
+  const isColumnId = (id: string | number) => String(id).startsWith("col-");
+  
+  const parseColumnId = (id: string | number) =>
+    Number(String(id).replace("col-", ""));
 
   useEffect(() => {
     if (statusData?.data) {
@@ -160,50 +153,12 @@ export function ProjectBoardView() {
       <ProjectHeader projectName={project?.name} projectId={projectId} />
       <ProjectNav projectId={projectId} />
 
-      <Box sx={{ flexShrink: 0, px: 2, pt: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={2} className={styles.boardHeader}>
-          <TextField size="small" placeholder="Tìm kiếm nhiệm vụ" />
-
-          <Stack direction="row" spacing={-1} alignItems="center">
-            {project?.project_members?.slice(0, 5).map((member) => (
-              <Tooltip key={member.user_id} title={member.user?.name || "Member"}>
-                <Avatar
-                  src={member.user?.picture}
-                  alt={member.user?.name}
-                  sx={{ width: 32, height: 32, border: "2px solid white", boxShadow: "0 0 0 1px rgba(0,0,0,0.1)" }}
-                >
-                  {member.user?.name?.charAt(0).toUpperCase()}
-                </Avatar>
-              </Tooltip>
-            ))}
-            {project?.project_members && project.project_members.length > 5 && (
-              <Tooltip title={`${project.project_members.length - 5} người khác`}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: "#5663ee", fontSize: "0.875rem", border: "2px solid white" }}>
-                  +{project.project_members.length - 5}
-                </Avatar>
-              </Tooltip>
-            )}
-          </Stack>
-
-          <FilterModal
-            projectMembers={projectMembers}
-            onFilterChange={setFilters}
-            statuses={statuses}    
-          />
-
-          <Box className={styles.rightActions}>
-            <Button variant="outlined" size="small" endIcon={<KeyboardArrowDownIcon />} className={styles.groupButton}>
-              Nhóm
-            </Button>
-            <Tooltip title="Tùy chỉnh hiển thị">
-              <IconButton className={styles.filterButton}><TuneIcon fontSize="small" /></IconButton>
-            </Tooltip>
-            <Tooltip title="Tùy chọn">
-              <IconButton className={styles.filterButton}><MoreHorizIcon fontSize="small" /></IconButton>
-            </Tooltip>
-          </Box>
-        </Stack>
-      </Box>
+      <ProjectToolbar
+        projectMembers={projectMembers}
+        statuses={statuses}
+        onFilterChange={setFilters}
+        showGroupButton={true}
+      />
         
       <Box sx={{ flex: 1,  overflowX: "auto",  overflowY: "hidden", minHeight: 0, px: 2, pb: 2,  scrollbarWidth: "none" }}>
         <DndContext
