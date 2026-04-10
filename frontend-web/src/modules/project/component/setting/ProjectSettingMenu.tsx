@@ -33,6 +33,8 @@ export default function ProjectSettingsMenu({ anchorEl, onClose, projectId, proj
         navigate(ROUTES.projectDetailsSettings(projectId));
       } else if (subPath === "/members") {
         navigate(ROUTES.projectMembersSettings(projectId));
+      } else if (subPath === "/statuses") {
+        navigate(ROUTES.projectStatusesSettings(projectId));
       }
     }
   };

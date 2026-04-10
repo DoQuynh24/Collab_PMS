@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/mapped-types'
-import { ProjectTaskStatus } from '../entities/task-status.entity';
+import { TaskStatusDto } from './task-status-dto';
 
-export class UpdateTaskStatusDto extends PartialType(ProjectTaskStatus) {}
+export class UpdateTaskStatusDto extends PartialType(TaskStatusDto) {}

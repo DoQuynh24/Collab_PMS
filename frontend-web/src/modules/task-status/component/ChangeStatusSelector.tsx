@@ -4,6 +4,8 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Settings as SettingsIcon} from '@mui/icons-material';
 import { useGetProjectTaskStatuses } from "../../task-status/api/get-project-task-status";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../../routes/urls";
 
 interface Props {
   currentStatusId: number;
@@ -18,6 +20,7 @@ export default function ChangeStatusSelector({
   projectId,
   onStatusChange,
 }: Props) {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -35,6 +38,14 @@ export default function ChangeStatusSelector({
     e.stopPropagation();
     onStatusChange(statusId);
     handleClose();
+  };
+
+  const handleGoToStatusSettings = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleClose();
+    if (projectId) {
+      navigate(ROUTES.projectStatusesSettings(projectId));
+    }
   };
 
   const getStatusColor = (index: number, total: number) => {
@@ -104,6 +115,7 @@ export default function ChangeStatusSelector({
           <Divider sx={{ my: 1 }} />
 
           <MenuItem 
+            onClick={handleGoToStatusSettings}
             sx={{ 
               fontSize: 14, 
               fontWeight: 500,
