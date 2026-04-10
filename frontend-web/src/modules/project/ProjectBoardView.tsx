@@ -37,7 +37,7 @@ import { BoardColumn, toColumnSortableId } from "../task/component/BoardColumn";
 import { ProjectHeader } from "./component/ProjectHeader";
 import { ProjectNav } from "./component/ProjectNav";
 import { toDateString } from "../../utils/formatDate";
-import styles from "./ProjectDetail.module.scss";
+import styles from "./ProjectBoardView.module.scss";
 import { useMoveStatus } from "../task-status/api/move-task-status";
 import type { ITaskStatus } from "../task-status/types";
 import { AddStatusColumn } from "../task-status/component/AddStatusColumn";
@@ -49,7 +49,7 @@ const isColumnId = (id: string | number) => String(id).startsWith("col-");
 const parseColumnId = (id: string | number) =>
   Number(String(id).replace("col-", ""));
 
-export function ProjectDetail() {
+export function ProjectBoardView() {
   const { projectId } = useParams<{ projectId: string }>();
 
   const { data, isLoading } = useGetProjectById(projectId!);
@@ -270,4 +270,4 @@ export function ProjectDetail() {
   );
 }
 
-export default ProjectDetail;
+export default ProjectBoardView;

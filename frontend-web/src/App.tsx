@@ -1,11 +1,10 @@
 import { Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { Account, InvitationAccept, routes } from './modules/index';
+import { InvitationAccept, routes } from './modules/index';
 import { Layout } from './components/Layout';
 import LoadingPage from './components/loading/LoadingPage';
 import { NotifyProvider } from './components/notification/NotifiProvider';
 import { useQueryClient } from '@tanstack/react-query';
-import ProjectDetail from "./modules/project/ProjectDetail";
 
 function App() {
   const loginRoute = routes.find((r) => r.path === '/login');
@@ -61,13 +60,6 @@ function App() {
             path="/"
             element={<Navigate to="/home" replace />}
           />
-          <Route 
-            path="/account" 
-            element={<Account />} 
-          />
-          <Route 
-            path="/projects/:projectId" 
-            element={<ProjectDetail />} />
         </Routes>
       </Suspense>
     </NotifyProvider>

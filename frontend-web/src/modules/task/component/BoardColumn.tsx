@@ -6,7 +6,7 @@ import AddTaskInline from "./AddTaskInline";
 import TaskCard from "./TaskCard";
 import type { ITask } from "../types";
 import { toSortableId } from "../hook/useBoardDnd";
-import styles from "../../project/ProjectDetail.module.scss";
+import styles from "../../project/ProjectBoardView.module.scss";
 
 interface ProjectMember {
   user_id: number;

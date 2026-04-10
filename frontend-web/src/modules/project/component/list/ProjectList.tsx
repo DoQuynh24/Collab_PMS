@@ -76,8 +76,8 @@ export default function ProjectList({ open }: { open: boolean }) {
               <ProjectItem
                 key={project.project_id}
                 project={project}
-                isSelected={location.pathname === ROUTES.projectDetail(project.project_id)}
-                onNavigate={() => navigate(ROUTES.projectDetail(project.project_id))}
+                isSelected={location.pathname === ROUTES.projectBoard(project.project_id)}
+                onNavigate={() => navigate(ROUTES.projectBoard(project.project_id))}
               />
             ))
           )}
