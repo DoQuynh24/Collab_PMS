@@ -12,7 +12,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import FlagIcon from "@mui/icons-material/Flag";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -22,6 +21,7 @@ import { useUpdateTask } from "../api/update-task";
 import TaskDetailModal from "../TaskDetailModal";
 import { toSortableId } from "../hook/useBoardDnd";
 import TaskCardMenu from "./TaskCardMenu";
+import DeadlineChip from "./DeadlineChip";
 
 interface Props {
   task: ITask;
@@ -49,24 +49,9 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
     isDragging,
   } = useSortable({ id: sortableId });
 
-  const dragStyle: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition ?? "transform 200ms ease",
-    opacity: isDragging ? 0 : 1, 
-    position: "relative",
-    zIndex: isDragging ? 999 : "auto" as any,
-  };
-
   const priority = PRIORITIES.find((p) => p.id === task.priority_id);
   const assigneeMember = projectMembers.find((m: any) => m.user_id === task.assignee_id);
   const assignee = assigneeMember?.user;
-
-  const deadlineDate = task.deadline
-    ? new Date(task.deadline).toLocaleDateString("vi-VN", {
-        month: "short",
-        day: "numeric",
-      })
-    : null;
 
   const isOverdue = task.deadline
     ? new Date(task.deadline) < new Date()
@@ -121,7 +106,13 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
     <>
       <div
         ref={setNodeRef}
-        style={dragStyle}
+        style={{
+          transform: CSS.Transform.toString(transform),
+          transition: transition ?? "transform 200ms ease",
+          opacity: isDragging ? 0 : 1,
+          position: "relative",
+          zIndex: isDragging ? 999 : "auto" as any,
+        }}
         {...attributes}
         {...listeners}
       >
@@ -165,15 +156,6 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
                   onKeyDown={handleKeyDown}
                   onBlur={handleSave}
                   size="small" fullWidth disabled={isPending} variant="outlined"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      fontSize: 14, fontWeight: 500, borderRadius: "6px",
-                      "& fieldset": { borderColor: "#5663ee" },
-                      "&:hover fieldset": { borderColor: "#5663ee" },
-                      "&.Mui-focused fieldset": { borderColor: "#5663ee" },
-                    },
-                    "& .MuiInputBase-input": { py: "5px", px: "8px" },
-                  }}
                 />
                 {isPending ? (
                   <CircularProgress size={18} sx={{ color: "#5663ee", ml: 0.5 }} />
@@ -245,19 +227,7 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
                 </Tooltip>
               )}
               {task.deadline && (
-                <Tooltip title={isOverdue ? "Đã quá hạn" : "Hạn hoàn thành"} arrow>
-                  <Box display="flex" alignItems="center" gap={0.5}
-                    sx={{
-                      fontSize: "1rem",
-                      color: isOverdue ? "#d32f2f" : "#73a030",
-                      bgcolor: isOverdue ? "#ffebee" : "#e8f5e9",
-                      px: 1, py: 0.3, borderRadius: "4px",
-                      border: isOverdue ? "1px solid #ef5350" : "none",
-                    }}>
-                    <CalendarTodayIcon fontSize="inherit" sx={{ color: isOverdue ? "#d32f2f" : "#73a030" }} />
-                    <span style={{ fontSize: "13px" }}>{deadlineDate}</span>
-                  </Box>
-                </Tooltip>
+                <DeadlineChip deadline={task.deadline} />
               )}
             </Box>
 
