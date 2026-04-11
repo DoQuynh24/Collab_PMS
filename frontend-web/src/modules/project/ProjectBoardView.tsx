@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Box,
   Typography,
@@ -36,6 +36,7 @@ import { AddStatusColumn } from "../task-status/component/AddStatusColumn";
 import { useTaskFilter } from "../task/hook/useTaskFilter";
 import LoadingPage from "../../components/loading/LoadingPage";
 import { ProjectToolbar } from "./component/ProjectToolbar";
+import { ToastContext } from "../../components/notification/NotifiProvider";
 
 export function ProjectBoardView() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -46,6 +47,8 @@ export function ProjectBoardView() {
   const { data: tasks = [] } = useGetTasksByProject(projectId!);
   const { mutate: createTask } = useCreateTask();
   const { mutate: moveStatus } = useMoveStatus();
+
+  const { showToast } = useContext(ToastContext)!;
 
   const [localStatuses, setLocalStatuses] = useState<ITaskStatus[]>([]);
   const [openAdd, setOpenAdd] = useState<number | null>(null);
@@ -92,7 +95,12 @@ export function ProjectBoardView() {
       priority_id: priorityId,
       deadline: deadline ? toDateString(deadline) : undefined,
       assignee_id: assigneeId ?? undefined,
-    });
+    },{ onSuccess: () => {
+      showToast("Đã thêm nhiệm vụ mới", "success");
+      setOpenAdd(null);
+    },
+    onError: () => showToast("Thêm nhiệm vụ thất bại", "error"),
+  });
   };
 
   const handleDragStart = (event: DragStartEvent) => {

@@ -60,7 +60,7 @@ export default function ChangeStatusSelector({
         label={
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Typography fontSize={12} fontWeight={500}>
-              {currentStatusName || "—"}
+              {currentStatusName?.toUpperCase() || "—"}
             </Typography>
             <KeyboardArrowDownIcon sx={{ fontSize: 14 }} />
           </Box>

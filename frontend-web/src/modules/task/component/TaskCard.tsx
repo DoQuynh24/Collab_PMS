@@ -247,6 +247,7 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
       </div>
 
       <TaskDetailModal
+        key={task.task_id}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         task={task}

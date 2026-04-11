@@ -1,0 +1,197 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.tableWrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
+.table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+}
+
+.thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8fafc;
+
+  th {
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .checkCol   { width: 40px; text-align: center;}
+  .workCol    { min-width: 300px; }
+  .assigneeCol { width: 180px; }
+  .reporterCol { width: 140px; }
+  .priorityCol { width: 140px; }
+  .statusCol   { width: 150px; }
+  .deadlineCol { width: 120px; }
+
+  .sortHeader {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .sortIconDefault {
+    font-size: 14px !important;
+    color: #c0c4cc;
+  }
+
+  .sortIconActive {
+    font-size: 14px !important;
+    color: #5663ee;
+  }
+}
+
+.tbody {
+  tr {
+    border-bottom: 1px solid #e2e8f0;
+    border-left: 1px solid #e2e8f0;
+    transition: background 0.1s;
+    cursor: pointer;
+
+    &:hover {
+      background: #f8faff;
+    }
+  }
+
+  td {
+    padding: 9px 12px;
+    font-size: 13px;
+    color: #374151;
+    vertical-align: middle;
+    border-right: 1px solid #e2e8f0;
+  }
+
+  .checkCell {
+    text-align: center;
+
+    input[type="checkbox"] {
+      cursor: pointer;
+      width: 14px;
+      height: 14px;
+      accent-color: #5663ee;
+    }
+  }
+
+  .workCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .taskLink {
+    font-weight: 600;
+    color: #5663ee;
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: monospace;
+    text-decoration: underline;
+  }
+
+  .taskTitle {
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 400px;
+  }
+
+  .assigneeCell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6b7280;
+  }
+}
+
+.footer {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+
+  .footerActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .createBtn {
+    font-size: 13px;
+    background-color: #2563eb;
+    text-transform: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: #fff;
+
+    &:hover {
+      background: #1d4ed8;
+    }
+  }
+
+  .countInfo {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+}
+
+
+.actionBar {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  font-size: 13px;
+  white-space: nowrap;
+
+  .actionBarCount {
+    font-weight: 600;
+  }
+
+  .actionBarDivider {
+    color: #64748b;
+  }
+
+  .actionBarBtn {
+    color: #fff;
+    text-transform: none;
+    font-size: 13px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}

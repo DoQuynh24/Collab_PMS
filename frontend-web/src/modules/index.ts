@@ -22,8 +22,13 @@ export const Account = lazyLoad(
   (module) => module.default
 );
 
-export const ProjetDetail = lazyLoad(
-  () => import('./project/ProjectDetail'),
+export const ProjectBoardView = lazyLoad(
+  () => import('./project/ProjectBoardView'),
+  (module) => module.default
+);
+
+export const ProjectListViewPage = lazyLoad(
+  () => import('./project/ProjectListView'),
   (module) => module.default
 );
 
@@ -51,7 +56,8 @@ export const routes: RouteConfig[] = [
   { path: '/home', component: Home, title: 'Home' },
   { path: '/login', component: Login, title: 'Login' },
   { path: '/account', component: Account, title: 'Account' },
-  { path: '/projects/:projectId', component: ProjetDetail, title: 'Project Detail' },
+  { path: '/projects/:projectId/board', component: ProjectBoardView, title: 'Project Board' },
+  { path: '/projects/:projectId/list', component: ProjectListViewPage, title: 'Project List' },
   { path: '/projects/:projectId/settings/details', component: ProjectDetailSetting, title: 'Project Settings' },
   { path: '/projects/:projectId/settings/members', component: ProjectMemberSetting, title: 'Project Members' },
   { path: '/projects/:projectId/settings/statuses', component: ProjectStatusesSetting, title: 'Project Status' },
