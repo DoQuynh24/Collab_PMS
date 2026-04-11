@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -112,12 +113,14 @@ export class TaskService {
 
     if (!task) throw new NotFoundException('Task not found');
 
-    const isMember = await this.memberRepo.findOne({
-      where: { project_id: task.project_id, user_id: userId },
+    const isOwner = task.project.owner_id === userId;
+    const isAdmin = await this.memberRepo.findOne({
+      where: { project_id: task.project_id, user_id: userId, role: 'admin' },
     });
+    const isCreator = task.created_by === userId;
 
-    if (!isMember && task.project.owner_id !== userId) {
-      throw new UnauthorizedException('Only project members can archive task');
+    if (!isOwner && !isAdmin && !isCreator) {
+      throw new ForbiddenException('Only task creator, admin or owner can archive this task');
     }
 
     task.is_archived = true;
@@ -144,7 +147,7 @@ export class TaskService {
     });
 
     if (!isOwner && !isAdmin) {
-      throw new UnauthorizedException('Only project owner or admin can permanently delete this task');
+      throw new ForbiddenException('Only project owner or admin can permanently delete this task');
     }
 
     await this.taskRepo.remove(task);

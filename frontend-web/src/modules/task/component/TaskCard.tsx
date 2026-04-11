@@ -203,7 +203,9 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
                   )}
                   <TaskCardMenu 
                     task={task}
-                    onOpenDetail={() => setModalOpen(true)}/>
+                    onOpenDetail={() => setModalOpen(true)}
+                    projectMembers={projectMembers}
+                  />
                 </Box>
               </>
             )}

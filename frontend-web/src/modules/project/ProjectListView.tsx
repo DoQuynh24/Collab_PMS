@@ -15,16 +15,12 @@ import styles from "./ProjectListView.module.scss";
 import LoadingPage from "../../components/loading/LoadingPage";
 import TaskRow from "../task/component/TaskRow";
 import { toDateString } from "../../utils/formatDate";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import ArchiveIcon from "@mui/icons-material/Archive";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CloseIcon from "@mui/icons-material/Close";
-import { IconButton } from "@mui/material";
 import { useTaskActionConfirm } from "../task/hook/useTaskActionConfirm";
 import { ToastContext } from "../../components/notification/NotifiProvider";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import TaskActionBar from "./component/modal/ActionBar";
 
 export default function ProjectListView() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -134,54 +130,17 @@ export default function ProjectListView() {
       />
 
       {checkedIds.size > 0 && (
-        <div className={styles.actionBar}>
-          <span className={styles.actionBarCount}>{checkedIds.size} đã chọn</span>
-          <span className={styles.actionBarDivider}>|</span>
-          <Button
-            size="small"
-            className={styles.actionBarBtn}
-            onClick={() => {
-              if (checkedIds.size === filteredTasks.length) {
-                setCheckedIds(new Set());
-              } else {
-                setCheckedIds(new Set(sortedTasks.map((t) => t.task_id)));
-              }
-            }}
-            startIcon={<CheckBoxIcon sx={{ fontSize: 16 }} />}
-          >
-            {checkedIds.size === sortedTasks.length ? "Bỏ chọn tất cả" : "Chọn tất cả"}
-          </Button>
-
-          <span className={styles.actionBarDivider}>|</span>
-
-          <Button
-            size="small"
-            className={styles.actionBarBtn}
-            onClick={() => checkedIds.forEach((id) => confirmArchive(id)) }
-            startIcon={<ArchiveIcon sx={{ fontSize: 16 }} />}
-          >
-            Lưu trữ
-          </Button>
-
-          <Button
-            size="small"
-            className={styles.actionBarBtn}
-            onClick={() => checkedIds.forEach((id) => confirmDelete(id))} 
-            startIcon={<DeleteIcon sx={{ fontSize: 16 }} />}
-          >
-            Xóa
-          </Button>
-
-          <span className={styles.actionBarDivider}>|</span>
-
-          <IconButton
-            size="small"
-            className={styles.actionBarBtn}
-            onClick={() => setCheckedIds(new Set())}
-          >
-            <CloseIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-        </div>
+        <TaskActionBar
+          checkedIds={checkedIds}
+          totalCount={sortedTasks.length}
+          projectId={projectId!}
+          projectMembers={projectMembers}
+          onSelectAll={() => setCheckedIds(new Set(sortedTasks.map((t) => t.task_id)))}
+          onClearAll={() => setCheckedIds(new Set())}
+          onArchive={() => checkedIds.forEach((id) => confirmArchive(id))}
+          onDelete={() => checkedIds.forEach((id) => confirmDelete(id))}
+          tasks={sortedTasks}
+        />
       )}
 
       <div className={styles.tableWrapper}>

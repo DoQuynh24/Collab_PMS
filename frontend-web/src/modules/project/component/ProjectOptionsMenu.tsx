@@ -106,7 +106,7 @@ export function ProjectOptionsMenu({ anchorEl, onClose, projectId, projectName, 
         <SettingsIcon fontSize="small" sx={{ mr: 1.5 }} /> Cài đặt dự án
       </MenuItem>
 
-      <Divider />
+      {(canManage || canDelete) && <Divider />}
       {canManage && (
         <MenuItem onClick={handleArchiveClick} sx={{ py: 1.2 }}>
           <ArchiveIcon fontSize="small" sx={{ mr: 1.5 }} /> Lưu trữ dự án

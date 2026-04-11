@@ -1,4 +1,4 @@
-import styles from "./ProjectListView.module.scss";
+import styles from "../../project/ProjectListView.module.scss";
 import { PRIORITIES } from "../../../constant";
 import type { ITask } from "../types";
 import type { ITaskStatus } from "../../task-status/types";

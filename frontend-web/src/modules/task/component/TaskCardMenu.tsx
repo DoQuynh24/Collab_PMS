@@ -16,17 +16,30 @@ import ArchiveIcon from "@mui/icons-material/Archive";
 import DeleteIcon from "@mui/icons-material/Delete";
 import type { ITask } from "../types";
 import { useTaskActionConfirm } from "../hook/useTaskActionConfirm";
+import { useGetCurrentUser } from "../../login/api/auth";
+import { useGetProjectById } from "../../project/api/get-project-id";
 
 interface Props {
   task: ITask;
   onOpenDetail: () => void;
+  projectMembers: any[];
 }
 
-export default function TaskCardMenu({ task, onOpenDetail }: Props) {
+export default function TaskCardMenu({ task, onOpenDetail, projectMembers }: Props) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const { confirmArchive, confirmDelete, taskActionModals } = useTaskActionConfirm()
+
+    const { data: currentUser } = useGetCurrentUser();
+    const { data: project } = useGetProjectById(task.project_id);
+
+    const currentMember = projectMembers.find((m) => m.user_id === currentUser?.user_id);
+    const isOwnerOrAdmin = currentMember?.role === "admin" || project?.owner_id === currentUser?.user_id;
+    const isCreator = task.created_by === currentUser?.user_id;
+
+    const canDelete = isOwnerOrAdmin;
+    const canArchive = isOwnerOrAdmin || isCreator;
 
     const handleOpen = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
@@ -76,17 +89,21 @@ export default function TaskCardMenu({ task, onOpenDetail }: Props) {
                 <ListItemText><Typography fontSize={14}>Sao chép liên kết</Typography></ListItemText>
             </MenuItem>
 
-            <Divider sx={{ my: 0.5 }} />
+            {(canArchive || canDelete) && <Divider sx={{ my: 0.5 }} />}
 
-            <MenuItem dense onClick={(e) => { e.stopPropagation(); confirmArchive(task.task_id); handleClose(); }}>
-            <ListItemIcon><ArchiveIcon fontSize="small" sx={{ color: "#f57c00" }} /></ListItemIcon>
-            <ListItemText><Typography fontSize={14}>Lưu trữ nhiệm vụ</Typography></ListItemText>
-            </MenuItem>
+            {canArchive && (
+                <MenuItem dense onClick={(e) => { e.stopPropagation(); confirmArchive(task.task_id); handleClose(); }}>
+                    <ListItemIcon><ArchiveIcon fontSize="small" sx={{ color: "#f57c00" }} /></ListItemIcon>
+                    <ListItemText><Typography fontSize={14}>Lưu trữ nhiệm vụ</Typography></ListItemText>
+                </MenuItem>
+                )}
 
-            <MenuItem dense onClick={(e) => { e.stopPropagation(); confirmDelete(task.task_id); handleClose(); }}>
-            <ListItemIcon><DeleteIcon fontSize="small" sx={{ color: "#d32f2f" }} /></ListItemIcon>
-            <ListItemText><Typography fontSize={14} color="#d32f2f">Xóa nhiệm vụ</Typography></ListItemText>
-            </MenuItem>
+                {canDelete && (
+                <MenuItem dense onClick={(e) => { e.stopPropagation(); confirmDelete(task.task_id); handleClose(); }}>
+                    <ListItemIcon><DeleteIcon fontSize="small" sx={{ color: "#d32f2f" }} /></ListItemIcon>
+                    <ListItemText><Typography fontSize={14} color="#d32f2f">Xóa nhiệm vụ</Typography></ListItemText>
+                </MenuItem>
+            )}
         </Menu>
 
         {taskActionModals}
