@@ -1,3 +1,10 @@
+export interface ICommentUser {
+  user_id: number;
+  name: string;
+  picture?: string;
+  email?: string;
+}
+
 export interface IComment {
   comment_id: number;
   task_id: number;
@@ -6,18 +13,9 @@ export interface IComment {
   file_url?: string;
   created_at: string;
   parent_id?: number | null;
-  user?: {
-    user_id: number;
-    name: string;
-    picture?: string;
-    email: string;
-  };
+  user?: ICommentUser;
   parent?: {
     comment_id: number;
-    user?: {
-      user_id: number;
-      name: string;
-      picture?: string;
-    };
+    user?: ICommentUser;
   } | null;
 }

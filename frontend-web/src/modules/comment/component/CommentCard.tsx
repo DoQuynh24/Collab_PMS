@@ -5,7 +5,6 @@ import {
   Typography, 
   IconButton, 
   Tooltip, 
-  TextField, 
   Button, 
   Stack 
 } from "@mui/material";
@@ -13,16 +12,19 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import RepeatIcon from '@mui/icons-material/Repeat';
 import { useDeleteComment } from "../api/delete-comment";
 import { useGetCurrentUser } from "../../login/api/auth";
-import type { IComment } from "../type";
+import type { IComment, ICommentUser } from "../type/index";
 import { ModalConfirm } from "../../../components/modal/modalConfirm";
 import { useAddComment } from "../api/add-comment";
+import MentionInput from "./MentionInput";
+import CommentContent from "./CommentContent";
 
 interface Props {
   comment: IComment;
-  taskId: number;                   
+  taskId: number;
+  projectMembers?: ICommentUser[];
 }
 
-export default function CommentCard({ comment, taskId }: Props) {
+export default function CommentCard({ comment, taskId, projectMembers = [] }: Props) {
   const [openConfirm, setOpenConfirm] = useState(false);
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
@@ -101,7 +103,14 @@ export default function CommentCard({ comment, taskId }: Props) {
             <Tooltip title="Trả lời">
               <IconButton
                 size="small"
-                onClick={() => setShowReply(!showReply)}
+                onClick={() => {
+                  if (!showReply) {
+                    setReplyContent(`@${comment.user?.name}\u200B `);
+                  } else {
+                    setReplyContent("");
+                  }
+                  setShowReply(!showReply);
+                }}
                 sx={{ color: "#2563eb" }}
               >
                 <RepeatIcon fontSize="small" />
@@ -123,18 +132,14 @@ export default function CommentCard({ comment, taskId }: Props) {
 
           <Box
             sx={{
-              fontSize: 14,
-              color: "#374151",
               bgcolor: "#f9fafb",
               border: "1px solid #e5e7eb",
               borderRadius: "8px",
               px: 1.5,
               py: 1,
-              wordBreak: "break-word",
-              whiteSpace: "pre-wrap",
             }}
           >
-            {comment.content}
+            <CommentContent content={comment.content} />
           </Box>
 
           {showReply && (
@@ -148,14 +153,12 @@ export default function CommentCard({ comment, taskId }: Props) {
                 </Avatar>
 
                 <Box sx={{ flex: 1 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    minRows={1}
-                    placeholder={`Trả lời ${comment.user?.name}...`}
+                  <MentionInput
                     value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    variant="outlined"
+                    onChange={setReplyContent}
+                    placeholder={`Trả lời ${comment.user?.name}... (gõ @ để tag)`}
+                    members={projectMembers}
+                    minRows={1}
                     size="small"
                   />
                   <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>

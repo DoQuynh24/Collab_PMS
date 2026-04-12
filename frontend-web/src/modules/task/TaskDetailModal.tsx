@@ -36,6 +36,8 @@ import { useAddComment } from "../comment/api/add-comment";
 import CommentCard from "../comment/component/CommentCard";
 import { useGetCurrentUser } from "../login/api/auth";
 import ChangeStatusSelector from "../task-status/component/ChangeStatusSelector";
+import MentionInput from "../comment/component/MentionInput";
+import type { ICommentUser } from "../comment/type/index";
 
 interface Props {
   open: boolean;
@@ -70,6 +72,14 @@ export default function TaskDetailModal({
   const assignee = assigneeMember?.user;
 
   const priority = PRIORITIES.find((p) => p.id === task.priority_id);
+
+  // Map một lần, dùng cho cả MentionInput và CommentCard
+  const commentMembers: ICommentUser[] = projectMembers.map((m: any) => ({
+    user_id: m.user_id,
+    name: m.user?.name ?? "",
+    picture: m.user?.picture,
+    email: m.user?.email,
+  }));
 
 
   const [deadline, setDeadline] = useState<Date | null>(
@@ -379,14 +389,12 @@ export default function TaskDetailModal({
                   {currentUser?.name?.charAt(0) || "U"}
                 </Avatar>
                 <Box sx={{ flex: 1 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={2}
-                    placeholder="Thêm bình luận..."
+                  <MentionInput
                     value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    variant="outlined"
+                    onChange={setNewComment}
+                    placeholder="Thêm bình luận... (gõ @ để tag người)"
+                    members={commentMembers}
+                    minRows={2}
                   />
                   <Stack direction="row" spacing={2} sx={{ mt: 1.5, justifyContent: "flex-end" }}>
                     <Button
@@ -419,7 +427,8 @@ export default function TaskDetailModal({
                 <CommentCard 
                   key={comment.comment_id} 
                   comment={comment} 
-                  taskId={task.task_id} 
+                  taskId={task.task_id}
+                  projectMembers={commentMembers}
                 />
               ))}
 
