@@ -69,6 +69,13 @@ export class ProjectController {
     );
   }
 
+  @Get('archived')
+  async findAllArchived(
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    return this.projectService.findAllArchived(Number(req.user.sub));
+  }
+
   @Get(':projectId')
   async findOne(
     @Param('projectId') projectId: string,
@@ -128,6 +135,14 @@ export class ProjectController {
       projectId,
       Number(req.user.sub),
     );
+  }
+
+  @Patch(':projectId/restore')
+  async restore(
+    @Param('projectId') projectId: string,
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    return this.projectService.restoreProject(projectId, Number(req.user.sub));
   }
 
   @Delete(':projectId')

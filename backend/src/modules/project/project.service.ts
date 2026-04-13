@@ -97,6 +97,32 @@ export class ProjectService {
       .getMany();
   }
 
+  async findAllArchived(userId: number) {
+    const accessibleProjects = await this.projectRepository
+      .createQueryBuilder('project')
+      .leftJoin('project.project_members', 'members')
+      .where('project.status = :status', { status: 'archived' })
+      .andWhere(
+        '(project.owner_id = :userId OR members.user_id = :userId)',
+        { userId },
+      )
+      .select('project.project_id')
+      .getMany();
+
+    if (accessibleProjects.length === 0) return [];
+
+    const ids = accessibleProjects.map((p) => p.project_id);
+
+    return this.projectRepository
+      .createQueryBuilder('project')
+      .leftJoinAndSelect('project.owner', 'owner')
+      .leftJoinAndSelect('project.project_members', 'members')
+      .leftJoinAndSelect('members.user', 'memberUser')
+      .where('project.project_id IN (:...ids)', { ids })
+      .orderBy('project.created_at', 'DESC')
+      .getMany();
+  }
+
   async findOne(projectId: string, userId: number) {
     const project = await this.projectRepository.findOne({
       where: { project_id: projectId },
@@ -235,6 +261,27 @@ export class ProjectService {
 
     project.status = 'archived';
 
+    return this.projectRepository.save(project);
+  }
+
+  async restoreProject(projectId: string, userId: number) {
+    const project = await this.projectRepository.findOne({
+      where: { project_id: projectId },
+      relations: ['project_members'],
+    });
+
+    if (!project) throw new NotFoundException(`Project with ID ${projectId} not found`);
+
+    const isOwner = project.owner_id === userId;
+    const isAdmin = project.project_members.some(
+      (m) => m.user_id === userId && m.role === 'admin'
+    );
+
+    if (!isOwner && !isAdmin) {
+      throw new UnauthorizedException('Only owner or admin can restore this project');
+    }
+
+    project.status = 'active';
     return this.projectRepository.save(project);
   }
 
