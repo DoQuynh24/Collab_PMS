@@ -1,9 +1,10 @@
-import { ListItemButton, ListItemText, Tooltip, IconButton } from '@mui/material';
+import { ListItemButton, ListItemText, Tooltip, IconButton, Avatar } from '@mui/material';
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material';
 import { useState } from 'react';
 import { ProjectOptionsMenu } from '../ProjectOptionsMenu';
 import { useGetCurrentUser } from '../../../login/api/auth';
 import { isProjectPath } from '../../../../routes/urls';
+import { getProjectColor } from '../../../../utils/projectColor';
 
 interface Props {
   project: any;
@@ -25,12 +26,25 @@ export function ProjectItem({ project, onNavigate }: Props) {
         sx={{ 
           pl: 4, 
           pr: 1, 
+          gap: 1,
           '&:hover .moreBtn': { opacity: 1 },
           bgcolor: isSelected ? 'action.selected' : 'transparent'  
         }}
       >
+        <Avatar
+          variant="rounded"
+          sx={{
+            width: 22, height: 22, fontSize: 11, fontWeight: 700,
+            bgcolor: getProjectColor(project.project_id).bg,
+            color: getProjectColor(project.project_id).text,
+            borderRadius: "4px", flexShrink: 0,
+          }}
+        >
+          {project.name.charAt(0).toUpperCase()}
+        </Avatar>
         <ListItemText
           primary={project.name}
+          primaryTypographyProps={{ fontSize: 14, noWrap: true }}
         />
         <Tooltip title="Tùy chọn" arrow>
           <IconButton

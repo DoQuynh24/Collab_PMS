@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, Tooltip, Popover, TextField, InputAdornment, MenuItem, Select } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip, Popover, TextField, InputAdornment, MenuItem, Select, Avatar } from '@mui/material';
 import { Settings as SettingsIcon, PersonAdd as PersonAddIcon, Share as ShareIcon } from '@mui/icons-material';
 import { useState } from 'react';
 import LockIcon from '@mui/icons-material/Lock';
@@ -7,6 +7,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import { AddMemberModal } from '../../project-member/component/AddMemberFormModal';
 import ProjectSettingsMenu from './setting/ProjectSettingMenu';
+import { getProjectColor } from '../../../utils/projectColor';
 
 interface Props {
   projectName?: string;
@@ -33,9 +34,18 @@ export function ProjectHeader({ projectName, projectId }: Props) {
     return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid #e0e0e0', paddingTop: '0px' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Box sx={{ width: 32, height: 32, borderRadius: '6px', overflow: 'hidden' }}>
-          <Box component="img" src="/images/project.png" alt="project" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </Box>
+        <Avatar
+          variant="rounded"
+          sx={{
+            width: 32, height: 32,
+            fontSize: 14, fontWeight: 700,
+            bgcolor: getProjectColor(projectId ?? "").bg,
+            color: getProjectColor(projectId ?? "").text,
+            borderRadius: "6px",
+          }}
+        >
+          {projectName?.charAt(0).toUpperCase() ?? "P"}
+        </Avatar>
         <Typography fontWeight={600} fontSize={20}>{projectName}</Typography>
       </Box>
 

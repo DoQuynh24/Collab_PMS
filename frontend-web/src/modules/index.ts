@@ -52,10 +52,16 @@ export const ProjectStatusesSetting = lazyLoad(
   (module) => module.default
 );
 
+export const ArchivedProjects = lazyLoad(
+  () => import('./project/ArchivedProjects'),
+  (module) => module.default
+);
+
 export const routes: RouteConfig[] = [
   { path: '/home', component: Home, title: 'Home' },
   { path: '/login', component: Login, title: 'Login' },
   { path: '/account', component: Account, title: 'Account' },
+  { path: '/archive', component: ArchivedProjects, title: 'Kho lưu trữ' },
   { path: '/projects/:projectId/board', component: ProjectBoardView, title: 'Project Board' },
   { path: '/projects/:projectId/list', component: ProjectListViewPage, title: 'Project List' },
   { path: '/projects/:projectId/settings/details', component: ProjectDetailSetting, title: 'Project Settings' },

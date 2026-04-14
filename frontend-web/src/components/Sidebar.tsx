@@ -7,10 +7,10 @@ import {
   ListItemText, 
   Toolbar 
 } from '@mui/material';
-import { Home as HomeIcon } from '@mui/icons-material';
+import { Home as HomeIcon, ArchiveOutlined } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { homeUrl } from '../routes/urls';
-import ProjectList from '../modules/project/component/ProjectList';
+import { homeUrl, archiveUrl } from '../routes/urls';
+import ProjectList from '../modules/project/component/list/ProjectList';
 
 const drawerWidth = 230;
 const collapsedWidth = 60;
@@ -21,6 +21,7 @@ export function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => voi
 
   const menuItems = [
     { text: 'Trang chủ', icon: <HomeIcon />, path: homeUrl },
+    { text: 'Kho lưu trữ', icon: <ArchiveOutlined />, path: archiveUrl },
   ];
 
   return (

@@ -130,7 +130,13 @@ export function ProjectOptionsMenu({ anchorEl, onClose, projectId, projectName, 
           <br />
           Bạn và các thành viên sẽ không thể chỉnh sửa dự án này nữa cho đến khi khôi phục.
           <br />
-          Bạn có thể khôi phục dự án từ mục <span style={{ textDecoration: "underline", color: "blue", cursor: "pointer" }}>Lưu trữ</span>.
+          Bạn có thể khôi phục dự án từ mục{" "}
+          <span
+            style={{ textDecoration: "underline", color: "#2563eb", cursor: "pointer" }}
+            onClick={() => { setOpenArchiveConfirm(false); navigate('/archive'); }}
+          >
+            Lưu trữ
+          </span>.
         </>
       }
       titleButton="Lưu trữ"

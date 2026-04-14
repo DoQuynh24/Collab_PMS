@@ -5,7 +5,6 @@ interface Props {
   content: string;
 }
 
-// Match @Tên\u200B (format mới) hoặc @[Tên] (backward compat)
 export default function CommentContent({ content }: Props) {
   const parts = content.split(/(@[^\u200B@\n]+\u200B|@\[[^\]]+\])/g);
 
