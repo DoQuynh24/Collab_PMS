@@ -2,6 +2,13 @@ import { createTheme } from '@mui/material';
 
 export const theme = createTheme({
   components: {
+    MuiAvatar: {
+      defaultProps: {
+        imgProps: {
+          referrerPolicy: "no-referrer",
+        },
+      },
+    },
     MuiIconButton: {
       styleOverrides: {
         root: {

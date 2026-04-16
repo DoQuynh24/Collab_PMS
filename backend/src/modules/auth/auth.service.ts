@@ -48,4 +48,9 @@ export class AuthService {
       .limit(10)
       .getMany();
   }
+
+  async updateUserPicture(userId: number, picture: string | null): Promise<User> {
+    await this.userRepository.update(userId, { picture: picture ?? undefined });
+    return this.userRepository.findOne({ where: { user_id: userId } }) as Promise<User>;
+  }
 }
