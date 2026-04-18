@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectInvitation } from './entities/project-invitation.entity';
 import { ProjectInvitationService } from './project-invitation.service';
-import { ProjectInvitationController } from './project-invitation.controller';
+import { ProjectInvitationController, JoinRequestPublicController } from './project-invitation.controller';
 import { ProjectModule } from '../project/project.module';
 import { AuthModule } from '../auth/auth.module';
 import { ProjectMember } from '../project-member/entities/project-member.entity';
@@ -12,11 +12,12 @@ import { InvitationController } from './invitation.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ProjectInvitation, ProjectMember]),
-    ProjectModule,
+    forwardRef(() => ProjectModule),
     AuthModule,
     MailModule,
   ],
   providers: [ProjectInvitationService],
-  controllers: [ProjectInvitationController, InvitationController],
+  controllers: [JoinRequestPublicController, ProjectInvitationController, InvitationController],
+  exports: [ProjectInvitationService],
 })
 export class ProjectInvitationModule {}

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -13,6 +14,10 @@ import { GlobalTaskStatus } from '../task-status/entities/gobal-task-status.enti
 import { ProjectTaskStatus } from '../task-status/entities/task-status.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { CreateTaskDto } from '../tasks/dto/create-task.dto';
+import { ProjectMember } from '../project-member/entities/project-member.entity';
+import { MailService } from '../project-invitation/mail/mail.service';
+import { User } from '../auth/entities/user.entity';
+import { ProjectInvitationService } from '../project-invitation/project-invitation.service';
 
 @Injectable()
 export class ProjectService {
@@ -29,6 +34,15 @@ export class ProjectService {
     @InjectRepository(Task)
     private taskRepo: Repository<Task>,
 
+    @InjectRepository(ProjectMember)
+    private memberRepo: Repository<ProjectMember>,
+
+    private mailService: MailService,
+
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+
+    private invitationService: ProjectInvitationService,
   ) {}
 
   async create(dto: CreateProjectDto, userId: number) {
@@ -95,6 +109,87 @@ export class ProjectService {
       )
       .orderBy('project.created_at', 'DESC')
       .getMany();
+  }
+
+  async lookup(projectId: string) {
+  const project = await this.projectRepository.findOne({
+    where: { project_id: projectId },
+    select: ['project_id', 'name', 'access', 'status', 'description'],
+  });
+
+  if (!project) throw new NotFoundException('Project not found');
+  if (project.status === 'archived') throw new BadRequestException('This project has been archived');
+
+  return project;
+}
+
+  async joinProject(projectId: string, userId: number) {
+    const project = await this.projectRepository.findOne({
+      where: { project_id: projectId },
+      relations: ['project_members'],
+    });
+
+    if (!project) throw new NotFoundException('Project not found');
+    if (project.status === 'archived') throw new BadRequestException('This project has been archived');
+
+    const alreadyMember = project.project_members.some(
+      (m) => Number(m.user_id) === Number(userId)
+    );
+
+    if (project.owner_id === userId || alreadyMember) {
+      throw new ConflictException('You are already a member of this project');
+    }
+
+    if (project.access === 'public') {
+      const member = this.memberRepo.create({
+        project_id: projectId,
+        user_id: userId,
+        role: 'member',
+      });
+
+      await this.memberRepo.save(member);
+
+      return { 
+        type: 'joined', 
+        message: 'Successfully joined the project' 
+      };
+    } 
+    else {
+      const requester = await this.userRepo.findOne({ where: { user_id: userId } });
+      if (!requester) throw new NotFoundException('User not found');
+
+      const token = await this.invitationService.createJoinRequest(projectId, requester);
+
+      const owner = await this.userRepo.findOne({ where: { user_id: project.owner_id } });
+      const admins = await this.memberRepo.find({
+        where: { project_id: projectId, role: 'admin' },
+        relations: ['user'],
+      });
+
+      const recipients = new Set<string>();
+      if (owner?.email) recipients.add(owner.email);
+      admins.forEach((m) => {
+        if (m.user?.email) recipients.add(m.user.email);
+      });
+
+      await Promise.all(
+        [...recipients].map((email) =>
+          this.mailService.sendJoinRequest({
+            to: email,
+            projectName: project.name,
+            requesterName: requester.name,
+            requesterEmail: requester.email,
+            token,
+            projectId,
+          })
+        )
+      );
+
+      return { 
+        type: 'requested', 
+        message: 'Join request has been sent successfully' 
+      };
+    }
   }
 
   async findAllArchived(userId: number) {

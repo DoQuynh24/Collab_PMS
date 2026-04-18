@@ -19,6 +19,16 @@ import { AuthGuard } from '@nestjs/passport';
 import { CreateTaskDto } from '../tasks/dto/create-task.dto';
 
 @Controller('projects')
+export class ProjectPublicController {
+  constructor(private readonly projectService: ProjectService) {}
+
+  @Get('lookup/:projectId')
+  async lookup(@Param('projectId') projectId: string) {
+    return this.projectService.lookup(projectId);
+  }
+}
+
+@Controller('projects')
 @UseGuards(AuthGuard('jwt'))
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
@@ -74,6 +84,20 @@ export class ProjectController {
     @Req() req: Request & { user: { sub: string } },
   ) {
     return this.projectService.findAllArchived(Number(req.user.sub));
+  }
+
+  @Get('lookup/:projectId')
+  @UseGuards()
+  async lookup(@Param('projectId') projectId: string) {
+    return this.projectService.lookup(projectId);
+  }
+
+  @Post(':projectId/join')
+  async join(
+    @Param('projectId') projectId: string,
+    @Req() req: Request & { user: { sub: string } },
+  ) {
+    return this.projectService.joinProject(projectId, Number(req.user.sub));
   }
 
   @Get(':projectId')

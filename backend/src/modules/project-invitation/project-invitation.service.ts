@@ -107,4 +107,129 @@ export class ProjectInvitationService {
 
     return { message: 'Invitation accepted', project_id: invitation.project_id };
   }
+
+  async createJoinRequest(projectId: string, requester: User): Promise<string> {
+    await this.invitationRepo.delete({
+      project_id: projectId,
+      invited_email: requester.email,
+      is_join_request: true,
+      status: 'pending',
+    });
+
+    const token = uuidv4();
+    const expires_at = new Date();
+    expires_at.setDate(expires_at.getDate() + 7);
+
+    const req = this.invitationRepo.create({
+      project_id: projectId,
+      invited_by_user_id: requester.user_id,
+      invited_email: requester.email,
+      token,
+      expires_at,
+      role: 'member',
+      is_join_request: true,
+    });
+    await this.invitationRepo.save(req);
+    return token;
+  }
+
+  async getJoinRequests(projectId: string) {
+    return this.invitationRepo.find({
+      where: { project_id: projectId, is_join_request: true, status: 'pending' },
+      relations: ['invitedBy'],
+      order: { created_at: 'DESC' },
+    });
+  }
+
+  async approveJoinRequest(token: string, adminId: number) {
+    const req = await this.invitationRepo.findOne({ where: { token, is_join_request: true } });
+    if (!req) throw new NotFoundException('Join request not found');
+    if (req.status !== 'pending') throw new BadRequestException('Request already handled');
+
+    const project = await this.projectRepo.findOne({
+      where: { project_id: req.project_id },
+      relations: ['project_members'],
+    });
+    if (!project) throw new NotFoundException('Project not found');
+
+    const isOwner = project.owner_id === adminId;
+    const isAdmin = project.project_members?.some(
+      (m) => Number(m.user_id) === Number(adminId) && m.role === 'admin'
+    );
+    if (!isOwner && !isAdmin) throw new UnauthorizedException('Only owner or admin can approve');
+
+    const user = await this.userRepo.findOne({ where: { email: req.invited_email } });
+    if (!user) throw new NotFoundException('User not found');
+
+    req.status = 'accepted';
+    req.accepted_at = new Date();
+    await this.invitationRepo.save(req);
+
+    const existing = await this.memberRepo.findOne({
+      where: { project_id: req.project_id, user_id: user.user_id },
+    });
+    if (!existing) {
+      await this.memberRepo.save(
+        this.memberRepo.create({ project_id: req.project_id, user_id: user.user_id, role: 'member' })
+      );
+    }
+
+    return { message: 'Join request approved', project_id: req.project_id };
+  }
+
+  async rejectJoinRequest(token: string, adminId: number) {
+    const req = await this.invitationRepo.findOne({ where: { token, is_join_request: true } });
+    if (!req) throw new NotFoundException('Join request not found');
+    if (req.status !== 'pending') throw new BadRequestException('Request already handled');
+
+    const project = await this.projectRepo.findOne({
+      where: { project_id: req.project_id },
+      relations: ['project_members'],
+    });
+    if (!project) throw new NotFoundException('Project not found');
+
+    const isOwner = project.owner_id === adminId;
+    const isAdmin = project.project_members?.some(
+      (m) => Number(m.user_id) === Number(adminId) && m.role === 'admin'
+    );
+    if (!isOwner && !isAdmin) throw new UnauthorizedException('Only owner or admin can reject');
+
+    req.status = 'rejected';
+    await this.invitationRepo.save(req);
+    return { message: 'Join request rejected' };
+  }
+
+  async approveJoinRequestDirect(token: string) {
+    const req = await this.invitationRepo.findOne({ where: { token, is_join_request: true } });
+    if (!req) throw new NotFoundException('Yêu cầu không tồn tại');
+    if (req.status !== 'pending') throw new BadRequestException('Yêu cầu đã được xử lý trước đó');
+    if (new Date() > req.expires_at) throw new BadRequestException('Yêu cầu đã hết hạn');
+
+    const user = await this.userRepo.findOne({ where: { email: req.invited_email } });
+    if (!user) throw new NotFoundException('Người dùng không tồn tại');
+
+    req.status = 'accepted';
+    req.accepted_at = new Date();
+    await this.invitationRepo.save(req);
+
+    const existing = await this.memberRepo.findOne({
+      where: { project_id: req.project_id, user_id: user.user_id },
+    });
+    if (!existing) {
+      await this.memberRepo.save(
+        this.memberRepo.create({ project_id: req.project_id, user_id: user.user_id, role: 'member' })
+      );
+    }
+    return { message: 'Approved', project_id: req.project_id };
+  }
+
+  async rejectJoinRequestDirect(token: string) {
+    const req = await this.invitationRepo.findOne({ where: { token, is_join_request: true } });
+    if (!req) throw new NotFoundException('Yêu cầu không tồn tại');
+    if (req.status !== 'pending') throw new BadRequestException('Yêu cầu đã được xử lý trước đó');
+
+    req.status = 'rejected';
+    await this.invitationRepo.save(req);
+    return { message: 'Rejected', project_id: req.project_id };
+  }
 }

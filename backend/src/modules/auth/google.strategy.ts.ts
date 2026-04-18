@@ -43,6 +43,8 @@ export class GoogleOauthStrategy extends PassportStrategy(GoogleStrategy, 'googl
         google_id: googleId,
         picture
       });
+    } else {
+      user = await this.authService.updateUserPicture(user.user_id, picture);
     }
 
     done(null, user);

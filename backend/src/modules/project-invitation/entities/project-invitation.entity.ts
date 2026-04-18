@@ -29,6 +29,9 @@ export class ProjectInvitation {
   })
   role: 'admin' | 'member';
 
+  @Column({ type: 'boolean', default: false })
+  is_join_request: boolean;
+
   @CreateDateColumn({ type: 'datetime' })
   created_at: Date;
 
