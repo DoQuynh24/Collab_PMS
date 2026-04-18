@@ -43,7 +43,7 @@ export const ProjectDetailSetting = lazyLoad(
 );
 
 export const ProjectMemberSetting = lazyLoad(
-  () => import('./project/component/setting/ProjectMemberSetting'),
+  () => import('./project/component/setting/member/ProjectMemberSetting'),
   (module) => module.default
 );
 
@@ -58,7 +58,7 @@ export const ArchivedProjects = lazyLoad(
 );
 
 export const JoinProject = lazyLoad(
-  () => import('./project/JoinProject'),
+  () => import('./project-invitation/JoinProject'),
   (module) => module.default
 );
 

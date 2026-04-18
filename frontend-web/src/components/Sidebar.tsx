@@ -5,11 +5,11 @@ import {
   ListItemButton, 
   ListItemIcon, 
   ListItemText, 
-  Toolbar 
+  Toolbar,
+  Box,
 } from '@mui/material';
-import { Home as HomeIcon, ArchiveOutlined } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { homeUrl, archiveUrl } from '../routes/urls';
+import { homeUrl, archiveUrl, joinProjectUrl } from '../routes/urls';
 import ProjectList from '../modules/project/component/list/ProjectList';
 
 const drawerWidth = 230;
@@ -20,8 +20,12 @@ export function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => voi
   const location = useLocation();
 
   const menuItems = [
-    { text: 'Trang chủ', icon: <HomeIcon />, path: homeUrl },
-    { text: 'Kho lưu trữ', icon: <ArchiveOutlined />, path: archiveUrl },
+    { text: 'Trang chủ', 
+      icon: <Box component="img" src="/images/home.png" alt="home" sx={{ width: 22, height: 22, objectFit: 'contain' }} />, 
+      path: homeUrl },
+    { text: 'Tham gia dự án',
+      icon: <Box component="img" src="/images/microsoft-project.png" alt="join" sx={{ width: 22, height: 22, objectFit: 'contain' }} />, 
+      path: joinProjectUrl },
   ];
 
   return (
@@ -73,6 +77,16 @@ export function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => voi
           </ListItemButton>
         ))}
         <ProjectList open={open} />
+        <ListItemButton
+          onClick={() => navigate(archiveUrl)}
+          selected={location.pathname === archiveUrl}
+          sx={{ justifyContent: open ? 'initial' : 'center', px: 2.5 }}
+        >
+          <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+            <Box component="img" src="/images/archive.png" alt="archive" sx={{ width: 22, height: 22, objectFit: 'contain' }} />
+          </ListItemIcon>
+          <ListItemText primary="Kho lưu trữ" sx={{ opacity: open ? 1 : 0 }} />
+        </ListItemButton>
       </List>
     </Drawer>
   );
