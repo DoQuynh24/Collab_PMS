@@ -5,6 +5,7 @@ export const projectUrl = "/projects"
 export const projectDetailUrl = "/projects/:projectId";
 export const invitationAcceptUrl = "/invitations/accept";
 export const archiveUrl = "/archive";
+export const joinProjectUrl = "/join";
 
 export const isProjectPath = (pathname: string, projectId: string): boolean => {
   return pathname.startsWith(`/projects/${projectId}`);

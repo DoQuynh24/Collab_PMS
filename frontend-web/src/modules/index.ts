@@ -57,11 +57,17 @@ export const ArchivedProjects = lazyLoad(
   (module) => module.default
 );
 
+export const JoinProject = lazyLoad(
+  () => import('./project/JoinProject'),
+  (module) => module.default
+);
+
 export const routes: RouteConfig[] = [
   { path: '/home', component: Home, title: 'Home' },
   { path: '/login', component: Login, title: 'Login' },
   { path: '/account', component: Account, title: 'Account' },
   { path: '/archive', component: ArchivedProjects, title: 'Kho lưu trữ' },
+  { path: '/join', component: JoinProject, title: 'Tham gia dự án' },
   { path: '/projects/:projectId/board', component: ProjectBoardView, title: 'Project Board' },
   { path: '/projects/:projectId/list', component: ProjectListViewPage, title: 'Project List' },
   { path: '/projects/:projectId/settings/details', component: ProjectDetailSetting, title: 'Project Settings' },
