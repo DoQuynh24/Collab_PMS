@@ -42,6 +42,11 @@ export class TaskController {
     return this.service.findByProject(projectId, includeArchived);
   }
 
+  @Get('assigned-to-me')
+  findAssignedToMe(@Req() req: Request & { user: { sub: string } }) {
+    return this.service.findAssignedToMe(Number(req.user.sub));
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

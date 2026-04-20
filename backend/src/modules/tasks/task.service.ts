@@ -81,6 +81,14 @@ export class TaskService {
     });
   }
 
+  async findAssignedToMe(userId: number) {
+    return this.taskRepo.find({
+      where: { assignee_id: userId, is_archived: false },
+      relations: ['priority', 'status', 'project'],
+      order: { updated_at: 'DESC' },
+    });
+  }
+
   async update(taskId: number, dto: UpdateTaskDto, userId: number) {
     const task = await this.taskRepo.findOne({
       where: { task_id: taskId },

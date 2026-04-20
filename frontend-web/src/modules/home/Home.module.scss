@@ -1,8 +1,139 @@
-.homeTitle {
-    font-weight: 400 !important;
-    font-size: 24px !important;
+.container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
 }
 
-.homeDesc {
-    font-size: 16 !important;
+.left {
+  flex: 1;
+  min-width: 0;
+}
+
+.greeting {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sectionCount {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.projectGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.projectCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #5663ee;
+    background-color: #fafbff;
+  }
+}
+
+.projectCardInner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emptyBox {
+  border: 1px dashed #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.taskList {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f8fafc;
+  }
+}
+
+.taskInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.deadline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.right {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.statsCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.statsHeader {
+  padding: 12px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+}
+
+.overdueCard {
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fef2f2;
+}
+
+.overdueHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #fecaca;
+}
+
+.overdueRow {
+  padding: 12px 20px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #fee2e2;
+  }
 }
