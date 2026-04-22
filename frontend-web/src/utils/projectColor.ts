@@ -18,3 +18,6 @@ export function getProjectColor(projectId: string) {
   }
   return COLORS[Math.abs(hash) % COLORS.length];
 }
+
+export const calcPercent = (count: number, total: number): number =>
+  total > 0 ? Math.round((count / total) * 100) : 0;

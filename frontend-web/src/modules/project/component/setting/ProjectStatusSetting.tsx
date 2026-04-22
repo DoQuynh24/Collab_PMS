@@ -159,12 +159,18 @@ export function ProjectStatusSettings() {
         <Typography variant="h5" fontWeight={600}>Quản lý trạng thái</Typography>
       </Box>
 
-      <Typography color="#555" marginBottom={4}>
+      <Typography color="#555" marginBottom={2}>
         Trang quản lý trạng thái giúp bạn tùy chỉnh các cột trên bảng Kanban để theo dõi tiến độ công việc 
         một cách hiệu quả. Bạn có thể tạo thêm trạng thái mới, chỉnh sửa tên, thay đổi thứ tự hoặc xóa 
         những trạng thái không còn phù hợp. Việc sắp xếp và quản lý trạng thái linh hoạt sẽ giúp cả nhóm 
         dễ dàng nắm bắt tiến độ dự án, phân công nhiệm vụ rõ ràng và làm việc đồng bộ hơn.
       </Typography>
+
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1.5, mb: 3, bgcolor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "8px" }}>
+        <Typography fontSize={13} color="#92400e">
+          💡 <strong>Lưu ý:</strong> Trạng thái ở vị trí <strong>cuối cùng</strong> sẽ được coi là <strong>hoàn thành</strong> khi tính tiến độ dự án. Hãy đặt trạng thái "Done" hoặc tương đương ở cuối danh sách.
+        </Typography>
+      </Box>
 
       <Box >
         <Paper elevation={0} sx={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden", mb: 3 }}>

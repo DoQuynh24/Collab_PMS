@@ -17,6 +17,11 @@ export const ROLES: { key: RoleKey; label: string }[] = [
   { key: 'member', label: 'Thành viên' },
 ];
 
+export const getMemberRoleLabel = (userId: number, ownerId?: number, role?: RoleKey): string => {
+  if (userId === ownerId) return 'Chủ sở hữu';
+  return ROLES.find(r => r.key === role)?.label ?? 'Thành viên';
+};
+
 export const PROJECT_ACCESS = {
   PRIVATE: 'private' as const,
   PUBLIC: 'public' as const,
