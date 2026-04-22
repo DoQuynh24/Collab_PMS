@@ -1,5 +1,5 @@
-import { Box, Typography, Avatar, Chip, Stack, Tooltip } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { Box, Typography, Avatar, Chip, Stack, Tooltip } from '@mui/material';import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { useGetProjectById } from './api/get-project-id';
 import { useGetTasksByProject } from '../task/api/get-task-by-project';
 import { useGetProjectTaskStatuses } from '../task-status/api/get-project-task-status';
@@ -7,6 +7,7 @@ import { ProjectHeader } from './component/ProjectHeader';
 import { ProjectNav } from './component/ProjectNav';
 import { SectionCard } from './component/overview/SectionCard';
 import { ProgressBar } from './component/overview/ProgressBar';
+import { FilterModal, type FilterValues } from './component/modal/FilterModal';
 import LoadingPage from '../../components/loading/LoadingPage';
 import { PRIORITIES, getMemberRoleLabel } from '../../constant';
 import { calcPercent } from '../../utils/projectColor';
@@ -20,14 +21,27 @@ const WORKLOAD_LEGEND = [
 export default function ProjectOverview() {
   const { projectId } = useParams<{ projectId: string }>();
   const { data: project, isLoading } = useGetProjectById(projectId!);
-  const { data: tasks = [] } = useGetTasksByProject(projectId!);
+  const { data: allTasks = [] } = useGetTasksByProject(projectId!);
   const { data: statusData } = useGetProjectTaskStatuses(projectId!);
+
+  const [filters, setFilters] = useState<FilterValues>({ assignees: [], priorities: [], statuses: [] });
 
   if (isLoading) return <LoadingPage />;
 
   const statuses = statusData?.data ?? [];
   const members = project?.project_members ?? [];
   const now = new Date();
+
+  const tasks = allTasks.filter(t => {
+    if (filters.assignees.length > 0) {
+      const isUnassigned = filters.assignees.includes(-1) && !t.assignee_id;
+      const isAssigned = t.assignee_id && filters.assignees.includes(t.assignee_id);
+      if (!isUnassigned && !isAssigned) return false;
+    }
+    if (filters.priorities.length > 0 && !filters.priorities.includes(t.priority_id)) return false;
+    if (filters.statuses.length > 0 && !filters.statuses.includes(t.status_id)) return false;
+    return true;
+  });
   const total = tasks.length;
 
   const lastStatus = statuses.length > 0
@@ -46,7 +60,15 @@ export default function ProjectOverview() {
       <ProjectHeader projectName={project?.name} projectId={projectId} />
       <ProjectNav projectId={projectId} />
 
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
+      <Box sx={{ flex: 1, overflowY: 'auto'}}>
+        <Box sx={{ mb: 2, mt: 2, display: 'flex', justifyContent: 'flex-end', px:1 }}>
+          <FilterModal
+            projectMembers={members}
+            statuses={statuses}
+            onFilterChange={setFilters}
+          />
+        </Box>
+
         <Box className={styles.grid}>
 
           <SectionCard title="Đánh giá tiến độ dự án" span2>
@@ -57,7 +79,7 @@ export default function ProjectOverview() {
                 tooltipTitle={`Hoàn thành: ${progress}%`}
                 height={10}
               />
-              <Typography fontSize={14} fontWeight={700} color={progress === 100 ? '#059669' : '#5663ee'}>
+              <Typography fontSize={10} fontWeight={700} color={progress === 100 ? '#059669' : '#5663ee'}>
                 {progress}%
               </Typography>
             </Box>
@@ -68,7 +90,7 @@ export default function ProjectOverview() {
                 { label: 'Quá hạn', value: overdue, color: '#ef4444' },
               ].map(s => (
                 <Box key={s.label} sx={{ textAlign: 'center' }}>
-                  <Typography fontSize={18} fontWeight={700} color={s.color}>{s.value}</Typography>
+                  <Typography fontSize={16} fontWeight={600} color={s.color}>{s.value}</Typography>
                   <Typography fontSize={12} color="#6b7280">{s.label}</Typography>
                 </Box>
               ))}
@@ -101,7 +123,7 @@ export default function ProjectOverview() {
                   <Chip
                     label={p.name.toUpperCase()}
                     size="small"
-                    sx={{ fontSize: 11, height: 20, bgcolor: `${p.color}20`, color: p.color, fontWeight: 600, width: 100 }}
+                    sx={{ fontSize: 11, height: 22, bgcolor: `${p.color}20`, color: p.color, fontWeight: 600, width: 100 }}
                   />
                   <ProgressBar
                     value={calcPercent(p.count, total)}
