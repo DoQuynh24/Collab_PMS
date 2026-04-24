@@ -1,0 +1,76 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.weekdayHeader {
+  padding: 8px;
+  text-align: center;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.emptyCell {
+  min-height: 110px;
+  background-color: #fafafa;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+
+  &:nth-child(7n) {
+    border-right: none;
+  }
+}
+
+.dayCell {
+  min-height: 110px;
+  padding: 6px;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #fff;
+  vertical-align: top;
+  transition: background 0.1s;
+
+  &:nth-child(7n) {
+    border-right: none;
+  }
+
+  &:hover {
+    background-color: #fafbff;
+  }
+}
+
+.pastDay {
+  background-color: #fafafa;
+}
+
+.dayNumber {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.taskChip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #f3f4f6;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.1s;
+}

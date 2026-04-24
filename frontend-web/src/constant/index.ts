@@ -22,6 +22,13 @@ export const getMemberRoleLabel = (userId: number, ownerId?: number, role?: Role
   return ROLES.find(r => r.key === role)?.label ?? 'Thành viên';
 };
 
+export const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+export const MONTHS = [
+  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12',
+];
+
 export const PROJECT_ACCESS = {
   PRIVATE: 'private' as const,
   PUBLIC: 'public' as const,
