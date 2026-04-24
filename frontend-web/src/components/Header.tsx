@@ -1,11 +1,14 @@
 "use client";
-import { AppBar, Toolbar, Typography, Box, IconButton, Avatar, Menu, MenuItem, Badge, InputBase } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, IconButton, Avatar, Menu, MenuItem, Badge, Tooltip, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import MailIcon from '@mui/icons-material/Mail';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useState } from 'react';
-import SearchIcon from '@mui/icons-material/Search';
 import { HeaderMenu } from './HeaderMenu';
 import { useGetCurrentUser } from '../modules/login/api/auth';
 
@@ -41,64 +44,94 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const isLoggedIn = !!user && !isLoading;
 
   return (
-    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#5663ee', height: '50px' }}>
-      <Toolbar sx={{ minHeight: '50px !important', alignItems: 'center !important' }}>
-        <IconButton
-          color="inherit"
-          edge="start"
-          onClick={onToggleSidebar}
-        >
+    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#5663ee', height: '50px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      <Toolbar sx={{ minHeight: '50px !important', alignItems: 'center !important', gap: 1 }}>
+        <IconButton color="inherit" edge="start" onClick={onToggleSidebar}>
           <MenuIcon />
         </IconButton>
-        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, paddingLeft: '15px' }}>
-          <Typography variant="h5">
+
+        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, pl: 1.5 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
             COLLAB
           </Typography>
           <HeaderMenu />
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.15)', borderRadius: 4, ml: 2 }}>
-          <InputBase
-            placeholder="Search…"
-            inputProps={{ 'aria-label': 'search' }}
-            sx={{ color: 'white', ml: 1, flex: 1 }}
-          />
-          <IconButton type="button" sx={{ p: 1, color: 'white' }} aria-label="search">
-            <SearchIcon />
-          </IconButton>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Tooltip title="Thông báo">
+            <IconButton color="inherit">
+              <Badge badgeContent={4} color="error" sx={{ '& .MuiBadge-badge': { fontSize: 10, height: 16, minWidth: 16 } }}>
+                <NotificationsOutlinedIcon fontSize="small" />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Trợ giúp">
+            <IconButton color="inherit">
+              <HelpOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Cài đặt">
+            <IconButton color="inherit">
+              <SettingsOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Avatar
+            src={user?.picture}
+            sx={{ width: 32, height: 32, bgcolor: '#fff', color: '#5663ee', cursor: 'pointer', ml: 1 }}
+            onClick={handleAvatarClick}
+          >
+            {!user?.picture && <AccountCircleIcon />}
+          </Avatar>
         </Box>
-        <Box sx={{ flexGrow: 0.1 }} />
-        <Badge badgeContent={4} color="primary">
-          <MailIcon sx={{ color: 'white' }} />
-        </Badge>
-        <Avatar
-          src={user?.picture}
-          sx={{ width: 32, height: 32, bgcolor: '#5663ee', color: '#fff', cursor: 'pointer', ml: 2 }}
-          onClick={handleAvatarClick}
-        >
-          {!user?.picture && <AccountCircleIcon />}
-        </Avatar>
+
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          slotProps={{
+            paper: {
+              sx: { borderRadius: '12px', mt: 0.5, width: 280, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
+            },
           }}
         >
+          {isLoggedIn && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 2, py: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #f3f4f6' }}>
+              <Avatar
+                src={user?.picture}
+                sx={{ width: 48, height: 48, flexShrink: 0 }}
+              >
+                {user?.name?.charAt(0).toUpperCase()}
+              </Avatar>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography fontSize={15} fontWeight={700} color="#111827" noWrap>{user?.name}</Typography>
+                <Typography fontSize={12} color="#6b7280" noWrap>{user?.email}</Typography>
+              </Box>
+            </Box>
+          )}
+
           {isLoggedIn ? (
             <>
-              <MenuItem onClick={goToMyAccount}>
-                Tài khoản: {user && `${user.name || user.email}`}
+              <MenuItem onClick={goToMyAccount} sx={{ py: 1.2, gap: 1.5, fontSize: 14, color: '#374151' }}>
+                <PersonOutlinedIcon fontSize="small" sx={{ color: '#6b7280' }} />
+                Hồ sơ
               </MenuItem>
-              <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+              <MenuItem onClick={handleMenuClose} sx={{ py: 1.2, gap: 1.5, fontSize: 14, color: '#374151' }}>
+                <SettingsOutlinedIcon fontSize="small" sx={{ color: '#6b7280' }} />
+                Cài đặt tài khoản
+              </MenuItem>
+              <Divider />
+              <MenuItem onClick={handleLogout} sx={{ py: 1.2, gap: 1.5, fontSize: 14, color: '#374151' }}>
+                <LogoutIcon fontSize="small" sx={{ color: '#6b7280' }} />
+                Đăng xuất
+              </MenuItem>
             </>
           ) : (
-            <MenuItem onClick={handleLogin}>Đăng nhập</MenuItem>
+            <MenuItem onClick={handleLogin} sx={{ fontSize: 14 }}>Đăng nhập</MenuItem>
           )}
         </Menu>
       </Toolbar>
