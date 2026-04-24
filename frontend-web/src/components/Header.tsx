@@ -8,14 +8,18 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import { useState } from 'react';
 import { HeaderMenu } from './HeaderMenu';
 import { useGetCurrentUser } from '../modules/login/api/auth';
+import { useTheme } from '../contexts/ThemeContext';
 
 export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { data: user, isLoading } = useGetCurrentUser();
+  const { mode, toggleTheme } = useTheme();
 
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -123,6 +127,13 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
               <MenuItem onClick={handleMenuClose} sx={{ py: 1.2, gap: 1.5, fontSize: 14, color: '#374151' }}>
                 <SettingsOutlinedIcon fontSize="small" sx={{ color: '#6b7280' }} />
                 Cài đặt tài khoản
+              </MenuItem>
+              <MenuItem onClick={() => { toggleTheme(); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontSize: 14, color: '#374151' }}>
+                {mode === 'dark'
+                  ? <LightModeOutlinedIcon fontSize="small" sx={{ color: '#6b7280' }} />
+                  : <DarkModeOutlinedIcon fontSize="small" sx={{ color: '#6b7280' }} />
+                }
+                {mode === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
               </MenuItem>
               <Divider />
               <MenuItem onClick={handleLogout} sx={{ py: 1.2, gap: 1.5, fontSize: 14, color: '#374151' }}>
