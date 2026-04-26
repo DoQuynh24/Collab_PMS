@@ -53,4 +53,12 @@ export class AuthService {
     await this.userRepository.update(userId, { picture: picture ?? undefined });
     return this.userRepository.findOne({ where: { user_id: userId } }) as Promise<User>;
   }
+
+  async updateName(userId: number, name?: string): Promise<{ name: string }> {
+    if (name?.trim()) {
+      await this.userRepository.update(userId, { name: name.trim() });
+    }
+    const user = await this.userRepository.findOne({ where: { user_id: userId } });
+    return { name: user!.name };
+  }
 }

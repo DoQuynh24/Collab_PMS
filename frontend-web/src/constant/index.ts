@@ -10,6 +10,13 @@ export const FILTER_TABS = [
   { key: "status",   label: "Trạng thái", placeholder: "Tìm trạng thái..." },
 ];
 
+export const VISIBILITY_OPTIONS = [
+  { value: 'anyone', label: 'Bất kỳ ai' },
+  { value: 'members', label: 'Thành viên dự án' },
+  { value: 'only_me', label: 'Chỉ mình tôi' },
+];
+
+
 export type RoleKey = 'admin' | 'member';
 
 export const ROLES: { key: RoleKey; label: string }[] = [

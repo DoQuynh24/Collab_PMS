@@ -124,10 +124,6 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
                 <PersonOutlinedIcon fontSize="small" sx={{ color: '#6b7280' }} />
                 Hồ sơ
               </MenuItem>
-              <MenuItem onClick={handleMenuClose} sx={{ py: 1.2, gap: 1.5, fontSize: 14, color: '#374151' }}>
-                <SettingsOutlinedIcon fontSize="small" sx={{ color: '#6b7280' }} />
-                Cài đặt tài khoản
-              </MenuItem>
               <MenuItem onClick={() => { toggleTheme(); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontSize: 14, color: '#374151' }}>
                 {mode === 'dark'
                   ? <LightModeOutlinedIcon fontSize="small" sx={{ color: '#6b7280' }} />
