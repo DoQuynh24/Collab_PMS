@@ -20,7 +20,7 @@ export function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => voi
   const location = useLocation();
 
   const menuItems = [
-    { text: 'Trang chủ', 
+    { text: 'Dành cho bạn', 
       icon: <Box component="img" src="/images/home.png" alt="home" sx={{ width: 22, height: 22, objectFit: 'contain' }} />, 
       path: homeUrl },
     { text: 'Tham gia dự án',
@@ -59,20 +59,25 @@ export function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => voi
             sx={{
               justifyContent: open ? 'initial' : 'center',
               px: 2.5,
+              minHeight: 44,
             }}
           >
             <ListItemIcon
               sx={{
                 minWidth: 0,
-                mr: open ? 3 : 'auto',
+                mr: open ? 2 : 0,
                 justifyContent: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                width: 24,
+                flexShrink: 0,
               }}
             >
               {item.icon}
             </ListItemIcon>
             <ListItemText
               primary={item.text}
-              sx={{ opacity: open ? 1 : 0 }}
+              sx={{ opacity: open ? 1 : 0, whiteSpace: 'nowrap', overflow: 'hidden' }}
             />
           </ListItemButton>
         ))}
@@ -80,12 +85,12 @@ export function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => voi
         <ListItemButton
           onClick={() => navigate(archiveUrl)}
           selected={location.pathname === archiveUrl}
-          sx={{ justifyContent: open ? 'initial' : 'center', px: 2.5 }}
+          sx={{ justifyContent: open ? 'initial' : 'center', px: 2.5, minHeight: 44 }}
         >
-          <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+          <ListItemIcon sx={{ minWidth: 0, mr: open ? 2 : 0, justifyContent: 'center', display: 'flex', alignItems: 'center', width: 24, flexShrink: 0 }}>
             <Box component="img" src="/images/archive.png" alt="archive" sx={{ width: 22, height: 22, objectFit: 'contain' }} />
           </ListItemIcon>
-          <ListItemText primary="Kho lưu trữ" sx={{ opacity: open ? 1 : 0 }} />
+          <ListItemText primary="Kho lưu trữ" sx={{ opacity: open ? 1 : 0, whiteSpace: 'nowrap', overflow: 'hidden' }} />
         </ListItemButton>
       </List>
     </Drawer>

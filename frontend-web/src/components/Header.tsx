@@ -1,7 +1,7 @@
 "use client";
 import { AppBar, Toolbar, Typography, Box, IconButton, Avatar, Menu, MenuItem, Badge, Tooltip, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import MenuIcon from '@mui/icons-material/Menu';
+import MenuIcon from '@mui/icons-material/GridView';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
@@ -55,7 +55,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         </IconButton>
 
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, pl: 1.5 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
+          <Typography variant="h5" sx={{ letterSpacing: 0.5 }}>
             COLLAB
           </Typography>
           <HeaderMenu />
