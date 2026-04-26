@@ -56,7 +56,7 @@ export function Account() {
   if (isLoading) return <LoadingPage />;
 
   const joinedDate = user?.created_at
-    ? new Date(user.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(user.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short', year: 'numeric' })
     : '—';
 
   const handleSaveName = () => {
