@@ -11,7 +11,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined"; 
-import styles from "./ModalConfirm.module.scss";
+import styles from "./modalConfirm.module.scss";
 
 interface ModalConfirmProps {
   ComponentElement?: React.ComponentType;
