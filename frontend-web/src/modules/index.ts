@@ -73,16 +73,16 @@ export const ProjectCalendar = lazyLoad(
 );
 
 export const routes: RouteConfig[] = [
-  { path: '/home', component: Home, title: 'Home' },
-  { path: '/login', component: Login, title: 'Login' },
-  { path: '/account', component: Account, title: 'Account' },
+  { path: '/home', component: Home, title: 'Dành cho bạn' },
+  { path: '/login', component: Login, title: 'Đăng nhập' },
+  { path: '/account', component: Account, title: 'Tài khoản' },
   { path: '/archive', component: ArchivedProjects, title: 'Kho lưu trữ' },
   { path: '/join', component: JoinProject, title: 'Tham gia dự án' },
-  { path: '/projects/:projectId/board', component: ProjectBoardView, title: 'Project Board' },
-  { path: '/projects/:projectId/list', component: ProjectListViewPage, title: 'Project List' },
-  { path: '/projects/:projectId', component: ProjectOverview, title: 'Project Overview' },
-  { path: '/projects/:projectId/calendar', component: ProjectCalendar, title: 'Project Calendar' },
-  { path: '/projects/:projectId/settings/details', component: ProjectDetailSetting, title: 'Project Settings' },
-  { path: '/projects/:projectId/settings/members', component: ProjectMemberSetting, title: 'Project Members' },
-  { path: '/projects/:projectId/settings/statuses', component: ProjectStatusesSetting, title: 'Project Status' },
+  { path: '/projects/:projectId/board', component: ProjectBoardView, title: 'Bảng công việc' },
+  { path: '/projects/:projectId/list', component: ProjectListViewPage, title: 'Danh sách công việc' },
+  { path: '/projects/:projectId', component: ProjectOverview, title: 'Tổng quan dự án' },
+  { path: '/projects/:projectId/calendar', component: ProjectCalendar, title: 'Lịch dự án' },
+  { path: '/projects/:projectId/settings/details', component: ProjectDetailSetting, title: 'Cài đặt dự án' },
+  { path: '/projects/:projectId/settings/members', component: ProjectMemberSetting, title: 'Thành viên dự án' },
+  { path: '/projects/:projectId/settings/statuses', component: ProjectStatusesSetting, title: 'Trạng thái dự án' },
 ];

@@ -3,9 +3,11 @@ import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useState } from 'react';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export function Layout() {
   const [open, setOpen] = useState(true);
+  usePageTitle();
 
   const handleToggleSidebar = () => {
     setOpen(!open);
