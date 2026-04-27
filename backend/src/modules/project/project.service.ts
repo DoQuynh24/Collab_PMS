@@ -179,7 +179,6 @@ export class ProjectService {
             projectName: project.name,
             requesterName: requester.name,
             requesterEmail: requester.email,
-            token,
             projectId,
           })
         )

@@ -22,6 +22,7 @@ export function ProjectHeader({ projectName, projectId }: Props) {
     const [openAddMember, setOpenAddMember] = useState(false);
 
     const [copied, setCopied] = useState(false);
+    const [copiedId, setCopiedId] = useState(false);
     
     const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -47,6 +48,32 @@ export function ProjectHeader({ projectName, projectId }: Props) {
           {projectName?.charAt(0).toUpperCase() ?? "P"}
         </Avatar>
         <Typography fontWeight={600} fontSize={20}>{projectName}</Typography>
+        <Tooltip title={copiedId ? "Đã sao chép!" : `Mã dự án — Sao chép`}>
+          <Box
+            onClick={() => {
+              if (projectId) {
+                navigator.clipboard.writeText(projectId);
+                setCopiedId(true);
+                setTimeout(() => setCopiedId(false), 2000);
+              }
+            }}
+            sx={{
+              display: 'flex', alignItems: 'center', gap: 0.5,
+              px: 1, py: 0.3, borderRadius: '4px',
+              bgcolor: '#f3f4f6', cursor: 'pointer',
+              '&:hover': { bgcolor: '#e5e7eb' },
+              transition: 'background 0.15s',
+            }}
+          >
+            <Typography fontSize={11} color="#6b7280" sx={{letterSpacing: 0.5 }}>
+              {projectId}
+            </Typography>
+            {copiedId
+              ? <CheckIcon sx={{ fontSize: 12, color: '#059669' }} />
+              : <ContentCopyIcon sx={{ fontSize: 12, color: '#9ca3af' }} />
+            }
+          </Box>
+        </Tooltip>
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
