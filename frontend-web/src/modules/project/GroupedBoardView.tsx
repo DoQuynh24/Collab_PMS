@@ -1,10 +1,12 @@
-import { Box, Typography, Stack, Avatar } from "@mui/material";
+import { Box, Typography, Stack, Avatar, Collapse, IconButton } from "@mui/material";
 import {
   DndContext, DragOverlay, closestCorners,
   PointerSensor, useSensor, useSensors,
   type DragStartEvent, type DragEndEvent,
 } from "@dnd-kit/core";
 import { useState } from "react";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { BoardColumn } from "../task/component/BoardColumn";
 import { useMoveTask } from "../task/api/move-task";
 import type { ITask } from "../task/types";
@@ -36,7 +38,16 @@ const parseStatusFromDropId = (id: string): number | null => {
 
 export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMembers, projectId, onCreateTask }: Props) {
   const [activeTask, setActiveTask] = useState<ITask | null>(null);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const { mutate: moveTask } = useMoveTask();
+
+  const toggleCollapse = (key: string) => {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -103,9 +114,20 @@ export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMe
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <Box sx={{ overflowY: 'auto', height: '100%', pr: 1 }}>
-        {groups.filter(g => g.tasks.length > 0).map(group => (
+        {groups.filter(g => g.tasks.length > 0).map(group => {
+          const isCollapsed = collapsedGroups.has(group.key);
+          return (
           <Box key={group.key} sx={{ mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, px: 0.5, borderBottom: '2px solid #e5e7eb', mb: 1 }}>
+            <Box
+              onClick={() => toggleCollapse(group.key)}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1, px: 0.5, borderBottom: '2px solid #e5e7eb', mb: 1, cursor: 'pointer', userSelect: 'none', '&:hover': { bgcolor: '#f8fafc' }, borderRadius: '4px' }}
+            >
+              <IconButton size="small" sx={{ p: 0.3 }}>
+                {isCollapsed
+                  ? <KeyboardArrowRightIcon fontSize="small" sx={{ color: '#6b7280' }} />
+                  : <KeyboardArrowDownIcon fontSize="small" sx={{ color: '#6b7280' }} />
+                }
+              </IconButton>
               {group.color ? (
                 <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: group.color, flexShrink: 0 }} />
               ) : (
@@ -118,26 +140,30 @@ export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMe
                 {group.tasks.length}
               </Typography>
             </Box>
-            <Box sx={{ overflowX: 'auto', overflowY: 'hidden', scrollbarWidth: 'none' }}>
-              <Stack direction="row" spacing={2} className={styles.boardColumns}>
-                {statuses.map(status => (
-                  <BoardColumn
-                    key={status.id}
-                    status={status}
-                    tasks={group.tasks.filter(t => t.status_id === status.id)}
-                    projectMembers={projectMembers}
-                    projectId={projectId}
-                    isAddOpen={false}
-                    onOpenAdd={() => {}}
-                    onCloseAdd={() => {}}
-                    onCreateTask={onCreateTask}
-                    droppableId={toDropId(group.key, status.id)}
-                  />
-                ))}
-              </Stack>
-            </Box>
+
+            <Collapse in={!isCollapsed} timeout={200}>
+              <Box sx={{ overflowX: 'auto', overflowY: 'hidden', scrollbarWidth: 'none' }}>
+                <Stack direction="row" spacing={2} className={styles.boardColumns}>
+                  {statuses.map(status => (
+                    <BoardColumn
+                      key={status.id}
+                      status={status}
+                      tasks={group.tasks.filter(t => t.status_id === status.id)}
+                      projectMembers={projectMembers}
+                      projectId={projectId}
+                      isAddOpen={false}
+                      onOpenAdd={() => {}}
+                      onCloseAdd={() => {}}
+                      onCreateTask={onCreateTask}
+                      droppableId={toDropId(group.key, status.id)}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+            </Collapse>
           </Box>
-        ))}
+        )}
+      )}
       </Box>
 
       <DragOverlay>
