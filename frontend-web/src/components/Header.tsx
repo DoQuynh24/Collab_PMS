@@ -10,16 +10,28 @@ import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HeaderMenu } from './HeaderMenu';
+import { HelpPanel } from './HelpPanel';
 import { useGetCurrentUser } from '../modules/login/api/auth';
 import { useTheme } from '../contexts/ThemeContext';
 
 export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const { data: user, isLoading } = useGetCurrentUser();
   const { mode, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === '?' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+        setHelpOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
 
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -48,6 +60,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const isLoggedIn = !!user && !isLoading;
 
   return (
+    <>
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#5663ee', height: '50px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
       <Toolbar sx={{ minHeight: '50px !important', alignItems: 'center !important', gap: 1 }}>
         <IconButton color="inherit" edge="start" onClick={onToggleSidebar}>
@@ -71,7 +84,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
           </Tooltip>
 
           <Tooltip title="Trợ giúp">
-            <IconButton color="inherit">
+            <IconButton color="inherit" onClick={() => setHelpOpen(true)}>
               <HelpOutlineIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -143,5 +156,8 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         </Menu>
       </Toolbar>
     </AppBar>
+
+    <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
+    </>
   );
 }
