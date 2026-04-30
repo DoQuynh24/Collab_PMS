@@ -4,6 +4,8 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../routes/urls';
 
 interface UserInfo {
   email: string;
@@ -14,10 +16,18 @@ interface Props {
   open: boolean;
   onClose: () => void;
   projectName?: string;
+  projectId?: string;
   users?: UserInfo[];
 }
 
-export function AddMemberSuccessModal({ open, onClose, projectName, users = [] }: Props) {
+export function AddMemberSuccessModal({ open, onClose, projectName, projectId, users = [] }: Props) {
+  const navigate = useNavigate();
+
+  const handleMembersSettings = () => {
+    onClose();
+    if (projectId) navigate(ROUTES.projectMembersSettings(projectId));
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -48,9 +58,12 @@ export function AddMemberSuccessModal({ open, onClose, projectName, users = [] }
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="inherit">Cài đặt dự án</Button>
+        <Button onClick={handleMembersSettings} color="inherit"
+          sx={{ textTransform: 'none', fontSize: 13 }}>
+          Quản lý thành viên
+        </Button>
         <Button onClick={onClose} variant="contained"
-          sx={{ backgroundColor: '#5663ee', '&:hover': { backgroundColor: '#4451d3' } }}>
+          sx={{ textTransform: 'none', backgroundColor: '#5663ee', '&:hover': { backgroundColor: '#4451d3' } }}>
           OK
         </Button>
       </DialogActions>

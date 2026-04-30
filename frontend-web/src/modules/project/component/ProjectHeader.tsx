@@ -1,13 +1,20 @@
-import { Box, Typography, IconButton, Tooltip, Popover, TextField, InputAdornment, MenuItem, Select, Avatar } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip, Popover, TextField, InputAdornment, MenuItem, Select, Avatar, Button} from '@mui/material';
 import { Settings as SettingsIcon, PersonAdd as PersonAddIcon, Share as ShareIcon } from '@mui/icons-material';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import LockIcon from '@mui/icons-material/Lock';
 import PublicIcon from '@mui/icons-material/Public';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import SearchIcon from '@mui/icons-material/Search';
 import { AddMemberModal } from '../../project-member/component/AddMemberFormModal';
 import ProjectSettingsMenu from './setting/ProjectSettingMenu';
 import { getProjectColor } from '../../../utils/projectColor';
+import { useGetProjectById } from '../api/get-project-id';
+import { useUpdateProject } from '../api/update-project';
+import { useGetCurrentUser } from '../../login/api/auth';
+import { useInviteMember } from '../../project-member/api/add-member';
+import { ToastContext } from '../../../components/notification/NotifiProvider';
+import { PROJECT_ACCESS_OPTIONS } from '../../../constant';
 
 interface Props {
   projectName?: string;
@@ -16,20 +23,48 @@ interface Props {
 
 export function ProjectHeader({ projectName, projectId }: Props) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const shareUrl = `${window.location.origin}/projects/${projectId}`;
-    const [access, setAccess] = useState('public');
-
     const [openAddMember, setOpenAddMember] = useState(false);
-
     const [copied, setCopied] = useState(false);
     const [copiedId, setCopiedId] = useState(false);
-    
     const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
+    const [inviteEmail, setInviteEmail] = useState('');
+
+    const { data: project } = useGetProjectById(projectId!);
+    const { data: currentUser } = useGetCurrentUser();
+    const { mutate: updateProject } = useUpdateProject(projectId!);
+    const { mutate: inviteMember, isPending: isInviting } = useInviteMember(projectId!);
+    const { showToast } = useContext(ToastContext)!;
+
+    const members = project?.project_members ?? [];
+    const isOwner = project?.owner_id === currentUser?.user_id;
+    const isAdmin = members.some((m: any) => m.user_id === currentUser?.user_id && m.role === 'admin');
+    const canManage = isOwner || isAdmin;
+
+    const currentAccess = project?.access ?? 'private';
+    const shareUrl = `${window.location.origin}/projects/${projectId}`;
 
     const handleCopy = () => {
-    navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
+      navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
 
+    const handleAccessChange = (newAccess: string) => {
+      updateProject({ access: newAccess as 'public' | 'private' }, {
+        onSuccess: () => showToast('Đã cập nhật quyền truy cập', 'success'),
+        onError: () => showToast('Cập nhật thất bại', 'error'),
+      });
+    };
+
+    const handleInvite = () => {
+      if (!inviteEmail.trim()) return;
+      inviteMember({ invited_email: inviteEmail.trim(), role: 'member' }, {
+        onSuccess: () => {
+          showToast(`Đã gửi lời mời đến ${inviteEmail}`, 'success');
+          setInviteEmail('');
+        },
+        onError: (err: any) => showToast(err?.response?.data?.message || 'Gửi lời mời thất bại', 'error'),
+      });
     };
 
     return (
@@ -93,65 +128,76 @@ export function ProjectHeader({ projectName, projectId }: Props) {
           onClose={() => setAnchorEl(null)}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          PaperProps={{ sx: { width: 420, borderRadius: '8px', p: 2 } }}
+          slotProps={{ paper: { sx: { width: 500, borderRadius: '8px', p: 2 } } }}
         >
-        <Typography fontWeight={600} fontSize={16} mb={2}>Chia sẻ</Typography>
-        
-        <Typography fontSize={13} color="#555" mb={0.5}>Tên hoặc nhóm</Typography>
-        <TextField fullWidth size="small" placeholder="vd: Nguyễn Văn A, Nhóm A" sx={{ mb: 2 }} />
+          <Typography fontWeight={600} fontSize={16} mb={2}>Chia sẻ dự án</Typography>
 
-        <Typography fontSize={13} fontWeight={500} color="#555" mb={1}>Quyền truy cập dự án</Typography>
-        <Select
+          {canManage && (
+            <>
+              <Typography fontSize={13} color="#555" mb={1}>Mời thành viên qua email</Typography>
+              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <TextField
+                  fullWidth size="small"
+                  placeholder="Nhập địa chỉ email..."
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: '#9ca3af' }} /></InputAdornment> } }}
+                />
+                <Button variant="contained" size="small" onClick={handleInvite} disabled={!inviteEmail.trim() || isInviting}
+                  sx={{ textTransform: 'none', bgcolor: '#5663ee', '&:hover': { bgcolor: '#4451d4' }, flexShrink: 0, px: 2 }}>
+                  Mời
+                </Button>
+              </Box>
+            </>
+          )}
+
+          <Typography fontSize={13} fontWeight={500} color="#555" mb={1}>
+            Quyền truy cập dự án
+          </Typography>
+          <Select
             fullWidth
             size="small"
-            value={access}
-            onChange={(e) => setAccess(e.target.value)}
+            value={currentAccess}
+            onChange={e => canManage && handleAccessChange(e.target.value)}
+            disabled={!canManage}
             sx={{ mb: 2, borderRadius: '6px' }}
-        >
-        <MenuItem value="private">
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-            <LockIcon fontSize="small" sx={{ mt: 0.3 }} />
-            <Box>
-                <Typography fontSize={14} fontWeight={500}>Riêng tư</Typography>
-                <Typography fontSize={12} color="#888">Chỉ admin và thành viên được thêm mới có thể truy cập.</Typography>
-            </Box>
-            </Box>
-        </MenuItem>
-        <MenuItem value="public">
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-            <PublicIcon fontSize="small" sx={{ mt: 0.3 }} />
-            <Box>
-                <Typography fontSize={14} fontWeight={500}>Công khai</Typography>
-                <Typography fontSize={12} color="#888">Mọi người có thể xem, tạo và chỉnh sửa công việc trong dự án.</Typography>
-            </Box>
-            </Box>
-        </MenuItem>
-        </Select>
-           
-        <Typography fontSize={13} color="#555" mb={1}>
-            Bất kỳ ai có liên kết đều có thể xem dự án này.
-        </Typography>
-        <TextField
-            fullWidth
-            size="small"
-            value={shareUrl}
-            InputProps={{
-            readOnly: true,
-            endAdornment: (
-                <InputAdornment position="end">
+          >
+            {PROJECT_ACCESS_OPTIONS.map(opt => (
+              <MenuItem key={opt.value} value={opt.value}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  {opt.value === 'private'
+                    ? <LockIcon fontSize="small" sx={{ mt: 0.3}} />
+                    : <PublicIcon fontSize="small" sx={{ mt: 0.3 }} />
+                  }
+                  <Box>
+                    <Typography fontSize={14} fontWeight={500}>{opt.label}</Typography>
+                    <Typography fontSize={12} color="#888">{opt.description}</Typography>
+                  </Box>
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+          <Typography fontSize={13} color="#555" mb={1}>
+            Nếu dự án "Công khai" bất kỳ ai có liên kết đều có thể xem dự án này.
+          </Typography>
+          <TextField
+            fullWidth size="small" value={shareUrl}
+            slotProps={{
+              input: {
+                readOnly: true,
+                endAdornment: (
+                  <InputAdornment position="end">
                     <Tooltip title={copied ? "Đã sao chép!" : "Sao chép"}>
-                    <IconButton size="small" onClick={handleCopy}>
-                        {copied 
-                        ? <CheckIcon fontSize="small" sx={{ color: '#4CAF50' }} />
-                        : <ContentCopyIcon fontSize="small" sx={{ color: '#555' }} />
-                        }
-                    </IconButton>
+                      <IconButton size="small" onClick={handleCopy}>
+                        {copied ? <CheckIcon fontSize="small" sx={{ color: '#4CAF50' }} /> : <ContentCopyIcon fontSize="small" sx={{ color: '#555' }} />}
+                      </IconButton>
                     </Tooltip>
-                </InputAdornment>
+                  </InputAdornment>
                 ),
+              },
             }}
             sx={{ '& .MuiInputBase-input': { fontSize: 13, color: '#555' } }}
-        />
+          />
         </Popover>
 
         <Tooltip title="Thêm thành viên">

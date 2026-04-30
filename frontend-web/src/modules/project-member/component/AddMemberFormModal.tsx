@@ -185,6 +185,7 @@ export function AddMemberModal({ open, onClose, projectName, projectId }: Props)
         open={!!successUsers.length}
         onClose={() => { setSuccessUsers([]); onClose(); }}
         projectName={projectName}
+        projectId={projectId}
         users={successUsers}
       />
     </>
