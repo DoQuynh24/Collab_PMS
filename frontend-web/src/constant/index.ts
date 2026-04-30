@@ -16,7 +16,6 @@ export const VISIBILITY_OPTIONS = [
   { value: 'only_me', label: 'Chỉ mình tôi' },
 ];
 
-
 export type RoleKey = 'admin' | 'member';
 
 export const ROLES: { key: RoleKey; label: string }[] = [
@@ -30,6 +29,14 @@ export const getMemberRoleLabel = (userId: number, ownerId?: number, role?: Role
 };
 
 export const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+export type GroupBy = 'none' | 'assignee' | 'priority';
+
+export const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
+  { value: 'none', label: 'Không nhóm' },
+  { value: 'assignee', label: 'Người thực hiện' },
+  { value: 'priority', label: 'Độ ưu tiên' },
+];
 
 export const MONTHS = [
   'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',

@@ -24,5 +24,10 @@ export function useTaskFilter(tasks: ITask[]) {
       .filter((t) => filters.statuses.length === 0 || filters.statuses.includes(t.status_id))
       .sort((a, b) => a.order_index - b.order_index);
 
-  return { filters, setFilters, filterTasks };
+  const filteredTasks = tasks
+    .filter((t) => filters.assignees.length === 0 || filters.assignees.includes(t.assignee_id ?? -1))
+    .filter((t) => filters.priorities.length === 0 || filters.priorities.includes(t.priority_id))
+    .filter((t) => filters.statuses.length === 0 || filters.statuses.includes(t.status_id));
+
+  return { filters, setFilters, filterTasks, filteredTasks };
 }

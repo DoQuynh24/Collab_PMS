@@ -28,6 +28,7 @@ interface Props {
     deadline?: Date | null,
     assigneeId?: number | null
   ) => void;
+  droppableId?: string | number; 
 }
 
 export const toColumnSortableId = (statusId: number) => `col-${statusId}`;
@@ -41,8 +42,9 @@ export function BoardColumn({
   onOpenAdd,
   onCloseAdd,
   onCreateTask,
+  droppableId,
 }: Props) {
-  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: status.id });
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: droppableId ?? status.id });
 
   const {
     attributes,
