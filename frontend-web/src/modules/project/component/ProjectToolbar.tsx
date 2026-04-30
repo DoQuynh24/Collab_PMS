@@ -9,10 +9,14 @@ import {
   Menu,
   MenuItem,
   Typography,
+  Divider,
+  Switch,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CheckIcon from "@mui/icons-material/Check";
+import DownloadIcon from "@mui/icons-material/Download";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
 import type { ITaskStatus } from "../../task-status/types";
 import { FilterModal } from "./modal/FilterModal";
@@ -34,6 +38,10 @@ interface Props {
   showDisplaySettings?: boolean;
   displaySettings?: DisplaySettings;
   onDisplaySettingsChange?: (s: DisplaySettings) => void;
+  showMoreOptions?: boolean;
+  hideCompleted?: boolean;
+  onToggleHideCompleted?: () => void;
+  onExportCsv?: () => void;
 }
 
 export function ProjectToolbar({
@@ -46,8 +54,13 @@ export function ProjectToolbar({
   showDisplaySettings = false,
   displaySettings,
   onDisplaySettingsChange,
+  showMoreOptions = false,
+  hideCompleted = false,
+  onToggleHideCompleted,
+  onExportCsv,
 }: Props) {
   const [groupAnchor, setGroupAnchor] = useState<null | HTMLElement>(null);
+  const [moreAnchor, setMoreAnchor] = useState<null | HTMLElement>(null);
   const currentGroupLabel = GROUP_OPTIONS.find(o => o.value === groupBy)?.label ?? 'Nhóm';
 
   return (
@@ -150,11 +163,70 @@ export function ProjectToolbar({
             />
           )}
 
-          <Tooltip title="Tùy chọn">
-            <IconButton sx={{ borderRadius: "6px", padding: "5px", border: "1px solid #d3d3d3" }}>
-              <MoreHorizIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          {showMoreOptions && (
+            <>
+              <Tooltip title="Tùy chọn">
+                <IconButton
+                  onClick={(e) => setMoreAnchor(e.currentTarget)}
+                  sx={{
+                    borderRadius: "6px", padding: "5px", border: "1px solid",
+                    borderColor: hideCompleted ? "#5663ee" : "#d3d3d3",
+                    bgcolor: hideCompleted ? "#eef0ff" : "transparent",
+                    color: hideCompleted ? "#5663ee" : "inherit",
+                  }}
+                >
+                  <MoreHorizIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+
+              <Menu
+                anchorEl={moreAnchor}
+                open={Boolean(moreAnchor)}
+                onClose={() => setMoreAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                slotProps={{ paper: { sx: { borderRadius: '8px', minWidth: 240, mt: 0.5 } } }}
+              >
+                <Box sx={{ px: 2, py: 1 }}>
+                  <Typography fontSize={11} fontWeight={600} color="#9ca3af" letterSpacing={0.5}>TÙY CHỌN</Typography>
+                </Box>
+
+                <MenuItem
+                  onClick={() => { onToggleHideCompleted?.(); setMoreAnchor(null); }}
+                  sx={{ fontSize: 13, py: 1, gap: 1.5 }}
+                >
+                  <VisibilityOffIcon fontSize="small" sx={{ color: hideCompleted ? "#5663ee" : "#6b7280" }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography fontSize={13} color="#374151">Ẩn nhiệm vụ hoàn thành</Typography>
+                    <Typography fontSize={11} color="#9ca3af">Ẩn các task ở cột cuối cùng</Typography>
+                  </Box>
+                  <Switch
+                    size="small"
+                    checked={hideCompleted}
+                    onChange={() => { onToggleHideCompleted?.(); setMoreAnchor(null); }}
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': { color: '#5663ee' },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#5663ee' },
+                    }}
+                  />
+                </MenuItem>
+
+                <Divider sx={{ my: 0.5 }} />
+
+                <MenuItem
+                  onClick={() => { onExportCsv?.(); setMoreAnchor(null); }}
+                  sx={{ fontSize: 13, py: 1, gap: 1.5 }}
+                >
+                  <DownloadIcon fontSize="small" sx={{ color: "#6b7280" }} />
+                  <Box>
+                    <Typography fontSize={13} color="#374151">Xuất dữ liệu Excel</Typography>
+                    <Typography fontSize={11} color="#9ca3af">Tải xuống danh sách nhiệm vụ (.xlsx)</Typography>
+                  </Box>
+                </MenuItem>
+              </Menu>
+            </>
+          )}
         </Stack>
       </Stack>
     </Box>

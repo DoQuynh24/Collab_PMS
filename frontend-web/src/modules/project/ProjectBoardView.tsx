@@ -24,13 +24,14 @@ import { useGetProjectTaskStatuses } from "../task-status/api/get-project-task-s
 import { useGetTasksByProject } from "../task/api/get-task-by-project";
 import { useCreateTask } from "../task/api/add-task";
 import { useBoardDnd } from "../task/hook/useBoardDnd";
+import { useTaskFilter } from "../task/hook/useTaskFilter";
+import { useExportTasksCsv } from "../task/hook/useExportTasksCsv";
 import { BoardColumn, toColumnSortableId } from "../task/component/BoardColumn";
 import { GroupedBoardView } from "./GroupedBoardView";
 import { ProjectHeader } from "./component/ProjectHeader";
 import { ProjectNav } from "./component/ProjectNav";
 import { ProjectToolbar } from "./component/ProjectToolbar";
 import { AddStatusColumn } from "../task-status/component/AddStatusColumn";
-import { useTaskFilter } from "../task/hook/useTaskFilter";
 import { useMoveStatus } from "../task-status/api/move-task-status";
 import LoadingPage from "../../components/loading/LoadingPage";
 import { ToastContext } from "../../components/notification/NotifiProvider";
@@ -54,6 +55,10 @@ export function ProjectBoardView() {
   const [activeColumnId, setActiveColumnId] = useState<number | null>(null);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
 
+  const [hideCompleted, setHideCompleted] = useState(() =>
+    localStorage.getItem(`hide-completed-${projectId}`) === 'true'
+  );
+
   const [displaySettings, setDisplaySettings] = useState<DisplaySettings>(() => {
     try {
       const saved = localStorage.getItem(`display-settings-${projectId}`);
@@ -63,12 +68,9 @@ export function ProjectBoardView() {
     }
   });
 
-  const handleDisplaySettingsChange = (s: DisplaySettings) => {
-    setDisplaySettings(s);
-    localStorage.setItem(`display-settings-${projectId}`, JSON.stringify(s));
-  };
-
   const { setFilters, filterTasks, filteredTasks } = useTaskFilter(tasks);
+  const { exportCsv } = useExportTasksCsv();
+
   useEffect(() => {
     if (statusData?.data)
       setLocalStatuses(statusData.data);
@@ -76,16 +78,41 @@ export function ProjectBoardView() {
 
   const statuses = localStatuses;
 
+  const doneStatusId = statuses.length > 0 ? statuses[statuses.length - 1].id : null;
+  const isDoneStatus = (statusId: number) => statusId === doneStatusId;
+
   const {
-    activeTask,  
+    activeTask,
     sensors,
     handleDragStart: handleTaskDragStart,
     handleDragEnd: handleTaskDragEnd,
   } = useBoardDnd(tasks);
 
+  const handleDisplaySettingsChange = (s: DisplaySettings) => {
+    setDisplaySettings(s);
+    localStorage.setItem(`display-settings-${projectId}`, JSON.stringify(s));
+  };
+
+  const handleToggleHideCompleted = () => {
+    const next = !hideCompleted;
+    setHideCompleted(next);
+    localStorage.setItem(`hide-completed-${projectId}`, String(next));
+  };
+
   if (isLoading) return <LoadingPage />;
 
   const projectMembers = project?.project_members || [];
+
+  const handleExportCsv = () => {
+    exportCsv({
+      tasks,
+      statuses,
+      projectMembers,
+      projectName: project?.name,
+      hideCompleted,
+      doneStatusId,
+    });
+  };
 
   const handleCreateTask = (
     title: string,
@@ -164,13 +191,19 @@ export function ProjectBoardView() {
         showDisplaySettings
         displaySettings={displaySettings}
         onDisplaySettingsChange={handleDisplaySettingsChange}
+        showMoreOptions
+        hideCompleted={hideCompleted}
+        onToggleHideCompleted={handleToggleHideCompleted}
+        onExportCsv={handleExportCsv}
       />
 
       <Box sx={{ flex: 1, overflowX: groupBy === 'none' ? "auto" : "hidden", overflowY: "hidden", minHeight: 0, px: 2, pb: 2, scrollbarWidth: "none" }}>
         {groupBy === 'none' ? (
-          <DndContext sensors={sensors}
+          <DndContext
+            sensors={sensors}
             collisionDetection={activeColumnId ? closestCenter : closestCorners}
-            onDragStart={handleDragStart} onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
           >
             <SortableContext
               items={statuses.map(s => toColumnSortableId(s.id))}
@@ -181,7 +214,7 @@ export function ProjectBoardView() {
                   <BoardColumn
                     key={status.id}
                     status={status}
-                    tasks={filterTasks(status.id)}
+                    tasks={filterTasks(status.id).filter(t => !(hideCompleted && isDoneStatus(t.status_id)))}
                     projectMembers={projectMembers}
                     projectId={projectId}
                     isAddOpen={openAdd === status.id}
@@ -227,7 +260,7 @@ export function ProjectBoardView() {
         ) : (
           <GroupedBoardView
             groupBy={groupBy}
-            tasks={filteredTasks}
+            tasks={filteredTasks.filter(t => !(hideCompleted && isDoneStatus(t.status_id)))}
             allTasks={tasks}
             statuses={statuses}
             projectMembers={projectMembers}
