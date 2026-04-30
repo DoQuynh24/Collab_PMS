@@ -36,6 +36,7 @@ import LoadingPage from "../../components/loading/LoadingPage";
 import { ToastContext } from "../../components/notification/NotifiProvider";
 import { toDateString } from "../../utils/formatDate";
 import { type GroupBy } from "../../constant";
+import { type DisplaySettings, DEFAULT_DISPLAY_SETTINGS } from "./component/DisplaySettingsPopover";
 import type { ITaskStatus } from "../task-status/types";
 import styles from "./ProjectBoardView.module.scss";
 
@@ -52,6 +53,20 @@ export function ProjectBoardView() {
   const [openAdd, setOpenAdd] = useState<number | null>(null);
   const [activeColumnId, setActiveColumnId] = useState<number | null>(null);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
+
+  const [displaySettings, setDisplaySettings] = useState<DisplaySettings>(() => {
+    try {
+      const saved = localStorage.getItem(`display-settings-${projectId}`);
+      return saved ? JSON.parse(saved) : DEFAULT_DISPLAY_SETTINGS;
+    } catch {
+      return DEFAULT_DISPLAY_SETTINGS;
+    }
+  });
+
+  const handleDisplaySettingsChange = (s: DisplaySettings) => {
+    setDisplaySettings(s);
+    localStorage.setItem(`display-settings-${projectId}`, JSON.stringify(s));
+  };
 
   const { setFilters, filterTasks, filteredTasks } = useTaskFilter(tasks);
   useEffect(() => {
@@ -146,6 +161,9 @@ export function ProjectBoardView() {
         showGroupButton
         groupBy={groupBy}
         onGroupByChange={setGroupBy}
+        showDisplaySettings
+        displaySettings={displaySettings}
+        onDisplaySettingsChange={handleDisplaySettingsChange}
       />
 
       <Box sx={{ flex: 1, overflowX: groupBy === 'none' ? "auto" : "hidden", overflowY: "hidden", minHeight: 0, px: 2, pb: 2, scrollbarWidth: "none" }}>
@@ -170,6 +188,7 @@ export function ProjectBoardView() {
                     onOpenAdd={() => setOpenAdd(status.id)}
                     onCloseAdd={() => setOpenAdd(null)}
                     onCreateTask={handleCreateTask}
+                    displaySettings={displaySettings}
                   />
                 )
                 )}
@@ -214,6 +233,7 @@ export function ProjectBoardView() {
             projectMembers={projectMembers}
             projectId={projectId}
             onCreateTask={handleCreateTask}
+            displaySettings={displaySettings}
           />
         )}
       </Box>

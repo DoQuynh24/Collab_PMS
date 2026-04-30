@@ -11,13 +11,13 @@ import {
   Typography,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import TuneIcon from "@mui/icons-material/Tune";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CheckIcon from "@mui/icons-material/Check";
 import { useState } from "react";
 import type { ITaskStatus } from "../../task-status/types";
 import { FilterModal } from "./modal/FilterModal";
 import { GROUP_OPTIONS, type GroupBy } from "../../../constant";
+import { DisplaySettingsPopover, type DisplaySettings, DEFAULT_DISPLAY_SETTINGS } from "./DisplaySettingsPopover";
 
 interface ProjectMember {
   user_id: number;
@@ -31,6 +31,9 @@ interface Props {
   showGroupButton?: boolean;
   groupBy?: GroupBy;
   onGroupByChange?: (g: GroupBy) => void;
+  showDisplaySettings?: boolean;
+  displaySettings?: DisplaySettings;
+  onDisplaySettingsChange?: (s: DisplaySettings) => void;
 }
 
 export function ProjectToolbar({
@@ -40,6 +43,9 @@ export function ProjectToolbar({
   showGroupButton = false,
   groupBy = 'none',
   onGroupByChange,
+  showDisplaySettings = false,
+  displaySettings,
+  onDisplaySettingsChange,
 }: Props) {
   const [groupAnchor, setGroupAnchor] = useState<null | HTMLElement>(null);
   const currentGroupLabel = GROUP_OPTIONS.find(o => o.value === groupBy)?.label ?? 'Nhóm';
@@ -137,11 +143,12 @@ export function ProjectToolbar({
             </>
           )}
 
-          <Tooltip title="Tùy chỉnh hiển thị">
-            <IconButton sx={{ borderRadius: "6px", padding: "5px", border: "1px solid #d3d3d3" }}>
-              <TuneIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          {showDisplaySettings && (
+            <DisplaySettingsPopover
+              settings={displaySettings ?? DEFAULT_DISPLAY_SETTINGS}
+              onChange={onDisplaySettingsChange ?? (() => {})}
+            />
+          )}
 
           <Tooltip title="Tùy chọn">
             <IconButton sx={{ borderRadius: "6px", padding: "5px", border: "1px solid #d3d3d3" }}>

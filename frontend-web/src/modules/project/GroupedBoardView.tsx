@@ -14,6 +14,7 @@ import type { ITaskStatus } from "../task-status/types";
 import type { GroupBy } from "../../constant";
 import { PRIORITIES } from "../../constant";
 import styles from "./ProjectBoardView.module.scss";
+import type { DisplaySettings } from "./component/DisplaySettingsPopover";
 
 interface ProjectMember {
   user_id: number;
@@ -28,6 +29,7 @@ interface Props {
   projectMembers: ProjectMember[];
   projectId?: string;
   onCreateTask: (title: string, statusId: number, priorityId: number, deadline?: Date | null, assigneeId?: number | null) => void;
+  displaySettings?: DisplaySettings;
 }
 
 const toDropId = (groupKey: string, statusId: number) => `grp-${groupKey}-s-${statusId}`;
@@ -36,7 +38,7 @@ const parseStatusFromDropId = (id: string): number | null => {
   return m ? Number(m[1]) : null;
 };
 
-export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMembers, projectId, onCreateTask }: Props) {
+export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMembers, projectId, onCreateTask, displaySettings }: Props) {
   const [activeTask, setActiveTask] = useState<ITask | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const { mutate: moveTask } = useMoveTask();
@@ -156,6 +158,7 @@ export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMe
                       onCloseAdd={() => {}}
                       onCreateTask={onCreateTask}
                       droppableId={toDropId(group.key, status.id)}
+                      displaySettings={displaySettings}
                     />
                   ))}
                 </Stack>

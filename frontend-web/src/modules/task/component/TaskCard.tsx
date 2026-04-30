@@ -22,14 +22,18 @@ import TaskDetailModal from "../TaskDetailModal";
 import { toSortableId } from "../hook/useBoardDnd";
 import TaskCardMenu from "./TaskCardMenu";
 import DeadlineChip from "./DeadlineChip";
+import type { DisplaySettings } from "../../project/component/DisplaySettingsPopover";
+import { DEFAULT_DISPLAY_SETTINGS } from "../../project/component/DisplaySettingsPopover";
 
 interface Props {
   task: ITask;
   projectMembers: any[];
   projectId?: string;
+  displaySettings?: DisplaySettings;
 }
 
-export default function TaskCard({ task, projectMembers, projectId }: Props) {
+export default function TaskCard({ task, projectMembers, projectId, displaySettings }: Props) {
+  const ds = displaySettings ?? DEFAULT_DISPLAY_SETTINGS;
   const [hovered, setHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
@@ -211,7 +215,7 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
             )}
           </Box>
 
-          {!isEditing && (
+          {!isEditing && ds.showTaskId && (
             <Typography fontSize={13} color="#6b6f76" mt={0.5}>
               {`TASK-${task.task_id}`}
             </Typography>
@@ -223,27 +227,29 @@ export default function TaskCard({ task, projectMembers, projectId }: Props) {
             onClick={(e) => e.stopPropagation()}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
-              {priority && (
+              {ds.showPriority && priority && (
                 <Tooltip title={priority.name} arrow>
                   <FlagIcon fontSize="small" sx={{ color: priority.color }} />
                 </Tooltip>
               )}
-              {task.deadline && (
+              {ds.showDeadline && task.deadline && (
                 <DeadlineChip deadline={task.deadline} />
               )}
             </Box>
 
-            <Tooltip title={assignee?.name || "Chưa phân công"} arrow>
-              {assignee ? (
-                <Avatar src={assignee.picture} sx={{ width: 26, height: 26 }}>
-                  {assignee.name?.charAt(0).toUpperCase()}
-                </Avatar>
-              ) : (
-                <Avatar sx={{ width: 26, height: 26, bgcolor: "#e0e0e0", border: "1px dashed #9e9e9e" }}>
-                  <PersonOutlineIcon fontSize="small" sx={{ color: "#757575" }} />
-                </Avatar>
-              )}
-            </Tooltip>
+            {ds.showAssignee && (
+              <Tooltip title={assignee?.name || "Chưa phân công"} arrow>
+                {assignee ? (
+                  <Avatar src={assignee.picture} sx={{ width: 26, height: 26 }}>
+                    {assignee.name?.charAt(0).toUpperCase()}
+                  </Avatar>
+                ) : (
+                  <Avatar sx={{ width: 26, height: 26, bgcolor: "#e0e0e0", border: "1px dashed #9e9e9e" }}>
+                    <PersonOutlineIcon fontSize="small" sx={{ color: "#757575" }} />
+                  </Avatar>
+                )}
+              </Tooltip>
+            )}
           </Box>
         </Box>
       </div>

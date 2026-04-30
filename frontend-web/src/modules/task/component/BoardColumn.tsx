@@ -7,6 +7,7 @@ import TaskCard from "./TaskCard";
 import type { ITask } from "../types";
 import { toSortableId } from "../hook/useBoardDnd";
 import styles from "../../project/ProjectBoardView.module.scss";
+import type { DisplaySettings } from "../../project/component/DisplaySettingsPopover";
 
 interface ProjectMember {
   user_id: number;
@@ -28,7 +29,8 @@ interface Props {
     deadline?: Date | null,
     assigneeId?: number | null
   ) => void;
-  droppableId?: string | number; 
+  droppableId?: string | number;
+  displaySettings?: DisplaySettings;
 }
 
 export const toColumnSortableId = (statusId: number) => `col-${statusId}`;
@@ -43,6 +45,7 @@ export function BoardColumn({
   onCloseAdd,
   onCreateTask,
   droppableId,
+  displaySettings,
 }: Props) {
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: droppableId ?? status.id });
 
@@ -116,6 +119,7 @@ export function BoardColumn({
                   task={task}
                   projectMembers={projectMembers}
                   projectId={projectId}
+                  displaySettings={displaySettings}
                 />
               ))}
             </SortableContext>
