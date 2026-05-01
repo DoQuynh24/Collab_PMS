@@ -184,8 +184,8 @@ export function HelpPanel({ open, onClose }: Props) {
         zIndex: (theme) => theme.zIndex.drawer + 2,
         '& .MuiDrawer-paper': {
           width: 400,
-          top: '50px',
-          height: 'calc(100% - 50px)',
+          top: '60px',
+          height: 'calc(100% - 60px)',
           boxShadow: '-4px 0 20px rgba(0,0,0,0.12)',
           borderLeft: '1px solid #e5e7eb',
         },
@@ -202,7 +202,6 @@ export function HelpPanel({ open, onClose }: Props) {
         </IconButton>
       </Box>
 
-      {/* Quick tip */}
       <Box sx={{ mx: 2.5, my: 2, p: 1.5, bgcolor: '#eef0ff', borderRadius: '8px', border: '1px solid #c7d0ff' }}>
         <Typography fontSize={12} color="#4451d4">
           💡 Nhấn <strong>?</strong> bất kỳ lúc nào để mở/đóng panel trợ giúp này.
@@ -211,7 +210,6 @@ export function HelpPanel({ open, onClose }: Props) {
 
       <Divider />
 
-      {/* Sections */}
       <List disablePadding sx={{ overflowY: 'auto', flex: 1 }}>
         {HELP_SECTIONS.map((section) => {
           const isOpen = expanded === section.title;
@@ -270,7 +268,6 @@ export function HelpPanel({ open, onClose }: Props) {
         })}
       </List>
 
-      {/* Footer */}
       <Box sx={{ px: 2.5, py: 2, borderTop: '1px solid #f3f4f6', bgcolor: '#fafafa' }}>
         <Typography fontSize={11} color="#9ca3af" textAlign="center">
           Collab -  Project Management System · Phiên bản 1.0

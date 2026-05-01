@@ -36,7 +36,7 @@ export default function ProjectList({ open }: { open: boolean }) {
       >
         <ListItemIcon sx={{ minWidth: 0, mr: open ? 3 : "auto", justifyContent: "center" }}>
           {hovered && open ? (
-            projectsOpen ? <ExpandLess /> : <ExpandMore />
+            projectsOpen ? <ExpandLess sx={{ color: '#ffffff'}}  /> : <ExpandMore sx={{ color: '#ffffff'}}/>
           ) : (
             <Box
               component="img"
@@ -49,12 +49,12 @@ export default function ProjectList({ open }: { open: boolean }) {
 
         {open && (
           <>
-            <ListItemText primary="Dự án của tôi" sx={{ flexGrow: 1 }} />
+            <ListItemText primary="Dự án của tôi" sx={{ flexGrow: 1, color: '#fff' }} />
             <Tooltip title="Thêm dự án" arrow>
               <AddIcon
                 fontSize="small"
                 onClick={(e) => { e.stopPropagation(); setOpenModal(true); }}
-                sx={{ opacity: 0.8, cursor: "pointer", "&:hover": {
+                sx={{ color: '#fff', opacity: 0.8, cursor: "pointer", "&:hover": {
                 background: "transparent",
                 transform: "scale(1.15)", } }}
               />
@@ -68,9 +68,9 @@ export default function ProjectList({ open }: { open: boolean }) {
       <Collapse in={projectsOpen && open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           {isLoading ? (
-            <ListItemText primary="Đang tải..." sx={{ pl: 4, opacity: 0.6 }} />
+            <ListItemText primary="Đang tải..." sx={{ pl: 4, opacity: 0.6, color: '#fff' }} />
           ) : projects.length === 0 ? (
-            <ListItemText primary="Chưa có dự án" sx={{ pl: 4, opacity: 0.6 }} />
+            <ListItemText primary="Chưa có dự án" sx={{ pl: 4, opacity: 0.6, color: '#fff' }} />
           ) : (
             projects.map((project: any) => (
               <ProjectItem

@@ -23,7 +23,7 @@ export function Layout() {
         sx={{
           flexGrow: 1,
           p: 3,
-          pt: 10,
+          pt: 9,
           overflow: "auto",
           minWidth: 0, 
           height: "100vh",

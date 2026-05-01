@@ -48,7 +48,7 @@ export default function ArchivedProjects() {
   return (
     <Box>
       <Box className={styles.header}>
-        <ArchiveOutlinedIcon sx={{ color: "#6b7280", fontSize: 24 }} />
+        <Box component="img" src="/images/archive.png" alt="archive" sx={{ width: 30, height: 30}} />
         <Typography fontSize={20} fontWeight={600} color="#111827">
           Kho lưu trữ
         </Typography>

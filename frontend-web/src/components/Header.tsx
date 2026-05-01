@@ -61,8 +61,8 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 
   return (
     <>
-    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#5663ee', height: '50px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-      <Toolbar sx={{ minHeight: '50px !important', alignItems: 'center !important', gap: 1 }}>
+    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#5663ee', height: '60px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.57)' }}>
+      <Toolbar sx={{ minHeight: '60px !important', alignItems: 'center !important', gap: 1 }}>
         <IconButton color="inherit" edge="start" onClick={onToggleSidebar}>
           <MenuIcon />
         </IconButton>
@@ -78,20 +78,20 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
           <Tooltip title="Thông báo">
             <IconButton color="inherit">
               <Badge badgeContent={4} color="error" sx={{ '& .MuiBadge-badge': { fontSize: 10, height: 16, minWidth: 16 } }}>
-                <NotificationsOutlinedIcon fontSize="small" />
+                <NotificationsOutlinedIcon fontSize="medium" />
               </Badge>
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Trợ giúp">
             <IconButton color="inherit" onClick={() => setHelpOpen(true)}>
-              <HelpOutlineIcon fontSize="small" />
+              <HelpOutlineIcon fontSize="medium" />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Cài đặt">
             <IconButton color="inherit">
-              <SettingsOutlinedIcon fontSize="small" />
+              <SettingsOutlinedIcon fontSize="medium" />
             </IconButton>
           </Tooltip>
 

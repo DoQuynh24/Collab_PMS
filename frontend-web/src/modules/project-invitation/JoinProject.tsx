@@ -7,7 +7,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
@@ -74,7 +73,7 @@ export default function JoinProject() {
   return (
     <Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
-        <GroupAddOutlinedIcon sx={{ color: "#6b7280", fontSize: 24 }} />
+        <Box component="img" src="/images/microsoft-project-color.png" alt="microsoft-project-color" sx={{ width: 30, height: 30 }} />
         <Typography fontSize={20} fontWeight={600} color="#111827">Tham gia dự án</Typography>
       </Box>
       <Typography fontSize={14} color="#6b7280" mb={3}>
@@ -84,9 +83,11 @@ export default function JoinProject() {
       <Paper elevation={0} sx={{ border: "1px solid #e5e7eb", borderRadius: "10px", overflow: "hidden", minHeight: 500 }}>
 
         <Box sx={{ p: 3 }}>
-          <Typography fontSize={12} color="#6b7280" mb={2}>
-            💡 <strong>Mã dự án</strong> là chuỗi 8 ký tự (vd: <span style={{ fontFamily: "monospace" }}>PROJ1A2B</span>). Lấy mã từ admin hoặc owner của dự án.
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1.5, mb: 3, bgcolor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "8px" }}>
+            <Typography fontSize={13} color="#92400e">
+              💡 <strong>Mã dự án:</strong> là chuỗi 8 ký tự (ví dụ: <strong>PROJ1A2B</strong>). Bạn có thể lấy mã từ <strong>chủ sở hữu</strong> hoặc <strong> quản trị viên</strong> của dự án.
+            </Typography>
+          </Box>
           <Box sx={{ display: "flex", gap: 1.5 }}>
             <TextField
               fullWidth size="small"
