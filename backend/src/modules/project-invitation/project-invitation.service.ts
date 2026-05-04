@@ -8,6 +8,7 @@ import { User } from '../auth/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateInvitationDto } from './dto/create-project-invitation';
 import { MailService } from './mail/mail.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class ProjectInvitationService {
@@ -25,6 +26,7 @@ export class ProjectInvitationService {
     private userRepo: Repository<User>,
 
     private mailService: MailService,
+    private notificationService: NotificationService,
   ) {}
 
   async invite(dto: CreateInvitationDto, currentUserId: number) {
@@ -130,6 +132,26 @@ export class ProjectInvitationService {
       is_join_request: true,
     });
     await this.invitationRepo.save(req);
+
+    const project = await this.projectRepo.findOne({
+      where: { project_id: projectId },
+      relations: ['project_members'],
+    });
+    if (project) {
+      const adminUserIds = (project.project_members || [])
+        .filter(m => m.role === 'admin')
+        .map(m => m.user_id);
+      const recipientIds = Array.from(new Set([project.owner_id, ...adminUserIds]));
+
+      await this.notificationService.createMany({
+        user_ids: recipientIds,
+        type: 'join_request_received',
+        title: 'Yêu cầu tham gia dự án',
+        body: `${requester.name} đã gửi yêu cầu tham gia dự án "${project.name}".`,
+        project_id: projectId,
+      });
+    }
+
     return token;
   }
 
@@ -174,6 +196,14 @@ export class ProjectInvitationService {
       );
     }
 
+    await this.notificationService.create({
+      user_id: user.user_id,
+      type: 'join_request_approved',
+      title: 'Yêu cầu tham gia được chấp nhận',
+      body: `Yêu cầu tham gia dự án "${project.name}" của bạn đã được chấp nhận.`,
+      project_id: req.project_id,
+    });
+
     return { message: 'Join request approved', project_id: req.project_id };
   }
 
@@ -196,6 +226,18 @@ export class ProjectInvitationService {
 
     req.status = 'rejected';
     await this.invitationRepo.save(req);
+
+    const requesterUser = await this.userRepo.findOne({ where: { email: req.invited_email } });
+    if (requesterUser) {
+      await this.notificationService.create({
+        user_id: requesterUser.user_id,
+        type: 'join_request_rejected',
+        title: 'Yêu cầu tham gia bị từ chối',
+        body: `Yêu cầu tham gia dự án "${project.name}" của bạn đã bị từ chối.`,
+        project_id: req.project_id,
+      });
+    }
+
     return { message: 'Join request rejected' };
   }
 

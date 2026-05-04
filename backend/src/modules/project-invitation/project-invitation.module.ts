@@ -8,6 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { ProjectMember } from '../project-member/entities/project-member.entity';
 import { MailModule } from './mail/mail.module';
 import { InvitationController } from './invitation.controller';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { InvitationController } from './invitation.controller';
     forwardRef(() => ProjectModule),
     AuthModule,
     MailModule,
+    NotificationModule,
   ],
   providers: [ProjectInvitationService],
   controllers: [JoinRequestPublicController, ProjectInvitationController, InvitationController],
