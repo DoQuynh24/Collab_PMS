@@ -43,6 +43,23 @@ export const MONTHS = [
   'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12',
 ];
 
+export type NotificationType =
+  | 'join_request_received'
+  | 'join_request_approved'
+  | 'join_request_rejected';
+
+export const NOTIFICATION_ICON_COLOR: Record<NotificationType, string> = {
+  join_request_received: '#5663ee',
+  join_request_approved: '#16a34a',
+  join_request_rejected: '#ef4444',
+};
+
+export const NOTIFICATION_BG: Record<NotificationType, string> = {
+  join_request_received: '#eef0ff',
+  join_request_approved: '#f0fdf4',
+  join_request_rejected: '#fef2f2',
+};
+
 export const PROJECT_ACCESS = {
   PRIVATE: 'private' as const,
   PUBLIC: 'public' as const,

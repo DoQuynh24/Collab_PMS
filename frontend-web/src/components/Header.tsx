@@ -13,6 +13,8 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import { useState, useEffect } from 'react';
 import { HeaderMenu } from './HeaderMenu';
 import { HelpPanel } from './HelpPanel';
+import { NotificationPanel } from '../modules/notification/component/NotificationPanel';
+import { useGetUnreadCount } from '../modules/notification/api/get-unread-count';
 import { useGetCurrentUser } from '../modules/login/api/auth';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -20,8 +22,10 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [notiOpen, setNotiOpen] = useState(false);
   const { data: user, isLoading } = useGetCurrentUser();
   const { mode, toggleTheme } = useTheme();
+  const { data: unreadCount = 0 } = useGetUnreadCount();
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -76,8 +80,8 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Tooltip title="Thông báo">
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="error" sx={{ '& .MuiBadge-badge': { fontSize: 10, height: 16, minWidth: 16 } }}>
+            <IconButton color="inherit" onClick={() => setNotiOpen(true)}>
+              <Badge badgeContent={unreadCount || 0} color="error" sx={{ '& .MuiBadge-badge': { fontSize: 10, height: 16, minWidth: 16 } }}>
                 <NotificationsOutlinedIcon fontSize="medium" />
               </Badge>
             </IconButton>
@@ -158,6 +162,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
     </AppBar>
 
     <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
+    <NotificationPanel open={notiOpen} onClose={() => setNotiOpen(false)} />
     </>
   );
 }

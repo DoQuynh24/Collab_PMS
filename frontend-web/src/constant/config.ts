@@ -14,3 +14,5 @@ export const URL_API_GET_PROJECT_TASK = `${COLLAB_URL}/project-task-statuses`;
 export const URL_API_GET_INVITATION = `${COLLAB_URL}/invitations`;
 //Comments
 export const URL_API_GET_COMMENT = `${COLLAB_URL}/comments`;
+//Notifications
+export const URL_API_NOTIFICATIONS = `${COLLAB_URL}/notifications`;
