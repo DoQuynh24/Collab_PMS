@@ -13,6 +13,9 @@ import { Project } from '../project/entities/project.entity';
 import { ProjectMember } from '../project-member/entities/project-member.entity';
 import { ProjectTaskStatus } from '../task-status/entities/task-status.entity';
 import { MoveTaskDto } from './dto/move-task.dto';
+import { User } from '../auth/entities/user.entity';
+import { NotificationService } from '../notification/notification.service';
+import { MailService } from '../project-invitation/mail/mail.service';
 
 @Injectable()
 export class TaskService {
@@ -28,6 +31,12 @@ export class TaskService {
 
     @InjectRepository(ProjectTaskStatus)
     private statusRepo: Repository<ProjectTaskStatus>,
+
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+
+    private notificationService: NotificationService,
+    private mailService: MailService,
   ) {}
 
   async create(dto: CreateTaskDto, userId: number) {
@@ -107,10 +116,54 @@ export class TaskService {
       throw new UnauthorizedException('Only project members can update task');
     }
 
+    const prevAssigneeId = task.assignee_id;
+    const newAssigneeId = dto.assignee_id;
+    const assigneeChanged = newAssigneeId !== undefined && newAssigneeId !== prevAssigneeId;
+
     Object.assign(task, dto);
     if (dto.deadline) task.deadline = new Date(dto.deadline);
 
-    return this.taskRepo.save(task);
+    const saved = await this.taskRepo.save(task);
+
+    if (assigneeChanged && newAssigneeId && newAssigneeId !== userId) {
+      const assigner = await this.userRepo.findOne({ where: { user_id: userId } });
+      const assignerName = assigner?.name ?? 'Ai đó';
+      const projectName = project?.name ?? 'dự án';
+
+      await this.notificationService.create({
+        user_id: newAssigneeId,
+        type: 'assigned_task',
+        title: `Bạn được giao nhiệm vụ trong dự án "${projectName}"`,
+        body: `${assignerName} đã giao nhiệm vụ "${task.title}" cho bạn.`,
+        project_id: task.project_id,
+        entity_id: task.task_id,
+      });
+
+      const assignee = await this.userRepo.findOne({ where: { user_id: newAssigneeId } });
+      if (assignee) {
+        await this.mailService.sendAssignedTask({
+          to: assignee.email,
+          assignerName,
+          taskTitle: task.title,
+          projectName,
+          projectId: task.project_id,
+          taskId: task.task_id,
+        });
+      }
+
+      if (task.created_by !== userId && task.created_by !== newAssigneeId) {
+        await this.notificationService.create({
+          user_id: task.created_by,
+          type: 'assigned_task',
+          title: `Nhiệm vụ do bạn tạo đã được giao`,
+          body: `${assignerName} đã giao nhiệm vụ "${task.title}" cho ${assignee?.name ?? 'ai đó'}.`,
+          project_id: task.project_id,
+          entity_id: task.task_id,
+        });
+      }
+    }
+
+    return saved;
   }
 
   async archive(taskId: number, userId: number) {

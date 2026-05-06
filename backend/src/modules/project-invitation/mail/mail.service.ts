@@ -27,6 +27,15 @@ interface SendMentionParams {
   commentContent: string;
 }
 
+interface SendAssignedTaskParams {
+  to: string;
+  assignerName: string;
+  taskTitle: string;
+  projectName: string;
+  projectId: string;
+  taskId: number;
+}
+
 @Injectable()
 export class MailService implements OnModuleInit {
   private from: string;
@@ -160,6 +169,48 @@ export class MailService implements OnModuleInit {
                   text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600;
                   display: inline-block;">
                 Xem bình luận
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      `,
+    });
+  }
+
+  async sendAssignedTask({ to, assignerName, taskTitle, projectName, projectId, taskId }: SendAssignedTaskParams) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const taskUrl = `${frontendUrl}/projects/${projectId}/board?taskId=${taskId}`;
+
+    await sgMail.send({
+      from: this.from,
+      to,
+      subject: `Bạn được giao nhiệm vụ "${taskTitle}" trong dự án "${projectName}"`,
+      html: `
+      <div style="background-color: #f4f5f7; padding: 40px 0; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 24px; font-weight: 700; color: #5663ee;">⚡ Collab PMS</span>
+          </div>
+          <div style="background: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <p style="font-size: 18px; margin-top: 0;">👋 Xin chào,</p>
+            <h2 style="font-size: 20px; font-weight: 700; color: #172b4d; margin-bottom: 8px;">
+              Bạn vừa được giao một nhiệm vụ mới
+            </h2>
+            <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; margin: 20px 0; background: #f8f9ff;">
+              <p style="margin: 0 0 8px 0; font-size: 13px; color: #6b7280;">
+                NHIỆM VỤ: <strong style="font-size: 16px; color: #172b4d;">${taskTitle}</strong>
+              </p>
+              <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">
+                Dự án: <strong style="color: #374151;">${projectName}</strong> · Giao bởi: <strong style="color: #374151;">${assignerName}</strong>
+              </p>
+            </div>
+            <div style="text-align: center; margin: 28px 0;">
+              <a href="${taskUrl}"
+                style="background-color: #5663ee; color: white; padding: 12px 40px;
+                  text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600;
+                  display: inline-block;">
+                Xem nhiệm vụ
               </a>
             </div>
           </div>

@@ -47,13 +47,15 @@ export type NotificationType =
   | 'join_request_received'
   | 'join_request_approved'
   | 'join_request_rejected'
-  | 'new_comment';
+  | 'new_comment'
+  | 'assigned_task';
 
 export const NOTIFICATION_ICON_COLOR: Record<NotificationType, string> = {
   join_request_received: '#5663ee',
   join_request_approved: '#16a34a',
   join_request_rejected: '#ef4444',
   new_comment: '#f59e0b',
+  assigned_task: '#0ea5e9',
 };
 
 export const NOTIFICATION_BG: Record<NotificationType, string> = {
@@ -61,6 +63,7 @@ export const NOTIFICATION_BG: Record<NotificationType, string> = {
   join_request_approved: '#f0fdf4',
   join_request_rejected: '#fef2f2',
   new_comment: '#fffbeb',
+  assigned_task: '#f0f9ff',
 };
 
 export const PROJECT_ACCESS = {

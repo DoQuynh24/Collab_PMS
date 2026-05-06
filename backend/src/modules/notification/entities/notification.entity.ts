@@ -5,7 +5,8 @@ export type NotificationType =
   | 'join_request_received'
   | 'join_request_approved'
   | 'join_request_rejected'
-  | 'new_comment';
+  | 'new_comment'
+  | 'assigned_task';
 
 @Entity('notifications')
 export class Notification {

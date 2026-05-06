@@ -12,6 +12,7 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -52,6 +53,11 @@ export function NotificationPanel({ open, onClose }: Props) {
     } else if (n.type === 'join_request_rejected') {
       navigate('/home');
     } else if (n.type === 'new_comment' && n.project_id) {
+      const url = n.entity_id
+        ? `${ROUTES.projectBoard(n.project_id)}?taskId=${n.entity_id}`
+        : ROUTES.projectBoard(n.project_id);
+      navigate(url);
+    } else if (n.type === 'assigned_task' && n.project_id) {
       const url = n.entity_id
         ? `${ROUTES.projectBoard(n.project_id)}?taskId=${n.entity_id}`
         : ROUTES.projectBoard(n.project_id);
@@ -161,6 +167,7 @@ export function NotificationPanel({ open, onClose }: Props) {
                     {n.type === 'join_request_approved' && <CheckCircleOutlineIcon fontSize="small" />}
                     {n.type === 'join_request_rejected' && <CancelOutlinedIcon fontSize="small" />}
                     {n.type === 'new_comment' && <ChatBubbleOutlineIcon fontSize="small" />}
+                    {n.type === 'assigned_task' && <AssignmentIndOutlinedIcon fontSize="small" />}
                   </Box>
 
                   <Box sx={{ flex: 1, minWidth: 0 }}>
