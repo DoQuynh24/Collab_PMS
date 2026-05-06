@@ -125,43 +125,61 @@ export class TaskService {
 
     const saved = await this.taskRepo.save(task);
 
-    if (assigneeChanged && newAssigneeId && newAssigneeId !== userId) {
+    if (assigneeChanged && newAssigneeId) {
       const assigner = await this.userRepo.findOne({ where: { user_id: userId } });
       const assignerName = assigner?.name ?? 'Ai đó';
       const projectName = project?.name ?? 'dự án';
 
-      await this.notificationService.create({
-        user_id: newAssigneeId,
-        type: 'assigned_task',
-        title: `Bạn được giao nhiệm vụ trong dự án "${projectName}"`,
-        body: `${assignerName} đã giao nhiệm vụ "${task.title}" cho bạn.`,
-        project_id: task.project_id,
-        entity_id: task.task_id,
-      });
+      const isSelfAssign = newAssigneeId === userId;
+      const isCreatorSelfAssign = isSelfAssign && userId === task.created_by;
+
+      if (!isCreatorSelfAssign) {
+        if (!isSelfAssign) {
+          await this.notificationService.create({
+            user_id: newAssigneeId,
+            type: 'assigned_task',
+            title: `Bạn được giao nhiệm vụ trong dự án "${projectName}"`,
+            body: `${assignerName} đã giao nhiệm vụ "${task.title}" cho bạn.`,
+            project_id: task.project_id,
+            entity_id: task.task_id,
+          });
 
       const assignee = await this.userRepo.findOne({ where: { user_id: newAssigneeId } });
-      if (assignee) {
-        await this.mailService.sendAssignedTask({
-          to: assignee.email,
-          assignerName,
-          taskTitle: task.title,
-          projectName,
-          projectId: task.project_id,
-          taskId: task.task_id,
-        });
-      }
+        if (assignee) {
+          await this.mailService.sendAssignedTask({
+            to: assignee.email,
+            assignerName,
+            taskTitle: task.title,
+            projectName,
+            projectId: task.project_id,
+            taskId: task.task_id,
+          });
+        }
 
-      if (task.created_by !== userId && task.created_by !== newAssigneeId) {
-        await this.notificationService.create({
-          user_id: task.created_by,
-          type: 'assigned_task',
-          title: `Nhiệm vụ do bạn tạo đã được giao`,
-          body: `${assignerName} đã giao nhiệm vụ "${task.title}" cho ${assignee?.name ?? 'ai đó'}.`,
-          project_id: task.project_id,
-          entity_id: task.task_id,
-        });
+        if (task.created_by !== userId && task.created_by !== newAssigneeId) {
+          await this.notificationService.create({
+            user_id: task.created_by,
+            type: 'assigned_task',
+            title: `Nhiệm vụ do bạn tạo đã được giao`,
+            body: `${assignerName} đã giao nhiệm vụ "${task.title}" cho ${assignee?.name ?? 'ai đó'}.`,
+            project_id: task.project_id,
+            entity_id: task.task_id,
+          });
+        }
+      } else {
+        if (task.created_by !== userId) {
+          await this.notificationService.create({
+            user_id: task.created_by,
+            type: 'assigned_task',
+            title: `Nhiệm vụ do bạn tạo đã được nhận`,
+            body: `${assignerName} đã nhận nhiệm vụ "${task.title}".`,
+            project_id: task.project_id,
+            entity_id: task.task_id,
+          });
+        }
       }
     }
+  }
 
     return saved;
   }
