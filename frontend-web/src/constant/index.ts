@@ -46,18 +46,21 @@ export const MONTHS = [
 export type NotificationType =
   | 'join_request_received'
   | 'join_request_approved'
-  | 'join_request_rejected';
+  | 'join_request_rejected'
+  | 'new_comment';
 
 export const NOTIFICATION_ICON_COLOR: Record<NotificationType, string> = {
   join_request_received: '#5663ee',
   join_request_approved: '#16a34a',
   join_request_rejected: '#ef4444',
+  new_comment: '#f59e0b',
 };
 
 export const NOTIFICATION_BG: Record<NotificationType, string> = {
   join_request_received: '#eef0ff',
   join_request_approved: '#f0fdf4',
   join_request_rejected: '#fef2f2',
+  new_comment: '#fffbeb',
 };
 
 export const PROJECT_ACCESS = {

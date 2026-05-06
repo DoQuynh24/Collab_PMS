@@ -5,6 +5,9 @@ import { Comment } from './entities/comment.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { ProjectMember } from '../project-member/entities/project-member.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { NotificationService } from '../notification/notification.service';
+import { User } from '../auth/entities/user.entity';
+import { Project } from '../project/entities/project.entity';
 
 @Injectable()
 export class CommentService {
@@ -17,6 +20,14 @@ export class CommentService {
 
     @InjectRepository(ProjectMember)
     private memberRepo: Repository<ProjectMember>,
+
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+
+    @InjectRepository(Project)
+    private projectRepo: Repository<Project>,
+
+    private notificationService: NotificationService,
   ) {}
 
   async create(taskId: number, dto: CreateCommentDto, userId: number) {
@@ -36,7 +47,29 @@ export class CommentService {
       parent_id: dto.parent_id,
     });
 
-    return this.commentRepo.save(comment);
+    const saved = await this.commentRepo.save(comment);
+
+    const recipientIds = Array.from(
+      new Set([task.assignee_id, task.created_by].filter((id): id is number => !!id && id !== userId))
+    );
+
+    if (recipientIds.length > 0) {
+      const commenter = await this.userRepo.findOne({ where: { user_id: userId } });
+      const project = await this.projectRepo.findOne({ where: { project_id: task.project_id } });
+      const commenterName = commenter?.name ?? 'Ai đó';
+      const projectName = project?.name ?? 'dự án';
+
+      await this.notificationService.createMany({
+        user_ids: recipientIds,
+        type: 'new_comment',
+        title: `Bình luận mới trong dự án "${projectName}"`,
+        body: `${commenterName} đã bình luận trên nhiệm vụ "${task.title}".`,
+        project_id: task.project_id,
+        entity_id: task.task_id,
+      });
+    }
+
+    return saved;
   }
 
   async findByTask(taskId: number) {

@@ -4,7 +4,7 @@ import {
   Typography,
   Stack,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   closestCenter,
   closestCorners,
@@ -27,6 +27,7 @@ import { useBoardDnd } from "../task/hook/useBoardDnd";
 import { useTaskFilter } from "../task/hook/useTaskFilter";
 import { useExportTasksCsv } from "../task/hook/useExportTasksCsv";
 import { BoardColumn, toColumnSortableId } from "../task/component/BoardColumn";
+import TaskDetailModal from "../task/TaskDetailModal";
 import { GroupedBoardView } from "./GroupedBoardView";
 import { ProjectHeader } from "./component/ProjectHeader";
 import { ProjectNav } from "./component/ProjectNav";
@@ -43,6 +44,7 @@ import styles from "./ProjectBoardView.module.scss";
 
 export function ProjectBoardView() {
   const { projectId } = useParams<{ projectId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: project, isLoading } = useGetProjectById(projectId!);
   const { data: statusData } = useGetProjectTaskStatuses(projectId!);
   const { data: tasks = [] } = useGetTasksByProject(projectId!);
@@ -77,6 +79,9 @@ export function ProjectBoardView() {
     }, [statusData]);
 
   const statuses = localStatuses;
+
+  const urlTaskId = searchParams.get('taskId');
+  const taskFromUrl = urlTaskId ? tasks.find(t => t.task_id === Number(urlTaskId)) : null;
 
   const doneStatusId = statuses.length > 0 ? statuses[statuses.length - 1].id : null;
   const isDoneStatus = (statusId: number) => statusId === doneStatusId;
@@ -179,6 +184,16 @@ export function ProjectBoardView() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", minWidth: 0 }}>
+      {taskFromUrl && (
+        <TaskDetailModal
+          key={taskFromUrl.task_id}
+          open
+          onClose={() => setSearchParams({})}
+          task={taskFromUrl}
+          projectMembers={projectMembers}
+          projectId={projectId}
+        />
+      )}      
       <ProjectHeader projectName={project?.name} projectId={projectId} />
       <ProjectNav projectId={projectId} />
       <ProjectToolbar

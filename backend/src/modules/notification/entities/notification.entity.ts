@@ -2,9 +2,10 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Jo
 import { User } from '../../auth/entities/user.entity';
 
 export type NotificationType =
-  | 'join_request_received'  
-  | 'join_request_approved' 
-  | 'join_request_rejected';
+  | 'join_request_received'
+  | 'join_request_approved'
+  | 'join_request_rejected'
+  | 'new_comment';
 
 @Entity('notifications')
 export class Notification {
@@ -25,6 +26,9 @@ export class Notification {
 
   @Column({ type: 'varchar', length: 8, nullable: true })
   project_id: string;
+
+  @Column({ type: 'int', nullable: true })
+  entity_id: number;
 
   @Column({ type: 'boolean', default: false })
   is_read: boolean;

@@ -16,6 +16,7 @@ export class NotificationService {
     title: string;
     body: string;
     project_id?: string;
+    entity_id?: number;
   }): Promise<Notification> {
     const notification = this.notificationRepo.create(params);
     return this.notificationRepo.save(notification);
@@ -27,6 +28,7 @@ export class NotificationService {
     title: string;
     body: string;
     project_id?: string;
+    entity_id?: number;
   }): Promise<void> {
     const { user_ids, ...rest } = params;
     const notifications = user_ids.map(user_id =>

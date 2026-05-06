@@ -7,6 +7,7 @@ export interface INotification {
   title: string;
   body: string;
   project_id?: string;
+  entity_id?: number;
   is_read: boolean;
   created_at: string;
 }
