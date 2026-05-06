@@ -8,11 +8,13 @@ import { Project } from '../project/entities/project.entity';
 import { CommentService } from './comment.service';
 import { CommentController } from './comment.controller';
 import { NotificationModule } from '../notification/notification.module';
+import { MailModule } from '../project-invitation/mail/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Comment, Task, ProjectMember, User, Project]),
     NotificationModule,
+    MailModule,
   ],
   providers: [CommentService],
   controllers: [CommentController],

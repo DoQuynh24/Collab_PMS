@@ -115,9 +115,15 @@ export default function TaskDetailModal({
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
+
+    const mentionedIds = commentMembers
+      .filter(m => newComment.includes(`@${m.name}\u200B`))
+      .map(m => m.user_id);
+
     addComment({
       taskId: task.task_id,
       content: newComment.trim(),
+      mentioned_user_ids: mentionedIds,
     });
     setNewComment("");
   };

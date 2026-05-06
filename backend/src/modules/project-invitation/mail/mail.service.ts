@@ -17,6 +17,16 @@ interface SendJoinRequestParams {
   projectId: string;
 }
 
+interface SendMentionParams {
+  to: string;
+  mentionerName: string;
+  taskTitle: string;
+  projectName: string;
+  projectId: string;
+  taskId: number;
+  commentContent: string;
+}
+
 @Injectable()
 export class MailService implements OnModuleInit {
   private from: string;
@@ -112,6 +122,46 @@ export class MailService implements OnModuleInit {
               Lời mời có hiệu lực trong <strong>7 ngày</strong>.
               Nếu bạn không muốn nhận email này, hãy bỏ qua.
             </p>
+          </div>
+        </div>
+      </div>
+      `,
+    });
+  }
+
+  async sendMention({ to, mentionerName, taskTitle, projectName, projectId, taskId, commentContent }: SendMentionParams) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const taskUrl = `${frontendUrl}/projects/${projectId}/board?taskId=${taskId}`;
+
+    await sgMail.send({
+      from: this.from,
+      to,
+      subject: `${mentionerName} đã nhắc đến bạn trong dự án "${projectName}"`,
+      html: `
+      <div style="background-color: #f4f5f7; padding: 40px 0; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 24px; font-weight: 700; color: #5663ee;">⚡ Collab PMS</span>
+          </div>
+          <div style="background: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <p style="font-size: 18px; margin-top: 0;">👋 Xin chào,</p>
+            <h2 style="font-size: 20px; font-weight: 700; color: #172b4d; margin-bottom: 8px;">
+              ${mentionerName} đã nhắc đến bạn trong một bình luận
+            </h2>
+            <p style="color: #555; font-size: 14px; margin-bottom: 8px;">
+              Trong nhiệm vụ <strong>"${taskTitle}"</strong> thuộc dự án <strong>"${projectName}"</strong>:
+            </p>
+            <div style="border-left: 4px solid #5663ee; padding: 12px 16px; margin: 16px 0; background: #f8f9ff; border-radius: 0 6px 6px 0;">
+              <p style="margin: 0; font-size: 14px; color: #374151; font-style: italic;">${commentContent}</p>
+            </div>
+            <div style="text-align: center; margin: 28px 0;">
+              <a href="${taskUrl}"
+                style="background-color: #5663ee; color: white; padding: 12px 40px;
+                  text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600;
+                  display: inline-block;">
+                Xem bình luận
+              </a>
+            </div>
           </div>
         </div>
       </div>

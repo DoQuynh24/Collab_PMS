@@ -57,10 +57,15 @@ export default function CommentCard({ comment, taskId, projectMembers = [] }: Pr
   const handleReplySubmit = () => {
     if (!replyContent.trim()) return;
 
+    const mentionedIds = projectMembers
+      .filter(m => replyContent.includes(`@${m.name}\u200B`))
+      .map(m => m.user_id);
+
     addComment({
       taskId: taskId,
       content: replyContent.trim(),
-      parent_id: comment.comment_id,      
+      parent_id: comment.comment_id,
+      mentioned_user_ids: mentionedIds,
     });
 
     setReplyContent("");

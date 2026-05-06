@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsArray } from 'class-validator';
 
 export class CommentDto {
   @IsString()
@@ -11,4 +11,8 @@ export class CommentDto {
   @IsOptional()
   @IsNumber()
   parent_id?: number;
+
+  @IsOptional()
+  @IsArray()
+  mentioned_user_ids?: number[];
 }
