@@ -56,8 +56,12 @@ export class CommentService {
     const commenterName = commenter?.name ?? 'Ai đó';
     const projectName = project?.name ?? 'dự án';
 
+    const mentionedIds = dto.mentioned_user_ids ?? [];
+    const uniqueMentionIds = mentionedIds.filter(id => id !== userId);
+
     const recipientIds = Array.from(
-      new Set([task.assignee_id, task.created_by].filter((id): id is number => !!id && id !== userId))
+      new Set([task.assignee_id, task.created_by].filter((id): id is number => !!id && id !== userId && !uniqueMentionIds.includes(id))
+      )
     );
     if (recipientIds.length > 0) {
       await this.notificationService.createMany({
@@ -70,8 +74,6 @@ export class CommentService {
       });
     }
 
-    const mentionedIds = dto.mentioned_user_ids ?? [];
-    const uniqueMentionIds = mentionedIds.filter(id => id !== userId);
     if (uniqueMentionIds.length > 0) {
       await this.notificationService.createMany({
         user_ids: uniqueMentionIds,
