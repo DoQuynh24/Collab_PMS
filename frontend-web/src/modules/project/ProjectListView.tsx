@@ -7,6 +7,8 @@ import { useGetProjectTaskStatuses } from "../task-status/api/get-project-task-s
 import { useGetTasksByProject } from "../task/api/get-task-by-project";
 import { useCreateTask } from "../task/api/add-task";
 import { useTaskFilter } from "../task/hook/useTaskFilter";
+import { useExportTasksCsv } from "../task/hook/useExportTasksCsv";
+import { useGetCurrentUser } from "../login/api/auth";
 import { ProjectHeader } from "./component/ProjectHeader";
 import { ProjectNav } from "./component/ProjectNav";
 import { ProjectToolbar } from "./component/ProjectToolbar";
@@ -17,6 +19,7 @@ import TaskRow from "../task/component/TaskRow";
 import { toDateString } from "../../utils/formatDate";
 import { useTaskActionConfirm } from "../task/hook/useTaskActionConfirm";
 import { ToastContext } from "../../components/notification/NotifiProvider";
+import { ModalConfirm } from "../../components/modal/modalConfirm";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -32,11 +35,17 @@ export default function ProjectListView() {
   const statuses = statusData?.data ?? [];
   const projectMembers = project?.project_members || [];
 
-  const { setFilters, filterTasks } = useTaskFilter(tasks);
+  const { filters, setFilters, filterTasks } = useTaskFilter(tasks);
   const filteredTasks = statuses.flatMap((s) => filterTasks(s.id));
+  const { exportCsv } = useExportTasksCsv();
+  const { data: currentUser } = useGetCurrentUser();
 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [addingTask, setAddingTask] = useState(false);
+  const [hideCompleted, setHideCompleted] = useState(() =>
+    localStorage.getItem(`hide-completed-list-${projectId}`) === 'true'
+  );
+  const [exportConfirmOpen, setExportConfirmOpen] = useState(false);
 
   const { confirmArchive, confirmDelete, taskActionModals } = useTaskActionConfirm(() => setCheckedIds(new Set()));
 
@@ -84,9 +93,9 @@ export default function ProjectListView() {
 
   const toggleAll = () => {
     setCheckedIds(
-      checkedIds.size === sortedTasks.length
+      checkedIds.size === visibleTasks.length
         ? new Set()
-        : new Set(sortedTasks.map((t) => t.task_id))
+        : new Set(visibleTasks.map((t) => t.task_id))
     );
   };
 
@@ -117,6 +126,43 @@ export default function ProjectListView() {
   if (isLoading) return <LoadingPage />;
 
   const defaultStatusId = statuses[0]?.id;
+  const doneStatusId = statuses.length > 0 ? statuses[statuses.length - 1].id : null;
+
+  const visibleTasks = hideCompleted && doneStatusId
+    ? sortedTasks.filter(t => t.status_id !== doneStatusId)
+    : sortedTasks;
+
+  const isFilterActive = filters.assignees.length > 0 || filters.priorities.length > 0 || filters.statuses.length > 0;
+
+  const doExport = () => {
+    const exportTasks = hideCompleted && doneStatusId
+      ? filteredTasks.filter(t => t.status_id !== doneStatusId)
+      : filteredTasks;
+
+    exportCsv({
+      tasks: exportTasks,
+      statuses,
+      projectMembers,
+      projectName: project?.name,
+      exporterName: currentUser?.name,
+      hideCompleted,
+      doneStatusId,
+    });
+  };
+
+  const handleExportCsv = () => {
+    if (isFilterActive) {
+      setExportConfirmOpen(true);
+    } else {
+      doExport();
+    }
+  };
+
+  const handleToggleHideCompleted = () => {
+    const next = !hideCompleted;
+    setHideCompleted(next);
+    localStorage.setItem(`hide-completed-list-${projectId}`, String(next));
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -127,19 +173,23 @@ export default function ProjectListView() {
         statuses={statuses}
         onFilterChange={setFilters}
         showGroupButton={false}
+        showMoreOptions
+        hideCompleted={hideCompleted}
+        onToggleHideCompleted={handleToggleHideCompleted}
+        onExportCsv={handleExportCsv}
       />
 
       {checkedIds.size > 0 && (
         <TaskActionBar
           checkedIds={checkedIds}
-          totalCount={sortedTasks.length}
+          totalCount={visibleTasks.length}
           projectId={projectId!}
           projectMembers={projectMembers}
-          onSelectAll={() => setCheckedIds(new Set(sortedTasks.map((t) => t.task_id)))}
+          onSelectAll={() => setCheckedIds(new Set(visibleTasks.map((t) => t.task_id)))}
           onClearAll={() => setCheckedIds(new Set())}
           onArchive={() => checkedIds.forEach((id) => confirmArchive(id))}
           onDelete={() => checkedIds.forEach((id) => confirmDelete(id))}
-          tasks={sortedTasks}
+          tasks={visibleTasks}
         />
       )}
 
@@ -150,7 +200,7 @@ export default function ProjectListView() {
               <th className={styles.checkCol}>
                 <input
                   type="checkbox"
-                  checked={checkedIds.size === sortedTasks.length && sortedTasks.length > 0}
+                  checked={checkedIds.size === visibleTasks.length && visibleTasks.length > 0}
                   onChange={toggleAll}
                 />
               </th>
@@ -194,7 +244,7 @@ export default function ProjectListView() {
             </tr>
           </thead>
           <tbody className={styles.tbody}>
-            {sortedTasks.map((task) => (
+            {visibleTasks.map((task) => (
               <TaskRow
                 key={task.task_id}
                 task={task}
@@ -238,13 +288,29 @@ export default function ProjectListView() {
               Tạo nhiệm vụ mới
             </Button>
             <span className={styles.countInfo}>
-              {filteredTasks.length} / {tasks.length} nhiệm vụ
+              {visibleTasks.length} / {tasks.length} nhiệm vụ
             </span>
           </div>
         </div>
       </div>
 
       {taskActionModals}
+
+      <ModalConfirm
+        open={exportConfirmOpen}
+        setOpen={setExportConfirmOpen}
+        title="Xuất dữ liệu theo bộ lọc"
+        message={
+          <>
+            Bạn đang áp dụng <strong>bộ lọc</strong> — file Excel sẽ chỉ chứa các nhiệm vụ đang được lọc, không phải toàn bộ dự án.
+            <br />
+            Bạn có muốn tiếp tục xuất không?
+          </>
+        }
+        titleButton="Xuất"
+        cancelButtonText="Hủy"
+        onClick={doExport}
+      />
     </div>
   );
 }
