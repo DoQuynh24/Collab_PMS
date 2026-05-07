@@ -31,6 +31,7 @@ interface Props {
   ) => void;
   droppableId?: string | number;
   displaySettings?: DisplaySettings;
+  canManage?: boolean;
 }
 
 export const toColumnSortableId = (statusId: number) => `col-${statusId}`;
@@ -46,6 +47,7 @@ export function BoardColumn({
   onCreateTask,
   droppableId,
   displaySettings,
+  canManage = false,
 }: Props) {
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: droppableId ?? status.id });
 
@@ -56,7 +58,7 @@ export function BoardColumn({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: toColumnSortableId(status.id) });
+  } = useSortable({ id: toColumnSortableId(status.id), disabled: !canManage });
 
   const isBacklog = status.name.toLowerCase() === "backlog";
 
@@ -80,9 +82,12 @@ export function BoardColumn({
       >
         <Box className={styles.boardColumn}>
           <Typography className={styles.columnTitle}
-            {...attributes}
-            {...listeners}
-            sx={{ cursor: "grab", userSelect: "none", "&:active": { cursor: "grabbing" } }}
+            {...(canManage ? { ...attributes, ...listeners } : {})}
+            sx={{
+              cursor: canManage ? "grab" : "default",
+              userSelect: "none",
+              ...(canManage && { "&:active": { cursor: "grabbing" } }),
+            }}
           >
             {status.name.toUpperCase()}
           </Typography>

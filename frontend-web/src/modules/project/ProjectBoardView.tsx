@@ -26,6 +26,7 @@ import { useCreateTask } from "../task/api/add-task";
 import { useBoardDnd } from "../task/hook/useBoardDnd";
 import { useTaskFilter } from "../task/hook/useTaskFilter";
 import { useExportTasksCsv } from "../task/hook/useExportTasksCsv";
+import { useGetCurrentUser } from "../login/api/auth";
 import { BoardColumn, toColumnSortableId } from "../task/component/BoardColumn";
 import TaskDetailModal from "../task/TaskDetailModal";
 import { GroupedBoardView } from "./GroupedBoardView";
@@ -46,6 +47,7 @@ export function ProjectBoardView() {
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: project, isLoading } = useGetProjectById(projectId!);
+  const { data: currentUser } = useGetCurrentUser();
   const { data: statusData } = useGetProjectTaskStatuses(projectId!);
   const { data: tasks = [] } = useGetTasksByProject(projectId!);
   const { mutate: createTask } = useCreateTask();
@@ -107,6 +109,11 @@ export function ProjectBoardView() {
   if (isLoading) return <LoadingPage />;
 
   const projectMembers = project?.project_members || [];
+  const isOwner = project?.owner_id === currentUser?.user_id;
+  const isAdmin = projectMembers.some(
+    (m: any) => Number(m.user_id) === Number(currentUser?.user_id) && m.role === 'admin'
+  );
+  const canManage = isOwner || isAdmin;
 
   const handleExportCsv = () => {
     exportCsv({
@@ -237,10 +244,11 @@ export function ProjectBoardView() {
                     onCloseAdd={() => setOpenAdd(null)}
                     onCreateTask={handleCreateTask}
                     displaySettings={displaySettings}
+                    canManage={canManage}
                   />
                 )
                 )}
-                <AddStatusColumn projectId={projectId!} />
+                {canManage && <AddStatusColumn projectId={projectId!} />}
               </Stack>
             </SortableContext>
 
