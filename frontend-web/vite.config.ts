@@ -14,4 +14,7 @@ export default defineConfig({
     port: 6273, 
     hmr: true,
   },
+  optimizeDeps: {
+    include: ['xlsx-js-style'],
+  },
 })

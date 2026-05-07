@@ -40,6 +40,7 @@ import { ToastContext } from "../../components/notification/NotifiProvider";
 import { toDateString } from "../../utils/formatDate";
 import { type GroupBy } from "../../constant";
 import { type DisplaySettings, DEFAULT_DISPLAY_SETTINGS } from "./component/DisplaySettingsPopover";
+import { ModalConfirm } from "../../components/modal/modalConfirm";
 import type { ITaskStatus } from "../task-status/types";
 import styles from "./ProjectBoardView.module.scss";
 
@@ -62,6 +63,7 @@ export function ProjectBoardView() {
   const [hideCompleted, setHideCompleted] = useState(() =>
     localStorage.getItem(`hide-completed-${projectId}`) === 'true'
   );
+  const [exportConfirmOpen, setExportConfirmOpen] = useState(false);
 
   const [displaySettings, setDisplaySettings] = useState<DisplaySettings>(() => {
     try {
@@ -72,7 +74,7 @@ export function ProjectBoardView() {
     }
   });
 
-  const { setFilters, filterTasks, filteredTasks } = useTaskFilter(tasks);
+  const { filters, setFilters, filterTasks, filteredTasks } = useTaskFilter(tasks);
   const { exportCsv } = useExportTasksCsv();
 
   useEffect(() => {
@@ -115,15 +117,26 @@ export function ProjectBoardView() {
   );
   const canManage = isOwner || isAdmin;
 
-  const handleExportCsv = () => {
+  const doExport = () => {
     exportCsv({
-      tasks,
+      tasks: filteredTasks.filter(t => !(hideCompleted && isDoneStatus(t.status_id))),
       statuses,
       projectMembers,
       projectName: project?.name,
+      exporterName: currentUser?.name,
       hideCompleted,
       doneStatusId,
     });
+  };
+
+  const isFilterActive = filters.assignees.length > 0 || filters.priorities.length > 0 || filters.statuses.length > 0;
+
+  const handleExportCsv = () => {
+    if (isFilterActive) {
+      setExportConfirmOpen(true);
+    } else {
+      doExport();
+    }
   };
 
   const handleCreateTask = (
@@ -200,7 +213,23 @@ export function ProjectBoardView() {
           projectMembers={projectMembers}
           projectId={projectId}
         />
-      )}      
+      )}
+
+      <ModalConfirm
+        open={exportConfirmOpen}
+        setOpen={setExportConfirmOpen}
+        title="Xuất dữ liệu theo bộ lọc"
+        message={
+          <>
+            Bạn đang áp dụng <strong>bộ lọc</strong> — file Excel sẽ chỉ chứa các nhiệm vụ đang được lọc, không phải toàn bộ dự án.
+            <br />
+            Bạn có muốn tiếp tục xuất không?
+          </>
+        }
+        titleButton="Xuất"
+        cancelButtonText="Hủy"
+        onClick={doExport}
+      />      
       <ProjectHeader projectName={project?.name} projectId={projectId} />
       <ProjectNav projectId={projectId} />
       <ProjectToolbar
