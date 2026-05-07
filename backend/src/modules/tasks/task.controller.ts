@@ -63,9 +63,10 @@ export class TaskController {
   @Patch(':taskId/move')
   moveTask(
     @Param('taskId') taskId: number,
-    @Body() dto: MoveTaskDto
+    @Body() dto: MoveTaskDto,
+    @Req() req: Request & { user: { sub: string } },
   ) {
-    return this.service.move(taskId, dto);
+    return this.service.move(taskId, dto, Number(req.user.sub));
   }
 
   @Patch(':id/archive')
