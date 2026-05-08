@@ -26,7 +26,7 @@ export class DeadlineReminderService {
     private mailService: MailService,
   ) {}
 
-  @Cron('59 8 * * *')
+  @Cron('5 9 * * *')
   async handleDeadlineReminder() {
     this.logger.log('Running deadline reminder cron job...');
 
