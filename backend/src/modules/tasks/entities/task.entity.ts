@@ -48,6 +48,9 @@ export class Task {
   @Column({ type: 'tinyint', default: 0 })
   is_archived: boolean = false;
 
+  @Column({ type: 'tinyint', default: 0 })
+  deadline_reminded: boolean = false;
+
   @ManyToOne(() => Project, (project) => project.tasks, {
     onDelete: 'CASCADE',
   })

@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProjectModule } from './modules/project/project.module';
 import { ProjectMemberModule } from './modules/project-member/project-member.module';
@@ -17,10 +18,12 @@ import { ProjectInvitationModule } from './modules/project-invitation/project-in
 import { MailModule } from './modules/project-invitation/mail/mail.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { DeadlineReminderModule } from './modules/deadline-reminder/deadline-reminder.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
@@ -42,6 +45,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     MailModule,
     CommentModule,
     NotificationModule,
+    DeadlineReminderModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseSeed],
