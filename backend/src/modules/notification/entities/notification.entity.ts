@@ -6,6 +6,7 @@ export type NotificationType =
   | 'join_request_approved'
   | 'join_request_rejected'
   | 'new_comment'
+  | 'mention'
   | 'assigned_task'
   | 'status_changed'
   | 'deadline_upcoming'

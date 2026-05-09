@@ -48,6 +48,7 @@ export type NotificationType =
   | 'join_request_approved'
   | 'join_request_rejected'
   | 'new_comment'
+  | 'mention'
   | 'assigned_task'
   | 'status_changed'
   | 'deadline_upcoming'
@@ -58,6 +59,7 @@ export const NOTIFICATION_ICON_COLOR: Record<NotificationType, string> = {
   join_request_approved: '#16a34a',
   join_request_rejected: '#ef4444',
   new_comment: '#f59e0b',
+  mention: '#f59e0b',
   assigned_task: '#0ea5e9',
   status_changed: '#8b5cf6',
   deadline_upcoming: '#ef4444',
@@ -69,6 +71,7 @@ export const NOTIFICATION_BG: Record<NotificationType, string> = {
   join_request_approved: '#f0fdf4',
   join_request_rejected: '#fef2f2',
   new_comment: '#fffbeb',
+  mention: '#fffbeb',
   assigned_task: '#f0f9ff',
   status_changed: '#f5f3ff',
   deadline_upcoming: '#fef2f2',

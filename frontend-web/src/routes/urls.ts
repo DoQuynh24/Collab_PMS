@@ -19,4 +19,5 @@ export const ROUTES = {
   projectDetailsSettings: (id: string) => `/projects/${id}/settings/details`,
   projectMembersSettings: (id: string) => `/projects/${id}/settings/members`,
   projectStatusesSettings: (id: string) => `/projects/${id}/settings/statuses`,
+  projectNotificationsSettings: (id: string) => `/projects/${id}/settings/notifications`,
 };

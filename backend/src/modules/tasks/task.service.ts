@@ -165,14 +165,17 @@ export class TaskService {
 
       const assignee = await this.userRepo.findOne({ where: { user_id: newAssigneeId } });
         if (assignee) {
-          await this.mailService.sendAssignedTask({
-            to: assignee.email,
-            assignerName,
-            taskTitle: task.title,
-            projectName,
-            projectId: task.project_id,
-            taskId: task.task_id,
-          });
+          const canEmail = await this.notificationService.canReceiveEmail(newAssigneeId, task.project_id, 'assigned_task');
+          if (canEmail) {
+            await this.mailService.sendAssignedTask({
+              to: assignee.email,
+              assignerName,
+              taskTitle: task.title,
+              projectName,
+              projectId: task.project_id,
+              taskId: task.task_id,
+            });
+          }
         }
 
         if (task.created_by !== userId && task.created_by !== newAssigneeId) {
@@ -224,16 +227,19 @@ export class TaskService {
 
         const assignee = await this.userRepo.findOne({ where: { user_id: task.assignee_id } });
         if (assignee) {
-          await this.mailService.sendStatusChanged({
-            to: assignee.email,
-            changerName,
-            taskTitle: task.title,
-            projectName,
-            projectId: task.project_id,
-            taskId: task.task_id,
-            newStatusName,
-            oldStatusName: prevStatusName,
-          });
+          const canEmail = await this.notificationService.canReceiveEmail(task.assignee_id, task.project_id, 'status_changed');
+          if (canEmail) {
+            await this.mailService.sendStatusChanged({
+              to: assignee.email,
+              changerName,
+              taskTitle: task.title,
+              projectName,
+              projectId: task.project_id,
+              taskId: task.task_id,
+              newStatusName,
+              oldStatusName: prevStatusName,
+            });
+          }
         }
 
         if (task.created_by !== userId && task.created_by !== task.assignee_id) {
@@ -362,16 +368,19 @@ export class TaskService {
 
         const assignee = await this.userRepo.findOne({ where: { user_id: task.assignee_id } });
         if (assignee) {
-          await this.mailService.sendStatusChanged({
-            to: assignee.email,
-            changerName,
-            taskTitle: task.title,
-            projectName,
-            projectId: task.project_id,
-            taskId: task.task_id,
-            newStatusName,
-            oldStatusName,
-          });
+          const canEmail = await this.notificationService.canReceiveEmail(task.assignee_id, task.project_id, 'status_changed');
+          if (canEmail) {
+            await this.mailService.sendStatusChanged({
+              to: assignee.email,
+              changerName,
+              taskTitle: task.title,
+              projectName,
+              projectId: task.project_id,
+              taskId: task.task_id,
+              newStatusName,
+              oldStatusName,
+            });
+          }
         }
 
         if (task.created_by !== userId && task.created_by !== task.assignee_id) {

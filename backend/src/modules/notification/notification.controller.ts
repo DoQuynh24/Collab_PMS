@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Delete, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Patch, Put, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -40,5 +40,25 @@ export class NotificationController {
   async deleteAll(@Request() req: any) {
     await this.notificationService.deleteAll(req.user.user_id);
     return { message: 'All notifications deleted' };
+  }
+
+  @Get('preferences/:projectId')
+  async getPreferences(@Param('projectId') projectId: string, @Request() req: any) {
+    return this.notificationService.getPreference(req.user.user_id, projectId);
+  }
+
+  @Put('preferences/:projectId')
+  async updatePreferences(
+    @Param('projectId') projectId: string,
+    @Body() body: {
+      assigned_inapp?: boolean; assigned_email?: boolean;
+      status_inapp?: boolean; status_email?: boolean;
+      comment_inapp?: boolean;
+      mention_inapp?: boolean; mention_email?: boolean;
+      project_inapp?: boolean; project_email?: boolean;
+    },
+    @Request() req: any,
+  ) {
+    return this.notificationService.upsertPreference(req.user.user_id, projectId, body);
   }
 }

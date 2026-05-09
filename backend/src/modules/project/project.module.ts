@@ -10,12 +10,14 @@ import { ProjectMember } from '../project-member/entities/project-member.entity'
 import { User } from '../auth/entities/user.entity';
 import { MailModule } from '../project-invitation/mail/mail.module';
 import { ProjectInvitationModule } from '../project-invitation/project-invitation.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Project, GlobalTaskStatus, ProjectTaskStatus, Task, ProjectMember, User]),
     MailModule,
     forwardRef(() => ProjectInvitationModule),
+    NotificationModule,
   ],
   controllers: [ProjectPublicController, ProjectController],
   providers: [ProjectService],

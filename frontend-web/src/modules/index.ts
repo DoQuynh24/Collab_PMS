@@ -52,6 +52,11 @@ export const ProjectStatusesSetting = lazyLoad(
   (module) => module.default
 );
 
+export const ProjectNotificationsSetting = lazyLoad(
+  () => import('./project/component/setting/ProjectNotificationSetting'),
+  (module) => module.default
+);
+
 export const ArchivedProjects = lazyLoad(
   () => import('./project/ArchivedProjects'),
   (module) => module.default
@@ -85,4 +90,5 @@ export const routes: RouteConfig[] = [
   { path: '/projects/:projectId/settings/details', component: ProjectDetailSetting, title: 'Cài đặt dự án' },
   { path: '/projects/:projectId/settings/members', component: ProjectMemberSetting, title: 'Thành viên dự án' },
   { path: '/projects/:projectId/settings/statuses', component: ProjectStatusesSetting, title: 'Trạng thái dự án' },
+  { path: '/projects/:projectId/settings/notifications', component: ProjectNotificationsSetting, title: 'Thông báo dự án' },
 ];

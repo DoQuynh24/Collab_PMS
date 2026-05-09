@@ -59,6 +59,11 @@ export function NotificationPanel({ open, onClose }: Props) {
         ? `${ROUTES.projectBoard(n.project_id)}?taskId=${n.entity_id}`
         : ROUTES.projectBoard(n.project_id);
       navigate(url);
+    } else if (n.type === 'mention' && n.project_id) {
+      const url = n.entity_id
+        ? `${ROUTES.projectBoard(n.project_id)}?taskId=${n.entity_id}`
+        : ROUTES.projectBoard(n.project_id);
+      navigate(url);
     } else if (n.type === 'assigned_task' && n.project_id) {
       const url = n.entity_id
         ? `${ROUTES.projectBoard(n.project_id)}?taskId=${n.entity_id}`
@@ -184,6 +189,7 @@ export function NotificationPanel({ open, onClose }: Props) {
                     {n.type === 'join_request_approved' && <CheckCircleOutlineIcon fontSize="small" />}
                     {n.type === 'join_request_rejected' && <CancelOutlinedIcon fontSize="small" />}
                     {n.type === 'new_comment' && <ChatBubbleOutlineIcon fontSize="small" />}
+                    {n.type === 'mention' && <ChatBubbleOutlineIcon fontSize="small" />}
                     {n.type === 'assigned_task' && <AssignmentIndOutlinedIcon fontSize="small" />}
                     {n.type === 'status_changed' && <SwapHorizOutlinedIcon fontSize="small" />}
                     {n.type === 'deadline_upcoming' && <AccessTimeOutlinedIcon fontSize="small" />}

@@ -59,13 +59,25 @@ export class CommentService {
     const mentionedIds = dto.mentioned_user_ids ?? [];
     const uniqueMentionIds = mentionedIds.filter(id => id !== userId);
 
-    const recipientIds = Array.from(
-      new Set([task.assignee_id, task.created_by].filter((id): id is number => !!id && id !== userId && !uniqueMentionIds.includes(id))
-      )
-    );
-    if (recipientIds.length > 0) {
-      await this.notificationService.createMany({
-        user_ids: recipientIds,
+    const assigneeId = task.assignee_id && task.assignee_id !== userId && !uniqueMentionIds.includes(task.assignee_id)
+      ? task.assignee_id : null;
+    const creatorId = task.created_by !== userId && task.created_by !== task.assignee_id && !uniqueMentionIds.includes(task.created_by)
+      ? task.created_by : null;
+
+    if (assigneeId) {
+      await this.notificationService.createForced({
+        user_id: assigneeId,
+        type: 'new_comment',
+        title: `Bình luận mới trong dự án "${projectName}"`,
+        body: `${commenterName} đã bình luận trên nhiệm vụ "${task.title}".`,
+        project_id: task.project_id,
+        entity_id: task.task_id,
+      });
+    }
+
+    if (creatorId) {
+      await this.notificationService.create({
+        user_id: creatorId,
         type: 'new_comment',
         title: `Bình luận mới trong dự án "${projectName}"`,
         body: `${commenterName} đã bình luận trên nhiệm vụ "${task.title}".`,
@@ -77,8 +89,8 @@ export class CommentService {
     if (uniqueMentionIds.length > 0) {
       await this.notificationService.createMany({
         user_ids: uniqueMentionIds,
-        type: 'new_comment',
-        title: `Bình luận mới trong dự án "${projectName}"`,
+        type: 'mention',
+        title: `Bạn được nhắc đến trong dự án "${projectName}"`,
         body: `${commenterName} đã nhắc đến bạn trong bình luận của nhiệm vụ "${task.title}".`,
         project_id: task.project_id,
         entity_id: task.task_id,
@@ -86,15 +98,18 @@ export class CommentService {
 
       const mentionedUsers = await this.userRepo.findByIds(uniqueMentionIds);
       for (const user of mentionedUsers) {
-        await this.mailService.sendMention({
-          to: user.email,
-          mentionerName: commenterName,
-          taskTitle: task.title,
-          projectName,
-          projectId: task.project_id,
-          taskId: task.task_id,
-          commentContent: dto.content,
-        });
+        const canEmail = await this.notificationService.canReceiveEmail(user.user_id, task.project_id, 'mention');
+        if (canEmail) {
+          await this.mailService.sendMention({
+            to: user.email,
+            mentionerName: commenterName,
+            taskTitle: task.title,
+            projectName,
+            projectId: task.project_id,
+            taskId: task.task_id,
+            commentContent: dto.content,
+          });
+        }
       }
     }
 

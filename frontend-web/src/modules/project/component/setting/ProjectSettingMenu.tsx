@@ -35,6 +35,8 @@ export default function ProjectSettingsMenu({ anchorEl, onClose, projectId, proj
         navigate(ROUTES.projectMembersSettings(projectId));
       } else if (subPath === "/statuses") {
         navigate(ROUTES.projectStatusesSettings(projectId));
+      } else if (subPath === "/notifications") {
+        navigate(ROUTES.projectNotificationsSettings(projectId));
       }
     }
   };
@@ -96,7 +98,7 @@ export default function ProjectSettingsMenu({ anchorEl, onClose, projectId, proj
         </Box>
       </MenuItem>
 
-      <MenuItem onClick={() => handleNavigate('/notifycations')}>
+      <MenuItem onClick={() => handleNavigate('/notifications')}>
         <ListItemIcon>
           <NotificationsIcon fontSize="small" />
         </ListItemIcon>

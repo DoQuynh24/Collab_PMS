@@ -89,14 +89,17 @@ export class DeadlineReminderService {
         entity_id: task.task_id,
       });
 
-      await this.mailService.sendDeadlineUpcoming({
-        to: assignee.email,
-        taskTitle: task.title,
-        projectName,
-        projectId: task.project_id,
-        taskId: task.task_id,
-        deadline: deadlineStr,
-      });
+      const canEmail = await this.notificationService.canReceiveEmail(task.assignee_id, task.project_id, 'deadline_upcoming');
+      if (canEmail) {
+        await this.mailService.sendDeadlineUpcoming({
+          to: assignee.email,
+          taskTitle: task.title,
+          projectName,
+          projectId: task.project_id,
+          taskId: task.task_id,
+          deadline: deadlineStr,
+        });
+      }
 
       await this.taskRepo.update(task.task_id, { deadline_reminded: true });
 
@@ -175,14 +178,17 @@ export class DeadlineReminderService {
         entity_id: task.task_id,
       });
 
-      await this.mailService.sendOverdueTask({
-        to: assignee.email,
-        taskTitle: task.title,
-        projectName,
-        projectId: task.project_id,
-        taskId: task.task_id,
-        deadline: deadlineFormatted,
-      });
+      const canEmail = await this.notificationService.canReceiveEmail(task.assignee_id, task.project_id, 'deadline_overdue');
+      if (canEmail) {
+        await this.mailService.sendOverdueTask({
+          to: assignee.email,
+          taskTitle: task.title,
+          projectName,
+          projectId: task.project_id,
+          taskId: task.task_id,
+          deadline: deadlineFormatted,
+        });
+      }
 
       await this.taskRepo.update(task.task_id, { overdue_notified: true });
 

@@ -18,6 +18,7 @@ import { ProjectMember } from '../project-member/entities/project-member.entity'
 import { MailService } from '../project-invitation/mail/mail.service';
 import { User } from '../auth/entities/user.entity';
 import { ProjectInvitationService } from '../project-invitation/project-invitation.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class ProjectService {
@@ -43,6 +44,8 @@ export class ProjectService {
     private userRepo: Repository<User>,
 
     private invitationService: ProjectInvitationService,
+
+    private notificationService: NotificationService,
   ) {}
 
   async create(dto: CreateProjectDto, userId: number) {
@@ -172,16 +175,27 @@ export class ProjectService {
         if (m.user?.email) recipients.add(m.user.email);
       });
 
+      const recipientUsers: { userId: number; email: string }[] = [];
+      if (owner) recipientUsers.push({ userId: owner.user_id, email: owner.email });
+      admins.forEach((m) => {
+        if (m.user?.email && m.user_id !== owner?.user_id) {
+          recipientUsers.push({ userId: m.user_id, email: m.user.email });
+        }
+      });
+
       await Promise.all(
-        [...recipients].map((email) =>
-          this.mailService.sendJoinRequest({
-            to: email,
-            projectName: project.name,
-            requesterName: requester.name,
-            requesterEmail: requester.email,
-            projectId,
-          })
-        )
+        recipientUsers.map(async ({ userId, email }) => {
+          const canEmail = await this.notificationService.canReceiveEmail(userId, projectId, 'join_request_received');
+          if (canEmail) {
+            return this.mailService.sendJoinRequest({
+              to: email,
+              projectName: project.name,
+              requesterName: requester.name,
+              requesterEmail: requester.email,
+              projectId,
+            });
+          }
+        })
       );
 
       return { 
