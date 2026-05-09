@@ -30,6 +30,7 @@ interface Props {
   projectId?: string;
   onCreateTask: (title: string, statusId: number, priorityId: number, deadline?: Date | null, assigneeId?: number | null) => void;
   displaySettings?: DisplaySettings;
+  doneStatusId?: number | null;
 }
 
 const toDropId = (groupKey: string, statusId: number) => `grp-${groupKey}-s-${statusId}`;
@@ -38,7 +39,7 @@ const parseStatusFromDropId = (id: string): number | null => {
   return m ? Number(m[1]) : null;
 };
 
-export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMembers, projectId, onCreateTask, displaySettings }: Props) {
+export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMembers, projectId, onCreateTask, displaySettings, doneStatusId }: Props) {
   const [activeTask, setActiveTask] = useState<ITask | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const { mutate: moveTask } = useMoveTask();
@@ -159,6 +160,7 @@ export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMe
                       onCreateTask={onCreateTask}
                       droppableId={toDropId(group.key, status.id)}
                       displaySettings={displaySettings}
+                      doneStatusId={doneStatusId}
                     />
                   ))}
                 </Stack>

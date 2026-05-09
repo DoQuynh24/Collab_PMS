@@ -56,6 +56,15 @@ interface SendDeadlineUpcomingParams {
   deadline: string;
 }
 
+interface SendOverdueTaskParams {
+  to: string;
+  taskTitle: string;
+  projectName: string;
+  projectId: string;
+  taskId: number;
+  deadline: string;
+}
+
 @Injectable()
 export class MailService implements OnModuleInit {
   private from: string;
@@ -68,7 +77,7 @@ export class MailService implements OnModuleInit {
   }
 
   async sendJoinRequest({ to, projectName, requesterName, requesterEmail, projectId }: SendJoinRequestParams) {
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:6273';
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
     const membersUrl = `${frontendUrl}/projects/${projectId}/settings/members?tab=requests`;
 
     await sgMail.send({
@@ -321,6 +330,57 @@ export class MailService implements OnModuleInit {
             <div style="text-align: center; margin: 28px 0;">
               <a href="${taskUrl}"
                 style="background-color: #e53e3e; color: white; padding: 12px 40px;
+                  text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600;
+                  display: inline-block;">
+                Xem nhiệm vụ
+              </a>
+            </div>
+            <p style="color: #888; font-size: 12px; text-align: center; margin-bottom: 0;">
+              Đây là email nhắc nhở tự động từ Collab PMS.
+            </p>
+          </div>
+        </div>
+      </div>
+      `,
+    });
+  }
+
+  async sendOverdueTask({ to, taskTitle, projectName, projectId, taskId, deadline }: SendOverdueTaskParams) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const taskUrl = `${frontendUrl}/projects/${projectId}/board?taskId=${taskId}`;
+
+    await sgMail.send({
+      from: this.from,
+      to,
+      subject: `Nhiệm vụ "${taskTitle}" đã quá hạn`,
+      html: `
+      <div style="background-color: #f4f5f7; padding: 40px 0; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 24px; font-weight: 700; color: #5663ee;">⚡ Collab PMS</span>
+          </div>
+          <div style="background: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <p style="font-size: 18px; margin-top: 0;">👋 Xin chào,</p>
+            <h2 style="font-size: 20px; font-weight: 700; color: #dc2626; margin-bottom: 8px;">
+              🚨 Nhiệm vụ của bạn đã quá hạn
+            </h2>
+            <p style="color: #555; font-size: 14px; margin-bottom: 16px;">
+              Nhiệm vụ dưới đây đã <strong>quá hạn cần phải hoàn thành</strong>. Vui lòng xử lý sớm nhất có thể.
+            </p>
+            <div style="border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; margin: 20px 0; background: #fef2f2;">
+              <p style="margin: 0 0 8px 0; font-size: 13px; color: #6b7280;">
+                NHIỆM VỤ: <strong style="font-size: 16px; color: #172b4d;">${taskTitle}</strong>
+              </p>
+              <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">
+                Dự án: <strong style="color: #374151;">${projectName}</strong>
+              </p>
+              <p style="margin: 6px 0 0 0; font-size: 13px; color: #6b7280;">
+                Hạn chót: <strong style="color: #dc2626;">${deadline}</strong>
+              </p>
+            </div>
+            <div style="text-align: center; margin: 28px 0;">
+              <a href="${taskUrl}"
+                style="background-color: #dc2626; color: white; padding: 12px 40px;
                   text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600;
                   display: inline-block;">
                 Xem nhiệm vụ

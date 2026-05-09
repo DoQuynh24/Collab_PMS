@@ -3,17 +3,19 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 interface Props {
   deadline?: string | null;
+  isDone?: boolean;
 }
 
-export default function DeadlineChip({ deadline }: Props) {
+export default function DeadlineChip({ deadline, isDone }: Props) {
   if (!deadline) return null;
 
   const date = new Date(deadline);
+  date.setHours(0, 0, 0, 0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const isOverdue = date < today;
-  const isToday = date.toDateString() === today.toDateString();
+  const isOverdue = !isDone && date < today;
+  const isToday = date.getTime() === today.getTime();
 
   const formatted = date.toLocaleDateString("vi-VN", { month: "short", day: "numeric" });
 

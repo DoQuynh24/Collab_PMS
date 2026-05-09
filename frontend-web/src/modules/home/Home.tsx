@@ -41,11 +41,17 @@ export function Home() {
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
 
   const now = new Date();
+  now.setHours(0, 0, 0, 0);
 
   const overdueTasks = assignedTasks.filter(
-    (t) => t.deadline && new Date(t.deadline) < now && t.status?.name !== 'DONE'
+    (t) => {
+      if (!t.deadline || t.is_done) return false;
+      const d = new Date(t.deadline);
+      d.setHours(0, 0, 0, 0);
+      return d < now;
+    }
   );
-  const inProgressTasks = assignedTasks.filter((t) => t.status?.name === 'IN_PROGRESS');
+  const inProgressTasks = assignedTasks.filter((t) => !t.is_done);
 
   const greeting = () => {
     const h = now.getHours();
@@ -128,7 +134,11 @@ export function Home() {
             <Box className={styles.taskList}>
               {assignedTasks.slice(0, 8).map((task, idx) => {
                 const priority = PRIORITIES.find((p) => p.id === task.priority_id);
-                const isOverdue = task.deadline && new Date(task.deadline) < now && task.status?.name !== 'DONE';
+                const isOverdue = task.deadline && !task.is_done && (() => {
+                  const d = new Date(task.deadline!);
+                  d.setHours(0, 0, 0, 0);
+                  return d < now;
+                })();
                 const projectColor = getProjectColor(task.project_id);
                 const projectName = projects.find(p => p.project_id === task.project_id)?.name ?? task.project_id;
 

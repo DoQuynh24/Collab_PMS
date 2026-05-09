@@ -91,11 +91,27 @@ export class TaskService {
   }
 
   async findAssignedToMe(userId: number) {
-    return this.taskRepo.find({
+    const tasks = await this.taskRepo.find({
       where: { assignee_id: userId, is_archived: false },
       relations: ['priority', 'status', 'project'],
       order: { updated_at: 'DESC' },
     });
+
+    const projectIds = [...new Set(tasks.map(t => t.project_id))];
+    const doneStatusMap = new Map<string, number>();
+
+    for (const projectId of projectIds) {
+      const lastStatus = await this.statusRepo.findOne({
+        where: { project_id: projectId },
+        order: { order_index: 'DESC' },
+      });
+      if (lastStatus) doneStatusMap.set(projectId, lastStatus.id);
+    }
+
+    return tasks.map(task => ({
+      ...task,
+      is_done: doneStatusMap.get(task.project_id) === task.status_id,
+    }));
   }
 
   async update(taskId: number, dto: UpdateTaskDto, userId: number) {

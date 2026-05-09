@@ -274,6 +274,7 @@ export function ProjectBoardView() {
                     onCreateTask={handleCreateTask}
                     displaySettings={displaySettings}
                     canManage={canManage}
+                    doneStatusId={doneStatusId}
                   />
                 )
                 )}
@@ -319,6 +320,7 @@ export function ProjectBoardView() {
             projectId={projectId}
             onCreateTask={handleCreateTask}
             displaySettings={displaySettings}
+            doneStatusId={doneStatusId}
           />
         )}
       </Box>

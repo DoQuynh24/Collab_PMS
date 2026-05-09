@@ -8,7 +8,8 @@ export type NotificationType =
   | 'new_comment'
   | 'assigned_task'
   | 'status_changed'
-  | 'deadline_upcoming';
+  | 'deadline_upcoming'
+  | 'deadline_overdue';
 
 @Entity('notifications')
 export class Notification {

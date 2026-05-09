@@ -20,6 +20,7 @@ export interface ITask {
   };
   order_index: number;
   is_archived?: boolean;
+  is_done?: boolean;
   created_at:string;
 }
 

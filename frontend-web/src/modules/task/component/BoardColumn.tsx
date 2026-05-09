@@ -32,6 +32,7 @@ interface Props {
   droppableId?: string | number;
   displaySettings?: DisplaySettings;
   canManage?: boolean;
+  doneStatusId?: number | null;
 }
 
 export const toColumnSortableId = (statusId: number) => `col-${statusId}`;
@@ -48,6 +49,7 @@ export function BoardColumn({
   droppableId,
   displaySettings,
   canManage = false,
+  doneStatusId,
 }: Props) {
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: droppableId ?? status.id });
 
@@ -125,6 +127,7 @@ export function BoardColumn({
                   projectMembers={projectMembers}
                   projectId={projectId}
                   displaySettings={displaySettings}
+                  doneStatusId={doneStatusId}
                 />
               ))}
             </SortableContext>

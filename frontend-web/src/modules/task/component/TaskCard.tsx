@@ -30,9 +30,10 @@ interface Props {
   projectMembers: any[];
   projectId?: string;
   displaySettings?: DisplaySettings;
+  doneStatusId?: number | null;
 }
 
-export default function TaskCard({ task, projectMembers, projectId, displaySettings }: Props) {
+export default function TaskCard({ task, projectMembers, projectId, displaySettings, doneStatusId }: Props) {
   const ds = displaySettings ?? DEFAULT_DISPLAY_SETTINGS;
   const [hovered, setHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -58,7 +59,14 @@ export default function TaskCard({ task, projectMembers, projectId, displaySetti
   const assignee = assigneeMember?.user;
 
   const isOverdue = task.deadline
-    ? new Date(task.deadline) < new Date()
+    ? (() => {
+        const deadlineDate = new Date(task.deadline);
+        deadlineDate.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const isDone = doneStatusId != null && task.status_id === doneStatusId;
+        return !isDone && deadlineDate < today;
+      })()
     : false;
 
   useEffect(() => {
@@ -233,7 +241,7 @@ export default function TaskCard({ task, projectMembers, projectId, displaySetti
                 </Tooltip>
               )}
               {ds.showDeadline && task.deadline && (
-                <DeadlineChip deadline={task.deadline} />
+                <DeadlineChip deadline={task.deadline} isDone={doneStatusId != null && task.status_id === doneStatusId} />
               )}
             </Box>
 

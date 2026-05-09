@@ -74,6 +74,11 @@ export function NotificationPanel({ open, onClose }: Props) {
         ? `${ROUTES.projectBoard(n.project_id)}?taskId=${n.entity_id}`
         : ROUTES.projectBoard(n.project_id);
       navigate(url);
+    } else if (n.type === 'deadline_overdue' && n.project_id) {
+      const url = n.entity_id
+        ? `${ROUTES.projectBoard(n.project_id)}?taskId=${n.entity_id}`
+        : ROUTES.projectBoard(n.project_id);
+      navigate(url);
     }
     onClose();
   };
@@ -182,6 +187,7 @@ export function NotificationPanel({ open, onClose }: Props) {
                     {n.type === 'assigned_task' && <AssignmentIndOutlinedIcon fontSize="small" />}
                     {n.type === 'status_changed' && <SwapHorizOutlinedIcon fontSize="small" />}
                     {n.type === 'deadline_upcoming' && <AccessTimeOutlinedIcon fontSize="small" />}
+                    {n.type === 'deadline_overdue' && <AccessTimeOutlinedIcon fontSize="small" />}
                   </Box>
 
                   <Box sx={{ flex: 1, minWidth: 0 }}>
