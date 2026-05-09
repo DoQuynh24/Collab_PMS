@@ -15,7 +15,7 @@ export default function DeadlineChip({ deadline, isDone }: Props) {
   today.setHours(0, 0, 0, 0);
 
   const isOverdue = !isDone && date < today;
-  const isToday = date.getTime() === today.getTime();
+  const isToday = !isDone && date.getTime() === today.getTime();
 
   const formatted = date.toLocaleDateString("vi-VN", { month: "short", day: "numeric" });
 
