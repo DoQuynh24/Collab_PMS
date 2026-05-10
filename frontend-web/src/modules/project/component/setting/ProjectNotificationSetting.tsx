@@ -10,6 +10,7 @@ import { useGetNotificationPreferences } from '../../../notification/api/get-not
 import { useUpdateNotificationPreferences } from '../../../notification/api/update-notification-preferences';
 import type { INotificationPreference } from '../../../notification/api/get-notification-preferences';
 import { ROUTES } from '../../../../routes/urls';
+import LoadingPage from '../../../../components/loading/LoadingPage';
 
 type PrefKey = keyof INotificationPreference;
 
@@ -72,6 +73,8 @@ export function ProjectNotificationSettings() {
   const handleToggle = (key: PrefKey, value: boolean) => {
     updatePref({ [key]: value });
   };
+
+  if (isLoading) return <LoadingPage />;
 
   return (
     <Box>

@@ -11,6 +11,8 @@ import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import FilterListOutlinedIcon from '@mui/icons-material/FilterListOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { useState } from 'react';
 
 interface Props {
@@ -36,19 +38,23 @@ const HELP_SECTIONS: HelpSection[] = [
     items: [
       {
         title: 'Kéo thả nhiệm vụ',
-        content: 'Giữ và kéo card nhiệm vụ sang cột khác để thay đổi trạng thái. Khi đang kéo, cột đích sẽ được highlight màu xanh để báo hiệu có thể thả vào. Thứ tự trong cột cũng được lưu lại sau khi thả.',
+        content: 'Giữ và kéo card nhiệm vụ sang cột khác để thay đổi trạng thái. Cột đích sẽ được highlight màu xanh khi có thể thả vào. Thứ tự trong cột được lưu lại sau khi thả.',
       },
       {
-        title: 'Sắp xếp cột',
-        content: 'Kéo tiêu đề cột (phần chữ in hoa ở đầu cột) để thay đổi thứ tự các cột trên bảng. Thứ tự mới sẽ được lưu và áp dụng cho tất cả thành viên trong dự án.',
+        title: 'Sắp xếp cột trạng thái',
+        content: 'Kéo tiêu đề cột (phần chữ in hoa ở đầu cột) để thay đổi thứ tự các cột. Chỉ Admin và Chủ sở hữu mới có thể kéo thả cột. Thứ tự mới áp dụng cho tất cả thành viên.',
       },
       {
-        title: 'Thêm nhiệm vụ',
-        content: 'Click "+ Thêm nhiệm vụ" ở đầu mỗi cột để tạo nhanh nhiệm vụ mới. Bạn có thể đặt tiêu đề, độ ưu tiên, deadline và người thực hiện ngay tại chỗ mà không cần mở modal.',
+        title: 'Thêm nhiệm vụ nhanh',
+        content: 'Click "+ Thêm nhiệm vụ" ở đầu mỗi cột để tạo nhiệm vụ mới ngay tại chỗ. Có thể đặt tiêu đề, độ ưu tiên, deadline và người thực hiện mà không cần mở modal. Chỉ Admin và Chủ sở hữu mới thấy nút thêm trạng thái mới.',
       },
       {
         title: 'Nhóm nhiệm vụ',
-        content: 'Dùng nút "Nhóm" trên toolbar để nhóm các nhiệm vụ theo người thực hiện hoặc độ ưu tiên. Mỗi nhóm hiển thị đầy đủ các cột trạng thái và có thể thu gọn/mở rộng bằng cách click vào tiêu đề nhóm. Kéo thả vẫn hoạt động bình thường trong chế độ nhóm.',
+        content: 'Dùng nút "Nhóm" trên toolbar để nhóm theo người thực hiện hoặc độ ưu tiên. Mỗi nhóm hiển thị đầy đủ các cột trạng thái và có thể thu gọn/mở rộng. Kéo thả vẫn hoạt động trong chế độ nhóm.',
+      },
+      {
+        title: 'Ẩn nhiệm vụ hoàn thành',
+        content: 'Vào menu "⋯" → bật "Ẩn nhiệm vụ hoàn thành" để ẩn tất cả task ở cột cuối cùng (cột được coi là hoàn thành). Cài đặt được lưu riêng cho từng dự án.',
       },
     ],
   },
@@ -58,23 +64,23 @@ const HELP_SECTIONS: HelpSection[] = [
     items: [
       {
         title: 'Xem chi tiết nhiệm vụ',
-        content: 'Click vào card để mở modal chi tiết. Tại đây bạn có thể chỉnh sửa tiêu đề, mô tả (hỗ trợ @mention thành viên), thay đổi trạng thái, độ ưu tiên, deadline, người thực hiện và xem toàn bộ lịch sử bình luận.',
+        content: 'Click vào card để mở modal chi tiết. Tại đây có thể chỉnh sửa tiêu đề, mô tả, trạng thái, độ ưu tiên, deadline, người thực hiện và xem toàn bộ lịch sử bình luận.',
       },
       {
         title: 'Chỉnh sửa tiêu đề nhanh',
-        content: 'Hover vào card và click icon bút chì để chỉnh sửa tiêu đề trực tiếp trên board mà không cần mở modal. Nhấn Enter để lưu, Esc để hủy bỏ thay đổi.',
+        content: 'Hover vào card và click icon bút chì để chỉnh sửa tiêu đề trực tiếp trên board. Nhấn Enter để lưu, Esc để hủy.',
       },
       {
         title: 'Bình luận & @mention',
-        content: 'Trong phần bình luận của chi tiết nhiệm vụ, gõ @ để tag thành viên trong dự án. Danh sách gợi ý sẽ hiện ra để bạn chọn. Bình luận hỗ trợ chỉnh sửa và xóa sau khi đã đăng.',
-      },
-      {
-        title: 'Lưu trữ & xóa nhiệm vụ',
-        content: 'Mở menu 3 chấm (⋯) trên card để lưu trữ hoặc xóa nhiệm vụ. Nhiệm vụ đã lưu trữ có thể xem lại trong trang "Lưu trữ" của dự án và khôi phục bất kỳ lúc nào. Xóa là hành động vĩnh viễn và không thể hoàn tác.',
+        content: 'Trong chi tiết nhiệm vụ, gõ @ để tag thành viên. Người được tag sẽ nhận thông báo in-app và email. Bình luận hỗ trợ chỉnh sửa và xóa sau khi đã đăng.',
       },
       {
         title: 'Màu sắc deadline',
-        content: 'Chip deadline trên card đổi màu theo trạng thái: xanh lá khi còn nhiều thời gian, vàng khi sắp đến hạn và đỏ khi đã quá hạn. Viền card cũng đổi màu đỏ khi nhiệm vụ quá hạn.',
+        content: 'Chip deadline đổi màu theo trạng thái: xanh lá khi còn thời gian, vàng khi đến hạn hôm nay, đỏ khi đã quá hạn. Task ở cột hoàn thành không bị báo đỏ dù đã quá hạn.',
+      },
+      {
+        title: 'Lưu trữ & xóa nhiệm vụ',
+        content: 'Mở menu 3 chấm (⋯) trên card để lưu trữ hoặc xóa. Nhiệm vụ đã lưu trữ có thể xem lại trong "Kho lưu trữ" và khôi phục bất kỳ lúc nào. Xóa là hành động vĩnh viễn.',
       },
     ],
   },
@@ -84,19 +90,15 @@ const HELP_SECTIONS: HelpSection[] = [
     items: [
       {
         title: 'Bộ lọc nhiệm vụ',
-        content: 'Dùng nút "Bộ lọc" trên toolbar để lọc theo người thực hiện, độ ưu tiên hoặc trạng thái. Có thể chọn nhiều giá trị cùng lúc. Khi bộ lọc đang hoạt động, nút sẽ đổi màu xanh để nhắc nhở. Bộ lọc áp dụng cho cả chế độ bảng thường lẫn chế độ nhóm.',
+        content: 'Dùng nút "Bộ lọc" để lọc theo người thực hiện, độ ưu tiên hoặc trạng thái. Có thể chọn nhiều giá trị cùng lúc. Bộ lọc áp dụng cho cả bảng thường lẫn chế độ nhóm và cả trang Danh sách.',
       },
       {
         title: 'Tùy chỉnh hiển thị card',
-        content: 'Click icon Tune (⚙) để bật/tắt từng thông tin hiển thị trên card: mã nhiệm vụ (TASK-ID), icon cờ độ ưu tiên, chip deadline và avatar người thực hiện. Cài đặt được lưu riêng cho từng dự án và giữ nguyên khi reload trang.',
-      },
-      {
-        title: 'Ẩn nhiệm vụ hoàn thành',
-        content: 'Vào menu "⋯" → bật "Ẩn nhiệm vụ hoàn thành" để ẩn tất cả task ở cột cuối cùng (cột được coi là hoàn thành theo cài đặt quản lý trạng thái). Hữu ích khi bảng có quá nhiều task đã xong. Cài đặt được lưu và giữ nguyên khi reload trang.',
+        content: 'Click icon Tune (⚙) để bật/tắt: mã nhiệm vụ (TASK-ID), icon cờ độ ưu tiên, chip deadline và avatar người thực hiện. Cài đặt lưu riêng cho từng dự án.',
       },
       {
         title: 'Tìm kiếm nhiệm vụ',
-        content: 'Dùng ô tìm kiếm trên toolbar để lọc nhanh nhiệm vụ theo tiêu đề. Kết quả được cập nhật ngay khi gõ, không cần nhấn Enter.',
+        content: 'Dùng ô tìm kiếm trên toolbar để lọc nhanh theo tiêu đề. Kết quả cập nhật ngay khi gõ.',
       },
     ],
   },
@@ -106,55 +108,99 @@ const HELP_SECTIONS: HelpSection[] = [
     items: [
       {
         title: 'Mời thành viên qua email',
-        content: 'Vào Cài đặt dự án → tab Thành viên → nhập địa chỉ email để gửi lời mời. Người được mời sẽ nhận email với link tham gia trực tiếp. Chỉ Admin và Chủ sở hữu mới có quyền gửi lời mời.',
+        content: 'Vào Cài đặt dự án → Thành viên & Quyền, hoặc click icon "Thêm thành viên" ở header dự án. Nhập email để gửi lời mời. Chỉ Admin và Chủ sở hữu mới có quyền mời.',
       },
       {
-        title: 'Chia sẻ mã dự án',
-        content: 'Mã dự án hiển thị trong phần header của trang dự án (có nút copy). Chia sẻ mã này cho người khác để họ tự tìm kiếm và gửi yêu cầu tham gia tại trang "Tham gia dự án" trên menu Dự án.',
+        title: 'Tham gia qua mã dự án',
+        content: 'Mã dự án hiển thị ở header dự án (có nút copy). Chia sẻ mã này để người khác tự tìm và gửi yêu cầu tham gia tại trang "Tham gia dự án" trên menu.',
       },
       {
         title: 'Phân quyền thành viên',
-        content: 'Có 3 cấp quyền: Chủ sở hữu (toàn quyền, không thể bị xóa), Admin (quản lý thành viên, trạng thái, cài đặt dự án) và Thành viên (tạo và chỉnh sửa nhiệm vụ). Chủ sở hữu và Admin có thể thay đổi vai trò của thành viên khác trong tab Thành viên.',
+        content: 'Có 3 cấp: Chủ sở hữu (toàn quyền), Admin (quản lý thành viên, trạng thái, cài đặt) và Thành viên (tạo và chỉnh sửa nhiệm vụ). Chỉ Chủ sở hữu mới có thể thay đổi vai trò.',
       },
       {
         title: 'Duyệt yêu cầu tham gia',
-        content: 'Khi có người gửi yêu cầu tham gia qua mã dự án, Admin và Chủ sở hữu sẽ thấy thông báo trong tab "Yêu cầu tham gia" ở Cài đặt → Thành viên. Có thể chấp nhận hoặc từ chối từng yêu cầu. Người được chấp nhận sẽ tự động trở thành Thành viên.',
+        content: 'Admin và Chủ sở hữu nhận thông báo khi có yêu cầu tham gia. Vào Cài đặt → Thành viên & Quyền → tab "Yêu cầu tham gia" để duyệt hoặc từ chối.',
       },
       {
         title: 'Quyền truy cập dự án',
-        content: 'Chủ sở hữu và Admin có thể đặt dự án là Riêng tư (chỉ thành viên được thêm mới có thể truy cập) hoặc Công khai (mọi người có thể xem và tham gia). Cài đặt này nằm trong phần chia sẻ ở header dự án.',
+        content: 'Đặt dự án là Riêng tư (chỉ thành viên được thêm) hoặc Công khai (mọi người có thể xem). Cài đặt này nằm trong phần Chia sẻ ở header dự án.',
       },
     ],
   },
   {
     icon: <CalendarMonthOutlinedIcon fontSize="small" />,
-    title: 'Lịch',
+    title: 'Lịch & Tổng quan',
     items: [
       {
         title: 'Xem nhiệm vụ theo tháng',
-        content: 'Trang Lịch hiển thị tất cả nhiệm vụ có deadline theo từng ngày trong tháng dưới dạng lưới. Mỗi ô ngày hiển thị các task có deadline vào ngày đó. Click vào task để mở modal chi tiết.',
+        content: 'Trang Lịch hiển thị nhiệm vụ có deadline theo từng ngày. Click vào task để mở modal chi tiết. Dùng mũi tên để chuyển tháng, click "Hôm nay" để về tháng hiện tại.',
       },
       {
-        title: 'Điều hướng tháng',
-        content: 'Dùng nút mũi tên trái/phải sát phần hiển thị tháng/năm để chuyển sang tháng trước/sau. Click "Hôm nay" để quay về tháng hiện tại — nút sẽ đổi màu xanh khi đang ở tháng hiện tại.',
+        title: 'Tổng quan dự án',
+        content: 'Trang Tổng quan hiển thị tiến độ dự án (% hoàn thành), thống kê theo trạng thái, danh sách thành viên và các nhiệm vụ gần đây. Hữu ích để nắm bắt nhanh tình trạng dự án.',
       },
       {
-        title: 'Lọc trên lịch',
-        content: 'Dùng bộ lọc ở góc phải toolbar để lọc nhiệm vụ hiển thị trên lịch theo người thực hiện, độ ưu tiên hoặc trạng thái. Hữu ích khi muốn xem deadline của một người cụ thể.',
+        title: 'Trang Dành cho bạn',
+        content: 'Trang chủ hiển thị tổng quan cá nhân: dự án đang tham gia, nhiệm vụ được giao, số task đang làm và quá hạn. Click vào task để mở chi tiết trực tiếp.',
       },
     ],
   },
   {
     icon: <DownloadOutlinedIcon fontSize="small" />,
-    title: 'Xuất dữ liệu',
+    title: 'Xuất dữ liệu Excel',
     items: [
       {
-        title: 'Xuất danh sách nhiệm vụ',
-        content: 'Vào menu "⋯" trên toolbar → "Xuất dữ liệu Excel" để tải xuống toàn bộ danh sách nhiệm vụ dạng file .xlsx. File bao gồm các cột: ID, Tiêu đề, Trạng thái, Độ ưu tiên, Người thực hiện, Hạn hoàn thành (MM/DD/YYYY) và Ngày tạo (MM/DD/YYYY). Tên file được đặt theo tên dự án và ngày xuất.',
+        title: 'Xuất từ trang Bảng',
+        content: 'Vào menu "⋯" trên toolbar → "Xuất dữ liệu Excel". File .xlsx bao gồm: ID, Tiêu đề, Trạng thái, Độ ưu tiên, Người thực hiện, Hạn hoàn thành, Ngày tạo. Nếu đang bật bộ lọc, hệ thống sẽ hỏi xác nhận trước khi xuất theo bộ lọc.',
       },
       {
-        title: 'Kết hợp với bộ lọc',
-        content: 'Nếu đang bật "Ẩn nhiệm vụ hoàn thành", file xuất ra sẽ không bao gồm các task ở cột hoàn thành. Hữu ích khi bạn chỉ muốn báo cáo các công việc đang còn dang dở hoặc chia sẻ với người quản lý.',
+        title: 'Xuất từ trang Danh sách',
+        content: 'Trang Danh sách cũng có chức năng xuất Excel với cùng bộ lọc và sắp xếp đang áp dụng. Định dạng file giống với xuất từ trang Bảng.',
+      },
+      {
+        title: 'Định dạng file xuất',
+        content: 'File Excel có header màu xanh (#5663ee), task quá hạn được tô đỏ ở cột deadline, tổng số theo từng trạng thái in đậm nghiêng ở cuối, thông tin dự án và người xuất ở đầu file.',
+      },
+    ],
+  },
+  {
+    icon: <NotificationsNoneOutlinedIcon fontSize="small" />,
+    title: 'Thông báo',
+    items: [
+      {
+        title: 'Các loại thông báo',
+        content: 'Hệ thống gửi thông báo cho các sự kiện: được giao nhiệm vụ, thay đổi trạng thái task, bình luận mới trên task bạn tạo, được @mention, yêu cầu tham gia dự án (admin/owner), deadline sắp tới (trước 1 ngày) và task quá hạn.',
+      },
+      {
+        title: 'Thông báo in-app',
+        content: 'Click icon chuông ở header để xem tất cả thông báo. Có 2 tab: Tất cả và Chưa đọc. Click vào thông báo để điều hướng đến nội dung liên quan. Có thể xóa từng thông báo hoặc xóa tất cả.',
+      },
+      {
+        title: 'Thông báo qua email',
+        content: 'Một số sự kiện gửi kèm email: được giao nhiệm vụ, thay đổi trạng thái, @mention, deadline sắp tới, task quá hạn và yêu cầu tham gia dự án (admin/owner).',
+      },
+      {
+        title: 'Tùy chỉnh thông báo',
+        content: 'Vào Cài đặt dự án → Thông báo để bật/tắt từng loại thông báo (in-app và email) cho từng dự án. Cài đặt áp dụng riêng cho bạn, không ảnh hưởng thành viên khác. Deadline sắp tới và quá hạn luôn bật và không thể tắt.',
+      },
+    ],
+  },
+  {
+    icon: <SettingsOutlinedIcon fontSize="small" />,
+    title: 'Cài đặt dự án',
+    items: [
+      {
+        title: 'Quản lý trạng thái',
+        content: 'Vào Cài đặt → Quản lý trạng thái để thêm, đổi tên, sắp xếp hoặc xóa các cột trạng thái. Cột ở vị trí cuối cùng được coi là "hoàn thành" khi tính tiến độ. Chỉ Admin và Chủ sở hữu mới có quyền thay đổi.',
+      },
+      {
+        title: 'Cài đặt chung',
+        content: 'Vào Cài đặt → Cài đặt chung để đổi tên dự án, thêm mô tả và thay đổi quyền truy cập (Riêng tư/Công khai). Chỉ Chủ sở hữu mới có thể xóa dự án.',
+      },
+      {
+        title: 'Kho lưu trữ',
+        content: 'Nhiệm vụ đã lưu trữ được lưu trong Kho lưu trữ (menu bên trái). Có thể xem, khôi phục hoặc xóa vĩnh viễn từng nhiệm vụ. Chỉ Admin, Chủ sở hữu và người tạo task mới có thể lưu trữ.',
       },
     ],
   },
@@ -270,9 +316,10 @@ export function HelpPanel({ open, onClose }: Props) {
 
       <Box sx={{ px: 2.5, py: 2, borderTop: '1px solid #f3f4f6', bgcolor: '#fafafa' }}>
         <Typography fontSize={11} color="#9ca3af" textAlign="center">
-          Collab -  Project Management System · Phiên bản 1.0
+          Collab - Project Management System · Phiên bản 1.0
         </Typography>
       </Box>
     </Drawer>
   );
 }
+

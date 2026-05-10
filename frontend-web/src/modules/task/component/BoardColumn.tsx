@@ -78,8 +78,9 @@ export function BoardColumn({
         ref={setDropRef}
         style={{
           borderRadius: 8,
-          transition: "background-color 0.15s ease",
-          backgroundColor: isOver ? "rgba(86,99,238,0.05)" : "transparent",
+          transition: "background-color 0.15s ease, border 0.15s ease",
+          backgroundColor: isOver ? "rgba(86,99,238,0.08)" : "transparent",
+          border: isOver ? "2px dashed #5663ee" : "2px dashed transparent",
         }}
       >
         <Box className={styles.boardColumn}>
@@ -88,6 +89,8 @@ export function BoardColumn({
             sx={{
               cursor: canManage ? "grab" : "default",
               userSelect: "none",
+              color: isOver ? "#5663ee" : undefined,
+              transition: "color 0.15s ease",
               ...(canManage && { "&:active": { cursor: "grabbing" } }),
             }}
           >

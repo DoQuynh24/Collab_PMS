@@ -1,12 +1,12 @@
 @use "../../assets/styles/theme.scss" as *;
 
 .loadingContainer {
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
+    min-height: 300px;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    background-color: gray.500;
 
     .loadingLogo {
         color: $color-primary;
