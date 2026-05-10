@@ -212,6 +212,7 @@ export function ProjectBoardView() {
           task={taskFromUrl}
           projectMembers={projectMembers}
           projectId={projectId}
+          projectOwnerId={project?.owner_id}
         />
       )}
 

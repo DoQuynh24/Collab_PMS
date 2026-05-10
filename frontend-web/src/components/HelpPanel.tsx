@@ -82,6 +82,10 @@ const HELP_SECTIONS: HelpSection[] = [
         title: 'Lưu trữ & xóa nhiệm vụ',
         content: 'Mở menu 3 chấm (⋯) trên card để lưu trữ hoặc xóa. Nhiệm vụ đã lưu trữ có thể xem lại trong "Kho lưu trữ" và khôi phục bất kỳ lúc nào. Xóa là hành động vĩnh viễn.',
       },
+      {
+        title: 'Tài liệu đính kèm',
+        content: 'Trong chi tiết nhiệm vụ, phần "Tài liệu liên kết" cho phép tải lên ảnh và file (PDF, Word, Excel, PowerPoint, ZIP...). Kéo thả file vào vùng upload, click để chọn, hoặc Ctrl+V để dán ảnh từ clipboard. File được đưa vào danh sách chờ — xem trước rồi bấm "Tải lên" để xác nhận. Ảnh có thể xem trực tiếp khi click. Chỉ người tải lên, người tạo task, Admin và Chủ sở hữu mới có thể xóa tệp đính kèm.',
+      },
     ],
   },
   {

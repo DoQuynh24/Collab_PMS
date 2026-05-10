@@ -269,6 +269,7 @@ export default function TaskCard({ task, projectMembers, projectId, displaySetti
         task={task}
         projectMembers={projectMembers}
         projectId={projectId}
+        projectOwnerId={projectMembers.find((m: any) => m.role === 'owner')?.user_id}
       />
     </>
   );

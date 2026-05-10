@@ -197,6 +197,7 @@ export default function ProjectCalendar() {
           task={selectedTask}
           projectMembers={members}
           projectId={projectId}
+          projectOwnerId={project?.owner_id}
         />
       )}
     </Box>

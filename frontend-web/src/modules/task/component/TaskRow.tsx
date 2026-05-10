@@ -103,6 +103,7 @@ export default function TaskRow({
         task={task}
         projectMembers={projectMembers}
         projectId={projectId}
+        projectOwnerId={projectMembers.find((m: any) => m.role === 'owner')?.user_id}
       />
     </>
   );

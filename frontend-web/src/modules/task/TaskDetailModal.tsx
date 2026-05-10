@@ -37,6 +37,7 @@ import CommentCard from "../comment/component/CommentCard";
 import { useGetCurrentUser } from "../login/api/auth";
 import ChangeStatusSelector from "../task-status/component/ChangeStatusSelector";
 import MentionInput from "../comment/component/MentionInput";
+import TaskAttachments from "../attachment/component/TaskAttachments";
 import type { ICommentUser } from "../comment/type/index";
 
 interface Props {
@@ -45,6 +46,7 @@ interface Props {
   task: ITask;
   projectMembers: any[];
   projectId?: string;
+  projectOwnerId?: number;
 }
 
 export default function TaskDetailModal({
@@ -53,6 +55,7 @@ export default function TaskDetailModal({
   task,
   projectMembers,
   projectId,
+  projectOwnerId,
 }: Props) {
   const [title, setTitle] = useState(task.title);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -344,18 +347,13 @@ export default function TaskDetailModal({
           <Typography fontWeight={600} fontSize={14} mb={1}>
             Tài liệu liên kết
           </Typography>
-          <Box
-            sx={{
-              fontSize: 14,
-              color: "#9ca3af",
-              cursor: "pointer",
-              p: 1,
-              borderRadius: "6px",
-              "&:hover": { bgcolor: "#f4f5f7" },
-              mb: 3,
-            }}
-          >
-            Thêm công việc liên kết...
+          <Box sx={{ mb: 3 }}>
+            <TaskAttachments
+              taskId={task.task_id}
+              taskCreatedBy={task.created_by}
+              projectMembers={projectMembers}
+              projectOwnerId={projectOwnerId}
+            />
           </Box>
 
           <Divider sx={{ mb: 2 }} />

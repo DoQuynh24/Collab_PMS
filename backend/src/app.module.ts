@@ -19,6 +19,7 @@ import { MailModule } from './modules/project-invitation/mail/mail.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { DeadlineReminderModule } from './modules/deadline-reminder/deadline-reminder.module';
+import { AttachmentModule } from './modules/attachment/attachment.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { DeadlineReminderModule } from './modules/deadline-reminder/deadline-rem
     CommentModule,
     NotificationModule,
     DeadlineReminderModule,
+    AttachmentModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseSeed],

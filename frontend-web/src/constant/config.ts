@@ -16,3 +16,5 @@ export const URL_API_GET_INVITATION = `${COLLAB_URL}/invitations`;
 export const URL_API_GET_COMMENT = `${COLLAB_URL}/comments`;
 //Notifications
 export const URL_API_NOTIFICATIONS = `${COLLAB_URL}/notifications`;
+//Attachments
+export const URL_API_ATTACHMENTS = `${COLLAB_URL}/attachments`;

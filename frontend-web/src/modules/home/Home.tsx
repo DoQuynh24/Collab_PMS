@@ -28,6 +28,7 @@ function TaskDetailWrapper({ task, onClose }: { task: ITask; onClose: () => void
       task={task}
       projectMembers={members}
       projectId={task.project_id}
+      projectOwnerId={project?.owner_id}
     />
   );
 }
