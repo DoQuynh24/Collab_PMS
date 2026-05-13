@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/GridView';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
