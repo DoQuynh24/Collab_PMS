@@ -35,7 +35,7 @@ export default function ProjectListView() {
   const statuses = statusData?.data ?? [];
   const projectMembers = project?.project_members || [];
 
-  const { filters, setFilters, filterTasks } = useTaskFilter(tasks);
+  const { filters, setFilters, filterTasks, searchText, setSearchText } = useTaskFilter(tasks);
   const filteredTasks = statuses.flatMap((s) => filterTasks(s.id));
   const { exportCsv } = useExportTasksCsv();
   const { data: currentUser } = useGetCurrentUser();
@@ -172,6 +172,8 @@ export default function ProjectListView() {
         projectMembers={projectMembers}
         statuses={statuses}
         onFilterChange={setFilters}
+        searchText={searchText}
+        onSearchChange={setSearchText}
         showGroupButton={false}
         showMoreOptions
         hideCompleted={hideCompleted}

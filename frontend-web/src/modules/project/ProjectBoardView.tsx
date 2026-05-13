@@ -74,7 +74,7 @@ export function ProjectBoardView() {
     }
   });
 
-  const { filters, setFilters, filterTasks, filteredTasks } = useTaskFilter(tasks);
+  const { filters, setFilters, filterTasks, filteredTasks, searchText, setSearchText } = useTaskFilter(tasks);
   const { exportCsv } = useExportTasksCsv();
 
   useEffect(() => {
@@ -237,6 +237,8 @@ export function ProjectBoardView() {
         projectMembers={projectMembers}
         statuses={statuses}
         onFilterChange={setFilters}
+        searchText={searchText}
+        onSearchChange={setSearchText}
         showGroupButton
         groupBy={groupBy}
         onGroupByChange={setGroupBy}

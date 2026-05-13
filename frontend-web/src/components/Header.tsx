@@ -93,12 +93,6 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Cài đặt">
-            <IconButton color="inherit">
-              <SettingsOutlinedIcon fontSize="medium" />
-            </IconButton>
-          </Tooltip>
-
           <Avatar
             src={user?.picture}
             sx={{ width: 32, height: 32, bgcolor: '#fff', color: '#5663ee', cursor: 'pointer', ml: 1 }}

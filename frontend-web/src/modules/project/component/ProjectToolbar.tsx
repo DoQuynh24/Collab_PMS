@@ -32,6 +32,8 @@ interface Props {
   projectMembers: ProjectMember[];
   statuses: ITaskStatus[];
   onFilterChange: (filters: any) => void;
+  searchText?: string;
+  onSearchChange?: (value: string) => void;
   showGroupButton?: boolean;
   groupBy?: GroupBy;
   onGroupByChange?: (g: GroupBy) => void;
@@ -48,6 +50,8 @@ export function ProjectToolbar({
   projectMembers,
   statuses,
   onFilterChange,
+  searchText = '',
+  onSearchChange,
   showGroupButton = false,
   groupBy = 'none',
   onGroupByChange,
@@ -71,7 +75,31 @@ export function ProjectToolbar({
           <TextField
             size="small"
             placeholder="Tìm kiếm nhiệm vụ"
+            value={searchText}
+            onChange={(e) => onSearchChange?.(e.target.value)}
             sx={{ width: 240 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <Box component="span" sx={{ mr: 0.5, color: '#9ca3af', display: 'flex', alignItems: 'center' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                  </Box>
+                ),
+                endAdornment: searchText ? (
+                  <Box
+                    component="span"
+                    onClick={() => onSearchChange?.('')}
+                    sx={{ cursor: 'pointer', color: '#9ca3af', display: 'flex', alignItems: 'center', '&:hover': { color: '#374151' } }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                  </Box>
+                ) : null,
+              },
+            }}
           />
 
           <Stack direction="row" spacing={-1} alignItems="center">
