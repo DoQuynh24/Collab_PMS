@@ -20,7 +20,8 @@ export const useUpdateProject = (projectId: string) => {
   return useMutation({
     mutationFn: (payload: UpdateProjectPayload) => updateProject(projectId, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 };
