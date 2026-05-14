@@ -27,9 +27,9 @@ export class DatabaseSeed implements OnModuleInit {
 
     if (count === 0) {
       await this.priorityRepo.save([
-        { name: 'LOW', color: 'green', order_index: 1 },
-        { name: 'MEDIUM', color: 'yellow', order_index: 2 },
-        { name: 'HIGH', color: 'red', order_index: 3 },
+        { name: 'Thấp', color: 'green', order_index: 1 },
+        { name: 'Trung bình', color: 'yellow', order_index: 2 },
+        { name: 'Cao', color: 'red', order_index: 3 },
       ]);
     }
   }
@@ -39,10 +39,10 @@ export class DatabaseSeed implements OnModuleInit {
 
     if (count === 0) {
       await this.statusRepo.save([
-        { name: 'BACKLOG' },
-        { name: 'TODO' },
-        { name: 'IN_PROGRESS' },
-        { name: 'DONE' },
+        { name: 'Nhiệm vụ chờ' },
+        { name: 'Cần làm' },
+        { name: 'Đang làm' },
+        { name: 'Hoàn thành' },
       ]);
     }
   }

@@ -168,7 +168,7 @@ export function ProjectStatusSettings() {
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1.5, mb: 3, bgcolor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "8px" }}>
         <Typography fontSize={13} color="#92400e">
-          💡 <strong>Lưu ý:</strong> Trạng thái ở vị trí <strong>cuối cùng</strong> sẽ được coi là <strong>hoàn thành</strong> khi tính tiến độ dự án. Hãy đặt trạng thái "Done" hoặc tương đương ở cuối danh sách.
+          💡 <strong>Lưu ý:</strong> Trạng thái ở vị trí <strong>cuối cùng</strong> sẽ được coi là <strong>hoàn thành</strong> khi tính tiến độ dự án. Hãy đặt trạng thái "Hoàn thành" hoặc tương đương ở cuối danh sách.
         </Typography>
       </Box>
 
