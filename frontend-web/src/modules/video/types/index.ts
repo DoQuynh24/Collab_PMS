@@ -35,3 +35,13 @@ export interface IncomingCallPayload {
   hostName: string;
   hostPicture?: string;
 }
+
+export interface RemoteUser {
+  uid: number;
+  videoTrack?: import('agora-rtc-sdk-ng').IRemoteVideoTrack;
+  audioTrack?: import('agora-rtc-sdk-ng').IRemoteAudioTrack;
+}
+
+export const LOCAL_SCREEN_UID = -1 as const;
+
+export type PinnedTarget = typeof LOCAL_SCREEN_UID | number | null;

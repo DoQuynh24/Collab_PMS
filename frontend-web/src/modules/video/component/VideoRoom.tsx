@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import {
-  Box, Typography, IconButton, Tooltip, Avatar,
-  CircularProgress, Paper,
-} from '@mui/material';
+import { Box, Typography, IconButton, Tooltip } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
@@ -11,24 +8,15 @@ import CallEndIcon from '@mui/icons-material/CallEnd';
 import MinimizeIcon from '@mui/icons-material/Remove';
 import ScreenShareIcon from '@mui/icons-material/ScreenShare';
 import StopScreenShareIcon from '@mui/icons-material/StopScreenShare';
-import AgoraRTC, {
-  type IAgoraRTCClient,
-  type ILocalVideoTrack,
-  type ILocalAudioTrack,
-  type IRemoteVideoTrack,
-  type IRemoteAudioTrack,
-  type IAgoraRTCRemoteUser,
-} from 'agora-rtc-sdk-ng';
+import AgoraRTC, { type ILocalVideoTrack } from 'agora-rtc-sdk-ng';
 import { ControlBtn } from './ControlBtn';
+import { GridLayout, PinnedLayout } from './VideoLayout';
+import { useAgoraClient } from '../hook/useAgoraClient';
 import { useVideoSocket } from '../context/VideoSocketContext';
 import { useLeaveCall } from '../api/leave-call';
 import { leaveCallBeacon } from '../api/leave-call-beacon';
-
-interface RemoteUser {
-  uid: number;
-  videoTrack?: IRemoteVideoTrack;
-  audioTrack?: IRemoteAudioTrack;
-}
+import type { PinnedTarget } from '../types';
+import { LOCAL_SCREEN_UID } from '../types';
 
 interface Props {
   appId: string;
@@ -44,43 +32,29 @@ interface Props {
 }
 
 export function VideoRoom({
-  appId,
-  channelName,
-  token,
-  uid,
-  userName,
-  memberMap = {},
-  roomId,
-  isHost,
-  onLeave,
-  onMinimize,
+  appId, channelName, token, uid, userName,
+  memberMap = {}, roomId, isHost, onLeave, onMinimize,
 }: Props) {
-  const clientRef = useRef<IAgoraRTCClient | null>(null);
-  const localVideoRef = useRef<HTMLDivElement>(null);
-
-  // Ref để tránh stale closure và giữ state qua re-render
-  const localVideoTrackRef = useRef<ILocalVideoTrack | null>(null);
-  const localAudioTrackRef = useRef<ILocalAudioTrack | null>(null);
-  const screenTrackRef = useRef<ILocalVideoTrack | null>(null);
+  const screenPreviewRef = useRef<HTMLDivElement>(null);
   const roomIdRef = useRef(roomId);
   const onLeaveRef = useRef(onLeave);
   onLeaveRef.current = onLeave;
 
-  const [localVideoTrack, setLocalVideoTrack] = useState<ILocalVideoTrack | null>(null);
-  const [localAudioTrack, setLocalAudioTrack] = useState<ILocalAudioTrack | null>(null);
-  const [remoteUsers, setRemoteUsers] = useState<RemoteUser[]>([]);
+  const {
+    clientRef, localVideoRef, localVideoTrackRef, localAudioTrackRef, screenTrackRef,
+    localVideoTrack, localAudioTrack, remoteUsers,
+    isCameraOff, setIsCameraOff, isJoining, error,
+  } = useAgoraClient({ appId, channelName, token, uid });
+
   const [isMuted, setIsMuted] = useState(false);
-  const [isCameraOff, setIsCameraOff] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const [isJoining, setIsJoining] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [pinnedUid, setPinnedUid] = useState<PinnedTarget>(null);
 
   const { setOnCallEnded } = useVideoSocket();
   const { mutate: leaveCall } = useLeaveCall();
 
   useEffect(() => {
     if (isHost) return;
-
     setOnCallEnded((endedChannelName: string) => {
       if (endedChannelName !== channelName) return;
       localVideoTrackRef.current?.stop();
@@ -90,103 +64,14 @@ export function VideoRoom({
       clientRef.current?.leave().catch(() => {});
       onLeaveRef.current();
     });
-
     return () => setOnCallEnded(null);
   }, [isHost, channelName]);
 
   useEffect(() => {
-    const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-    clientRef.current = client;
+    const uids = remoteUsers.map((u) => u.uid);
+    setPinnedUid((prev) => (typeof prev === 'number' && prev !== LOCAL_SCREEN_UID && !uids.includes(prev) ? null : prev));
+  }, [remoteUsers]);
 
-    client.on('user-published', async (user, mediaType) => {
-      await client.subscribe(user, mediaType);
-      setRemoteUsers((prev) => {
-        const existing = prev.find((u) => u.uid === user.uid);
-        if (existing) {
-          return prev.map((u) =>
-            u.uid === user.uid
-              ? {
-                  ...u,
-                  videoTrack: mediaType === 'video' ? user.videoTrack : u.videoTrack,
-                  audioTrack: mediaType === 'audio' ? user.audioTrack : u.audioTrack,
-                }
-              : u,
-          );
-        }
-        return [
-          ...prev,
-          {
-            uid: user.uid as number,
-            videoTrack: mediaType === 'video' ? user.videoTrack : undefined,
-            audioTrack: mediaType === 'audio' ? user.audioTrack : undefined,
-          },
-        ];
-      });
-      if (mediaType === 'audio') user.audioTrack?.play();
-    });
-
-    client.on('user-unpublished', (user, mediaType) => {
-      setRemoteUsers((prev) =>
-        prev.map((u) =>
-          u.uid === user.uid
-            ? {
-                ...u,
-                videoTrack: mediaType === 'video' ? undefined : u.videoTrack,
-                audioTrack: mediaType === 'audio' ? undefined : u.audioTrack,
-              }
-            : u,
-        ),
-      );
-    });
-
-    client.on('user-left', (user: IAgoraRTCRemoteUser) => {
-      setRemoteUsers((prev) => prev.filter((u) => u.uid !== user.uid));
-    });
-
-    const join = async () => {
-      try {
-        await client.join(appId, channelName, token || null, uid);
-
-        let audioTrack: ILocalAudioTrack | null = null;
-        let videoTrack: ILocalVideoTrack | null = null;
-
-        try {
-          const tracks = await AgoraRTC.createMicrophoneAndCameraTracks();
-          audioTrack = tracks[0];
-          videoTrack = tracks[1];
-        } catch {
-          try {
-            audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-            setIsCameraOff(true);
-            setError('camera_busy');
-          } catch {
-          }
-        }
-
-        if (audioTrack) { localAudioTrackRef.current = audioTrack; setLocalAudioTrack(audioTrack); }
-        if (videoTrack) { localVideoTrackRef.current = videoTrack; setLocalVideoTrack(videoTrack); }
-
-        const toPublish = [audioTrack, videoTrack].filter(Boolean) as (ILocalAudioTrack | ILocalVideoTrack)[];
-        if (toPublish.length > 0) await client.publish(toPublish);
-      } catch (err: any) {
-        setError(err?.message ?? 'join_failed');
-      } finally {
-        setIsJoining(false);
-      }
-    };
-
-    join();
-
-    return () => {
-      localVideoTrackRef.current?.stop();
-      localVideoTrackRef.current?.close();
-      localAudioTrackRef.current?.stop();
-      localAudioTrackRef.current?.close();
-      client.leave().catch(() => {});
-    };
-  }, []);
-
-  // ─── Đóng tab → leave (và tự end nếu là người cuối) ─────────────────────
   useEffect(() => {
     const handleBeforeUnload = () => leaveCallBeacon(roomIdRef.current);
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -200,13 +85,34 @@ export function VideoRoom({
   }, [localVideoTrack, isCameraOff]);
 
   useEffect(() => {
-    remoteUsers.forEach((u) => {
-      if (u.videoTrack) {
-        const el = document.getElementById(`remote-video-${u.uid}`);
-        if (el) u.videoTrack.play(el as HTMLDivElement);
-      }
-    });
+    if (isSharing && screenTrackRef.current && screenPreviewRef.current) {
+      screenTrackRef.current.play(screenPreviewRef.current);
+    }
+  }, [isSharing]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      remoteUsers.forEach((u) => {
+        if (u.videoTrack) {
+          const el = document.getElementById(`remote-video-${u.uid}`);
+          if (el) u.videoTrack.play(el as HTMLDivElement);
+        }
+      });
+    }, 100);
+    return () => clearTimeout(timer);
   }, [remoteUsers]);
+
+  useEffect(() => {
+    if (pinnedUid === null) return;
+    if (pinnedUid === LOCAL_SCREEN_UID) {
+      const el = document.getElementById('pinned-screen');
+      if (el && screenTrackRef.current) screenTrackRef.current.play(el as HTMLDivElement);
+    } else {
+      const user = remoteUsers.find((u) => u.uid === pinnedUid);
+      const el = document.getElementById('pinned-video');
+      if (el && user?.videoTrack) user.videoTrack.play(el as HTMLDivElement);
+    }
+  }, [pinnedUid, remoteUsers]);
 
   const toggleMic = useCallback(async () => {
     if (!localAudioTrack) return;
@@ -238,6 +144,7 @@ export function VideoRoom({
         await client.publish(localVideoTrackRef.current).catch(() => {});
         if (localVideoRef.current) localVideoTrackRef.current.play(localVideoRef.current);
       }
+      setPinnedUid((prev) => (prev === LOCAL_SCREEN_UID ? null : prev));
       setIsSharing(false);
     } else {
       try {
@@ -248,6 +155,7 @@ export function VideoRoom({
           await client.unpublish(localVideoTrackRef.current).catch(() => {});
         }
         await client.publish(screenTrack);
+        setPinnedUid(LOCAL_SCREEN_UID);
 
         screenTrack.on('track-ended', async () => {
           await client.unpublish(screenTrack).catch(() => {});
@@ -258,12 +166,12 @@ export function VideoRoom({
             await client.publish(localVideoTrackRef.current).catch(() => {});
             if (localVideoRef.current) localVideoTrackRef.current.play(localVideoRef.current);
           }
+          setPinnedUid((prev) => (prev === LOCAL_SCREEN_UID ? null : prev));
           setIsSharing(false);
         });
 
         setIsSharing(true);
-      } catch {
-      }
+      } catch {}
     }
   }, [isSharing, localVideoTrack]);
 
@@ -283,6 +191,12 @@ export function VideoRoom({
     onLeave();
   }, [leaveCall, onLeave]);
 
+  const layoutProps = {
+    localVideoRef, screenPreviewRef, userName, uid, memberMap,
+    remoteUsers, isCameraOff, isMuted, isJoining, isSharing,
+    pinnedUid, onPin: setPinnedUid,
+  };
+
   const totalParticipants = 1 + remoteUsers.length;
 
   return (
@@ -295,11 +209,7 @@ export function VideoRoom({
           </Typography>
           {onMinimize && (
             <Tooltip title="Thu nhỏ — vẫn trong cuộc họp">
-              <IconButton
-                size="small"
-                onClick={onMinimize}
-                sx={{ color: '#9ca3af', '&:hover': { color: '#fff', transform: 'none' } }}
-              >
+              <IconButton size="small" onClick={onMinimize} sx={{ color: '#9ca3af', '&:hover': { color: '#fff', transform: 'none' } }}>
                 <MinimizeIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -309,9 +219,7 @@ export function VideoRoom({
 
       {error === 'camera_busy' && (
         <Box sx={{ px: 3, py: 1, bgcolor: '#7c2d12', borderBottom: '1px solid #9a3412' }}>
-          <Typography color="#fca5a5" fontSize={13}>
-            ⚠️ Camera đang bị chiếm bởi ứng dụng khác. Bạn đang tham gia chỉ với âm thanh.
-          </Typography>
+          <Typography color="#fca5a5" fontSize={13}>⚠️ Camera đang bị chiếm. Bạn đang tham gia chỉ với âm thanh.</Typography>
         </Box>
       )}
       {error && error !== 'camera_busy' && (
@@ -320,73 +228,10 @@ export function VideoRoom({
         </Box>
       )}
 
-      <Box sx={{
-        flex: 1, p: 2, overflow: 'hidden',
-        display: 'grid', gap: 2,
-        gridTemplateColumns: totalParticipants === 1 ? '1fr' : totalParticipants === 2 ? '1fr 1fr' : 'repeat(auto-fit, minmax(280px, 1fr))',
-        gridAutoRows: '1fr',
-      }}>
-        <Paper sx={{ position: 'relative', bgcolor: '#1a1d27', borderRadius: 2, overflow: 'hidden', border: '2px solid #5663ee', minHeight: 200 }}>
-          {isJoining ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-              <CircularProgress size={32} sx={{ color: '#5663ee' }} />
-            </Box>
-          ) : (
-            <>
-              <Box
-                ref={localVideoRef}
-                sx={{
-                  width: '100%', height: '100%', minHeight: 200,
-                  visibility: isCameraOff ? 'hidden' : 'visible',
-                  '& video': { width: '100% !important', height: '100% !important', objectFit: 'cover' },
-                }}
-              />
-              {isCameraOff && (
-                <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#1a1d27' }}>
-                  <Avatar sx={{ width: 72, height: 72, bgcolor: '#5663ee', fontSize: 28 }}>
-                    {userName.charAt(0).toUpperCase()}
-                  </Avatar>
-                </Box>
-              )}
-            </>
-          )}
-          <Box sx={{ position: 'absolute', bottom: 8, left: 12, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography fontSize={12} color="#fff" sx={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
-              {userName} (Bạn)
-            </Typography>
-            {isMuted && <MicOffIcon sx={{ fontSize: 14, color: '#ef4444' }} />}
-          </Box>
-        </Paper>
-
-        {remoteUsers.map((u) => {
-          const member = memberMap[u.uid];
-          const displayName = member?.name ?? `Người dùng ${u.uid}`;
-          return (
-            <Paper key={u.uid} sx={{ position: 'relative', bgcolor: '#1a1d27', borderRadius: 2, overflow: 'hidden', minHeight: 200 }}>
-              <Box
-                id={`remote-video-${u.uid}`}
-                sx={{
-                  width: '100%', height: '100%', minHeight: 200,
-                  visibility: u.videoTrack ? 'visible' : 'hidden',
-                  '& video': { width: '100% !important', height: '100% !important', objectFit: 'cover' },
-                }}
-              />
-              {!u.videoTrack && (
-                <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#1a1d27' }}>
-                  <Avatar src={member?.picture} sx={{ width: 72, height: 72, bgcolor: '#374151', fontSize: 28 }}>
-                    {displayName.charAt(0).toUpperCase()}
-                  </Avatar>
-                </Box>
-              )}
-              <Box sx={{ position: 'absolute', bottom: 8, left: 12 }}>
-                <Typography fontSize={12} color="#fff" sx={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
-                  {displayName}
-                </Typography>
-              </Box>
-            </Paper>
-          );
-        })}
-      </Box>
+      {pinnedUid !== null
+        ? <PinnedLayout {...layoutProps} />
+        : <GridLayout {...layoutProps} />
+      }
 
       <Box sx={{ py: 2.5, display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 3, borderTop: '1px solid #1e2130' }}>
         <ControlBtn label={isMuted ? 'Bật mic' : 'Tắt mic'} active={isMuted} disabled={!localAudioTrack} onClick={toggleMic}>
@@ -403,21 +248,11 @@ export function VideoRoom({
 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
           <Tooltip title="Rời cuộc họp">
-            <IconButton
-              onClick={handleLeave}
-              sx={{
-                width: 52, height: 52,
-                bgcolor: '#ef4444',
-                color: '#fff',
-                '&:hover': { bgcolor: '#dc2626', transform: 'none' },
-              }}
-            >
+            <IconButton onClick={handleLeave} sx={{ width: 52, height: 52, bgcolor: '#ef4444', color: '#fff', '&:hover': { bgcolor: '#dc2626', transform: 'none' } }}>
               <CallEndIcon />
             </IconButton>
           </Tooltip>
-          <Typography fontSize={11} color="#ef4444" fontWeight={500}>
-            Rời phòng
-          </Typography>
+          <Typography fontSize={11} color="#ef4444" fontWeight={500}>Rời phòng</Typography>
         </Box>
       </Box>
     </Box>

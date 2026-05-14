@@ -11,6 +11,8 @@ export function useActiveRoom(projectId: string) {
       return data ?? null;
     },
     enabled: !!projectId,
-    staleTime: 10_000,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 3000,
   });
 }
