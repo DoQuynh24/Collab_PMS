@@ -52,6 +52,7 @@ export class VideoService {
       project_id: projectId,
       host_id: hostId,
       status: 'active',
+      participant_count: 1,
     });
     await this.roomRepo.save(room);
 
@@ -95,8 +96,35 @@ export class VideoService {
       throw new NotFoundException('Call not found or already ended');
     }
 
+    // Tăng participant count
+    await this.roomRepo.increment({ id: room.id }, 'participant_count', 1);
+
     const token = this.generateToken(channelName, userId);
     return { room, token, channelName, appId: this.getAppId() };
+  }
+
+  /**
+   * User rời phòng — giảm participant count.
+   * Nếu count về 0 thì tự end room.
+   */
+  async leaveCall(roomId: number) {
+    const room = await this.roomRepo.findOne({ where: { id: roomId } });
+    if (!room || room.status === 'ended') return { message: 'Room not active' };
+
+    const newCount = Math.max(0, room.participant_count - 1);
+    room.participant_count = newCount;
+
+    if (newCount === 0) {
+      // Người cuối cùng rời → end room
+      room.status = 'ended';
+      await this.roomRepo.save(room);
+      const members = await this.memberService.findByProject(room.project_id);
+      this.gateway.sendCallEnded(members.map((m) => m.user_id), room.channel_name);
+      return { message: 'Room ended — last participant left' };
+    }
+
+    await this.roomRepo.save(room);
+    return { message: 'Left room' };
   }
 
   async endCall(roomId: number, userId: number) {

@@ -3,22 +3,16 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import { useVideoCall } from '../context/VideoCallContext';
-import { useEndCall } from '../api/end-call';
 import { useLeaveCall } from '../api/leave-call';
 
 export function FloatingCallBar() {
   const { activeCall, clearActiveCall, setMinimized } = useVideoCall();
-  const { mutate: endCall } = useEndCall();
   const { mutate: leaveCall } = useLeaveCall();
 
   if (!activeCall) return null;
 
   const handleLeave = () => {
-    if (activeCall.isHost) {
-      endCall({ roomId: activeCall.room.id, projectId: activeCall.projectId });
-    } else {
-      leaveCall({ roomId: activeCall.room.id });
-    }
+    leaveCall({ roomId: activeCall.room.id });
     clearActiveCall();
   };
 
@@ -76,13 +70,13 @@ export function FloatingCallBar() {
         </IconButton>
       </Tooltip>
 
-      <Tooltip title={activeCall.isHost ? 'Kết thúc cuộc họp' : 'Rời cuộc họp'}>
+      <Tooltip title="Rời cuộc họp">
         <IconButton
           size="small"
           onClick={handleLeave}
           sx={{
-            color: activeCall.isHost ? '#ef4444' : '#f97316',
-            '&:hover': { color: activeCall.isHost ? '#dc2626' : '#ea6c00', transform: 'none' },
+            color: '#ef4444',
+            '&:hover': { color: '#dc2626', transform: 'none' },
           }}
         >
           <CallEndIcon sx={{ fontSize: 18 }} />

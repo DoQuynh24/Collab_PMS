@@ -29,6 +29,22 @@ export function StartCallButton({ projectId }: Props) {
     }
   }
 
+  const handleJoin = (channelName: string, asHost: boolean) => {
+    if (!currentUser) return;
+    joinCall(
+      { channel_name: channelName },
+      {
+        onSuccess: (data) => setActiveCall({
+          ...data,
+          userName: currentUser.name,
+          memberMap,
+          isHost: asHost,
+          projectId,
+        }),
+      },
+    );
+  };
+
   const handleStart = () => {
     if (!currentUser) return;
     startCall(
@@ -45,30 +61,28 @@ export function StartCallButton({ projectId }: Props) {
     );
   };
 
-  const handleJoinExisting = () => {
-    if (!activeRoom || !currentUser) return;
-    joinCall(
-      { channel_name: activeRoom.channel_name },
-      {
-        onSuccess: (data) => setActiveCall({
-          ...data,
-          userName: currentUser.name,
-          memberMap,
-          isHost: false,
-          projectId,
-        }),
-      },
+  if (isInCall) {
+    return (
+      <Tooltip title="Đang trong cuộc họp">
+        <span>
+          <IconButton
+            size="small"
+            disabled
+            sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#5663ee', opacity: 0.4 }}
+          >
+            <VideocamIcon fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
     );
-  };
-
-  if (isInCall) return null;
+  }
 
   if (activeRoom && activeRoom.host_id !== currentUser?.user_id) {
     return (
       <Tooltip title="Tham gia cuộc họp đang diễn ra">
         <IconButton
           size="small"
-          onClick={handleJoinExisting}
+          onClick={() => handleJoin(activeRoom.channel_name, false)}
           disabled={isPending}
           sx={{
             border: '1px solid #16a34a', borderRadius: '6px', p: '5px', color: '#16a34a',
@@ -85,13 +99,35 @@ export function StartCallButton({ projectId }: Props) {
     );
   }
 
+  if (activeRoom && activeRoom.host_id === currentUser?.user_id) {
+    return (
+      <Tooltip title="Tham gia lại cuộc họp của bạn">
+        <IconButton
+          size="small"
+          onClick={() => handleJoin(activeRoom.channel_name, true)}
+          disabled={isPending}
+          sx={{
+            border: '1px solid #5663ee', borderRadius: '6px', p: '5px', color: '#5663ee',
+            animation: 'pulse 1.5s infinite',
+            '@keyframes pulse': {
+              '0%, 100%': { boxShadow: '0 0 0 0 rgba(86,99,238,0.4)' },
+              '50%': { boxShadow: '0 0 0 6px rgba(86,99,238,0)' },
+            },
+          }}
+        >
+          {isPending ? <CircularProgress size={16} sx={{ color: '#5663ee' }} /> : <VideocamIcon fontSize="small" />}
+        </IconButton>
+      </Tooltip>
+    );
+  }
+
   return (
-    <Tooltip title={activeRoom ? 'Bạn đang tổ chức cuộc họp' : 'Bắt đầu cuộc họp video'}>
+    <Tooltip title="Bắt đầu cuộc họp video">
       <span>
         <IconButton
           size="small"
           onClick={handleStart}
-          disabled={isPending || !!activeRoom}
+          disabled={isPending}
           sx={{
             border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#5663ee',
             '&:disabled': { opacity: 0.5 },

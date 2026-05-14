@@ -9,6 +9,8 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import MinimizeIcon from '@mui/icons-material/Remove';
+import ScreenShareIcon from '@mui/icons-material/ScreenShare';
+import StopScreenShareIcon from '@mui/icons-material/StopScreenShare';
 import AgoraRTC, {
   type IAgoraRTCClient,
   type ILocalVideoTrack,
@@ -17,9 +19,10 @@ import AgoraRTC, {
   type IRemoteAudioTrack,
   type IAgoraRTCRemoteUser,
 } from 'agora-rtc-sdk-ng';
-import { useEndCall } from '../api/end-call';
 import { ControlBtn } from './ControlBtn';
 import { useVideoSocket } from '../context/VideoSocketContext';
+import { useLeaveCall } from '../api/leave-call';
+import { leaveCallBeacon } from '../api/leave-call-beacon';
 
 interface RemoteUser {
   uid: number;
@@ -35,7 +38,6 @@ interface Props {
   userName: string;
   memberMap?: Record<number, { name: string; picture?: string }>;
   roomId: number;
-  projectId: string;
   isHost: boolean;
   onLeave: () => void;
   onMinimize?: () => void;
@@ -49,7 +51,6 @@ export function VideoRoom({
   userName,
   memberMap = {},
   roomId,
-  projectId,
   isHost,
   onLeave,
   onMinimize,
@@ -60,7 +61,7 @@ export function VideoRoom({
   // Ref để tránh stale closure và giữ state qua re-render
   const localVideoTrackRef = useRef<ILocalVideoTrack | null>(null);
   const localAudioTrackRef = useRef<ILocalAudioTrack | null>(null);
-  const isHostRef = useRef(isHost);
+  const screenTrackRef = useRef<ILocalVideoTrack | null>(null);
   const roomIdRef = useRef(roomId);
   const onLeaveRef = useRef(onLeave);
   onLeaveRef.current = onLeave;
@@ -70,11 +71,12 @@ export function VideoRoom({
   const [remoteUsers, setRemoteUsers] = useState<RemoteUser[]>([]);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [isJoining, setIsJoining] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { mutate: endCall } = useEndCall();
   const { setOnCallEnded } = useVideoSocket();
+  const { mutate: leaveCall } = useLeaveCall();
 
   useEffect(() => {
     if (isHost) return;
@@ -184,17 +186,9 @@ export function VideoRoom({
     };
   }, []);
 
+  // ─── Đóng tab → leave (và tự end nếu là người cuối) ─────────────────────
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      const jwtToken = localStorage.getItem('access_token');
-      if (!jwtToken) return;
-      fetch(`${import.meta.env.VITE_COLLAB_URL}/video/${roomIdRef.current}/end`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwtToken}` },
-        body: JSON.stringify({}),
-        keepalive: true,
-      }).catch(() => {});
-    };
+    const handleBeforeUnload = () => leaveCallBeacon(roomIdRef.current);
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
@@ -229,17 +223,65 @@ export function VideoRoom({
     if (!newOff && localVideoRef.current) localVideoTrack.play(localVideoRef.current);
   }, [localVideoTrack, isCameraOff]);
 
+  const toggleScreenShare = useCallback(async () => {
+    const client = clientRef.current;
+    if (!client) return;
+
+    if (isSharing) {
+      if (screenTrackRef.current) {
+        await client.unpublish(screenTrackRef.current).catch(() => {});
+        screenTrackRef.current.stop();
+        screenTrackRef.current.close();
+        screenTrackRef.current = null;
+      }
+      if (localVideoTrackRef.current) {
+        await client.publish(localVideoTrackRef.current).catch(() => {});
+        if (localVideoRef.current) localVideoTrackRef.current.play(localVideoRef.current);
+      }
+      setIsSharing(false);
+    } else {
+      try {
+        const screenTrack = await AgoraRTC.createScreenVideoTrack({}, 'disable') as ILocalVideoTrack;
+        screenTrackRef.current = screenTrack;
+
+        if (localVideoTrackRef.current) {
+          await client.unpublish(localVideoTrackRef.current).catch(() => {});
+        }
+        await client.publish(screenTrack);
+
+        screenTrack.on('track-ended', async () => {
+          await client.unpublish(screenTrack).catch(() => {});
+          screenTrack.stop();
+          screenTrack.close();
+          screenTrackRef.current = null;
+          if (localVideoTrackRef.current) {
+            await client.publish(localVideoTrackRef.current).catch(() => {});
+            if (localVideoRef.current) localVideoTrackRef.current.play(localVideoRef.current);
+          }
+          setIsSharing(false);
+        });
+
+        setIsSharing(true);
+      } catch {
+      }
+    }
+  }, [isSharing, localVideoTrack]);
+
   const handleLeave = useCallback(async () => {
+    if (screenTrackRef.current) {
+      await clientRef.current?.unpublish(screenTrackRef.current).catch(() => {});
+      screenTrackRef.current.stop();
+      screenTrackRef.current.close();
+      screenTrackRef.current = null;
+    }
     localVideoTrackRef.current?.stop();
     localVideoTrackRef.current?.close();
     localAudioTrackRef.current?.stop();
     localAudioTrackRef.current?.close();
     await clientRef.current?.leave().catch(() => {});
-    if (isHostRef.current) {
-      endCall({ roomId: roomIdRef.current, projectId });
-    }
+    leaveCall({ roomId: roomIdRef.current });
     onLeave();
-  }, [endCall, projectId, onLeave]);
+  }, [leaveCall, onLeave]);
 
   const totalParticipants = 1 + remoteUsers.length;
 
@@ -355,22 +397,26 @@ export function VideoRoom({
           {isCameraOff ? <VideocamOffIcon /> : <VideocamIcon />}
         </ControlBtn>
 
+        <ControlBtn label={isSharing ? 'Dừng chia sẻ' : 'Chia sẻ màn hình'} active={isSharing} onClick={toggleScreenShare}>
+          {isSharing ? <StopScreenShareIcon /> : <ScreenShareIcon />}
+        </ControlBtn>
+
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-          <Tooltip title={isHost ? 'Kết thúc cuộc họp cho tất cả' : 'Rời cuộc họp'}>
+          <Tooltip title="Rời cuộc họp">
             <IconButton
               onClick={handleLeave}
               sx={{
                 width: 52, height: 52,
-                bgcolor: isHost ? '#ef4444' : '#f97316',
+                bgcolor: '#ef4444',
                 color: '#fff',
-                '&:hover': { bgcolor: isHost ? '#dc2626' : '#ea6c00', transform: 'none' },
+                '&:hover': { bgcolor: '#dc2626', transform: 'none' },
               }}
             >
               <CallEndIcon />
             </IconButton>
           </Tooltip>
-          <Typography fontSize={11} color={isHost ? '#ef4444' : '#f97316'} fontWeight={500}>
-            {isHost ? 'Kết thúc' : 'Rời phòng'}
+          <Typography fontSize={11} color="#ef4444" fontWeight={500}>
+            Rời phòng
           </Typography>
         </Box>
       </Box>

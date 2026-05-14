@@ -25,6 +25,9 @@ export class VideoRoom {
   @Column()
   host_id: number;
 
+  @Column({ type: 'int', default: 0 })
+  participant_count: number;
+
   @Column({ type: 'enum', enum: ['active', 'ended'], default: 'active' })
   status: VideoRoomStatus;
 

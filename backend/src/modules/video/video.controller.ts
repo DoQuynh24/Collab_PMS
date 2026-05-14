@@ -27,6 +27,11 @@ export class VideoController {
     return this.videoService.joinCall(dto.channel_name, req.user.user_id);
   }
 
+  @Post(':roomId/leave')
+  leaveCall(@Param('roomId') roomId: string) {
+    return this.videoService.leaveCall(Number(roomId));
+  }
+
   @Post(':roomId/end')
   endCall(@Param('roomId') roomId: string, @Req() req: any) {
     return this.videoService.endCall(Number(roomId), req.user.user_id);

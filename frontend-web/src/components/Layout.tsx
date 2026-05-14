@@ -35,7 +35,6 @@ function ActiveCallSlot() {
           userName={activeCall.userName}
           memberMap={activeCall.memberMap}
           roomId={activeCall.room.id}
-          projectId={activeCall.projectId}
           isHost={activeCall.isHost}
           onMinimize={() => setMinimized(true)}
           onLeave={clearActiveCall}
