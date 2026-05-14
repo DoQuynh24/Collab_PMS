@@ -52,7 +52,8 @@ export type NotificationType =
   | 'assigned_task'
   | 'status_changed'
   | 'deadline_upcoming'
-  | 'deadline_overdue';
+  | 'deadline_overdue'
+  | 'video_call_started';
 
 export const NOTIFICATION_ICON_COLOR: Record<NotificationType, string> = {
   join_request_received: '#5663ee',
@@ -64,6 +65,7 @@ export const NOTIFICATION_ICON_COLOR: Record<NotificationType, string> = {
   status_changed: '#8b5cf6',
   deadline_upcoming: '#ef4444',
   deadline_overdue: '#dc2626',
+  video_call_started: '#16a34a',
 };
 
 export const NOTIFICATION_BG: Record<NotificationType, string> = {
@@ -76,6 +78,7 @@ export const NOTIFICATION_BG: Record<NotificationType, string> = {
   status_changed: '#f5f3ff',
   deadline_upcoming: '#fef2f2',
   deadline_overdue: '#fef2f2',
+  video_call_started: '#f0fdf4',
 };
 
 export const PROJECT_ACCESS = {

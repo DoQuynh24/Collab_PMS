@@ -10,7 +10,8 @@ export type NotificationType =
   | 'assigned_task'
   | 'status_changed'
   | 'deadline_upcoming'
-  | 'deadline_overdue';
+  | 'deadline_overdue'
+  | 'video_call_started';
 
 @Entity('notifications')
 export class Notification {

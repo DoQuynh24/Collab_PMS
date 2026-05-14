@@ -15,6 +15,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -194,6 +195,7 @@ export function NotificationPanel({ open, onClose }: Props) {
                     {n.type === 'status_changed' && <SwapHorizOutlinedIcon fontSize="small" />}
                     {n.type === 'deadline_upcoming' && <AccessTimeOutlinedIcon fontSize="small" />}
                     {n.type === 'deadline_overdue' && <AccessTimeOutlinedIcon fontSize="small" />}
+                    {n.type === 'video_call_started' && <VideocamOutlinedIcon fontSize="small" />}
                   </Box>
 
                   <Box sx={{ flex: 1, minWidth: 0 }}>

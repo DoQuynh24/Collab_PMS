@@ -20,6 +20,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { DeadlineReminderModule } from './modules/deadline-reminder/deadline-reminder.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
+import { VideoModule } from './modules/video/video.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { AttachmentModule } from './modules/attachment/attachment.module';
     NotificationModule,
     DeadlineReminderModule,
     AttachmentModule,
+    VideoModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseSeed],
