@@ -14,13 +14,10 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import ShareIcon from "@mui/icons-material/Share";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CheckIcon from "@mui/icons-material/Check";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { PRIORITIES } from "../../constant/index";
 import type { ITask } from "./types";
 import { useUpdateTask } from "./api/update-task";
@@ -62,7 +59,16 @@ export default function TaskDetailModal({
   const [description, setDescription] = useState(task.description || "");
   const [editingDesc, setEditingDesc] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [activeTab, setActiveTab] = useState<"all" | "comments" | "history" | "worklog">("comments");
+  const [activeTab] = useState<"comments">("comments");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}${window.location.pathname}?taskId=${task.task_id}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const { data: currentUser } = useGetCurrentUser();
   const { mutate: updateTask, isPending } = useUpdateTask();
@@ -138,13 +144,16 @@ export default function TaskDetailModal({
       maxWidth={false}
       PaperProps={{
         sx: {
-          width: "90vw",
-          maxWidth: 1100,
-          height: "88vh",
-          borderRadius: "12px",
+          width: isFullscreen ? "100vw" : "90vw",
+          maxWidth: isFullscreen ? "100vw" : 1100,
+          height: isFullscreen ? "100vh" : "88vh",
+          maxHeight: isFullscreen ? "100vh" : undefined,
+          borderRadius: isFullscreen ? 0 : "12px",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          m: isFullscreen ? 0 : undefined,
+          transition: "all 0.2s ease",
         },
       }}
     >
@@ -175,25 +184,21 @@ export default function TaskDetailModal({
         </Stack>
 
         <Stack direction="row" alignItems="center" spacing={0.5}>
-          <Tooltip title="Khóa">
-            <IconButton size="small"><LockOutlinedIcon fontSize="small" sx={{ color: "#6b7280" }} /></IconButton>
-          </Tooltip>
-          <Tooltip title="Người xem">
-            <IconButton size="small">
-              <Stack direction="row" alignItems="center" spacing={0.3}>
-                <VisibilityOutlinedIcon fontSize="small" sx={{ color: "#6b7280" }} />
-                <Typography fontSize={12} color="#6b7280">1</Typography>
-              </Stack>
+          <Tooltip title={copied ? "Đã sao chép link!" : "Sao chép link task"}>
+            <IconButton size="small" onClick={handleCopyLink}>
+              {copied
+                ? <CheckIcon fontSize="small" sx={{ color: "#16a34a" }} />
+                : <ShareIcon fontSize="small" sx={{ color: "#6b7280" }} />
+              }
             </IconButton>
           </Tooltip>
-          <Tooltip title="Chia sẻ">
-            <IconButton size="small"><ShareIcon fontSize="small" sx={{ color: "#6b7280" }} /></IconButton>
-          </Tooltip>
-          <Tooltip title="Tùy chọn">
-            <IconButton size="small"><MoreHorizIcon fontSize="small" sx={{ color: "#6b7280" }} /></IconButton>
-          </Tooltip>
-          <Tooltip title="Mở rộng">
-            <IconButton size="small"><OpenInFullIcon fontSize="small" sx={{ color: "#6b7280" }} /></IconButton>
+          <Tooltip title={isFullscreen ? "Thu nhỏ" : "Mở rộng toàn màn hình"}>
+            <IconButton size="small" onClick={() => setIsFullscreen(v => !v)}>
+              {isFullscreen
+                ? <CloseFullscreenIcon fontSize="small" sx={{ color: "#6b7280" }} />
+                : <OpenInFullIcon fontSize="small" sx={{ color: "#6b7280" }} />
+              }
+            </IconButton>
           </Tooltip>
           <Tooltip title="Đóng">
             <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" sx={{ color: "#6b7280" }} /></IconButton>
@@ -361,27 +366,6 @@ export default function TaskDetailModal({
           <Typography fontWeight={600} fontSize={14} mb={1.5}>
             Hoạt động
           </Typography>
-          <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-            {(["all", "comments", "history", "worklog"] as const).map((tab) => (
-              <Box
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                sx={{
-                  fontSize: 13,
-                  px: 1.5,
-                  py: 0.5,
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: activeTab === tab ? 600 : 400,
-                  color: activeTab === tab ? "#111827" : "#6b7280",
-                  bgcolor: activeTab === tab ? "#e5e7eb" : "transparent",
-                  "&:hover": { bgcolor: "#f4f5f7" },
-                }}
-              >
-                {tab === "all" ? "Tất cả" : tab === "comments" ? "Bình luận" : tab === "history" ? "Lịch sử" : "Work log"}
-              </Box>
-            ))}
-          </Stack>
 
           {(activeTab === "comments" || activeTab === "all") && (
             <Box>
@@ -490,7 +474,6 @@ export default function TaskDetailModal({
               }}
             >
               <Typography fontWeight={600} fontSize={13} flex={1}>Chi tiết</Typography>
-              <KeyboardArrowDownIcon sx={{ fontSize: 18, color: "#6b7280" }} />
             </Box>
 
             <Box sx={{ px: 2, py: 1 }}>
@@ -628,51 +611,6 @@ export default function TaskDetailModal({
             </Box>
           </Box>
 
-          <Box
-            sx={{
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              overflow: "hidden",
-              mb: 2,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                px: 1.5,
-                py: 1,
-                cursor: "pointer",
-                "&:hover": { bgcolor: "#f4f5f7" },
-              }}
-            >
-              <Typography fontWeight={600} fontSize={13} flex={1}>Phát triển</Typography>
-              <KeyboardArrowDownIcon sx={{ fontSize: 18, color: "#6b7280" }} />
-            </Box>
-          </Box>
-
-          <Box
-            sx={{
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              overflow: "hidden",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                px: 1.5,
-                py: 1,
-                cursor: "pointer",
-                "&:hover": { bgcolor: "#f4f5f7" },
-              }}
-            >
-              <Typography fontWeight={600} fontSize={13} flex={1}>Tự động hóa</Typography>
-              <Typography fontSize={12} color="#6b7280" mr={1}>Rule executions</Typography>
-              <KeyboardArrowDownIcon sx={{ fontSize: 18, color: "#6b7280" }} />
-            </Box>
-          </Box>
         </Box>
       </Box>
     </Dialog>
