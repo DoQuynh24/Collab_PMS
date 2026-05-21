@@ -14,6 +14,8 @@ Giao diện người dùng (SPA) cho hệ thống quản lý dự án **Collab P
 - **xlsx-js-style** — Xuất file Excel có định dạng
 - **date-fns** — Xử lý ngày tháng
 - **SCSS Modules** — Styling
+- **agora-rtc-react** + **agora-rtc-sdk-ng** — Video call WebRTC (Agora.io)
+- **Socket.IO Client** — Real-time signaling cho video call
 
 ## Tính năng chính
 
@@ -22,6 +24,8 @@ Giao diện người dùng (SPA) cho hệ thống quản lý dự án **Collab P
 - Upload file bằng kéo thả hoặc Ctrl + V
 - Hệ thống thông báo realtime (in-app)
 - Xuất báo cáo Excel có định dạng
+- Video call nhóm theo dự án
+- Đặt lịch họp trên trang Lịch — nhắc nhở 5 phút trước cuộc họp
 
 ## Cài đặt
 

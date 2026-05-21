@@ -141,6 +141,18 @@ const HELP_SECTIONS: HelpSection[] = [
         content: 'Trang Lịch hiển thị nhiệm vụ có deadline theo từng ngày. Click vào task để mở modal chi tiết. Dùng mũi tên để chuyển tháng, click "Hôm nay" để về tháng hiện tại.',
       },
       {
+        title: 'Đặt lịch cuộc họp',
+        content: 'Trên trang Lịch, click "Đặt lịch họp" để mở form. Điền tên cuộc họp, nội dung (tùy chọn), ngày, giờ và chọn người tham gia. Mặc định chọn tất cả thành viên. Sau khi đặt, lịch họp hiển thị trên lịch và tất cả người được mời nhận thông báo in-app + email.',
+      },
+      {
+        title: 'Xem chi tiết & hủy lịch họp',
+        content: 'Click vào chip lịch họp trên lịch để xem chi tiết: thời gian, người tổ chức, danh sách người tham gia. Người tạo có thể hủy lịch họp khi chưa tới giờ — tất cả người tham gia sẽ nhận thông báo hủy qua in-app.',
+      },
+      {
+        title: 'Nhắc nhở trước 5 phút',
+        content: 'Hệ thống tự động gửi thông báo in-app cho tất cả người tham gia 5 phút trước khi cuộc họp bắt đầu.',
+      },
+      {
         title: 'Tổng quan dự án',
         content: 'Trang Tổng quan hiển thị tiến độ dự án (% hoàn thành), thống kê theo trạng thái, danh sách thành viên và các nhiệm vụ gần đây. Hữu ích để nắm bắt nhanh tình trạng dự án.',
       },

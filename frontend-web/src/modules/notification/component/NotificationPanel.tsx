@@ -85,6 +85,14 @@ export function NotificationPanel({ open, onClose }: Props) {
         ? `${ROUTES.projectBoard(n.project_id)}?taskId=${n.entity_id}`
         : ROUTES.projectBoard(n.project_id);
       navigate(url);
+    } else if (
+      (n.type === 'meeting_scheduled' || n.type === 'meeting_reminder' || n.type === 'meeting_cancelled') &&
+      n.project_id
+    ) {
+      const url = n.entity_id
+        ? `${ROUTES.projectCalendar(n.project_id)}?meetingId=${n.entity_id}`
+        : ROUTES.projectCalendar(n.project_id);
+      navigate(url);
     }
     onClose();
   };
@@ -195,7 +203,7 @@ export function NotificationPanel({ open, onClose }: Props) {
                     {n.type === 'status_changed' && <SwapHorizOutlinedIcon fontSize="small" />}
                     {n.type === 'deadline_upcoming' && <AccessTimeOutlinedIcon fontSize="small" />}
                     {n.type === 'deadline_overdue' && <AccessTimeOutlinedIcon fontSize="small" />}
-                    {n.type === 'video_call_started' && <VideocamOutlinedIcon fontSize="small" />}
+                    {(n.type === 'meeting_scheduled' || n.type === 'meeting_reminder' || n.type === 'meeting_cancelled') && <VideocamOutlinedIcon fontSize="small" />}
                   </Box>
 
                   <Box sx={{ flex: 1, minWidth: 0 }}>

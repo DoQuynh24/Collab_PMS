@@ -53,7 +53,10 @@ export type NotificationType =
   | 'status_changed'
   | 'deadline_upcoming'
   | 'deadline_overdue'
-  | 'video_call_started';
+  | 'video_call_started'
+  | 'meeting_scheduled'
+  | 'meeting_cancelled'
+  | 'meeting_reminder';
 
 export const NOTIFICATION_ICON_COLOR: Record<NotificationType, string> = {
   join_request_received: '#5663ee',
@@ -66,6 +69,9 @@ export const NOTIFICATION_ICON_COLOR: Record<NotificationType, string> = {
   deadline_upcoming: '#ef4444',
   deadline_overdue: '#dc2626',
   video_call_started: '#16a34a',
+  meeting_scheduled: '#7c3aed',
+  meeting_cancelled: '#ef4444',
+  meeting_reminder: '#f59e0b',
 };
 
 export const NOTIFICATION_BG: Record<NotificationType, string> = {
@@ -79,6 +85,9 @@ export const NOTIFICATION_BG: Record<NotificationType, string> = {
   deadline_upcoming: '#fef2f2',
   deadline_overdue: '#fef2f2',
   video_call_started: '#f0fdf4',
+  meeting_scheduled: '#faf5ff',
+  meeting_cancelled: '#fef2f2',
+  meeting_reminder: '#fff7ed',
 };
 
 export const PROJECT_ACCESS = {
