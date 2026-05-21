@@ -13,7 +13,9 @@ Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJ
 - Google OAuth2 — Đăng nhập bằng Google
 - Cloudinary — Lưu trữ file đính kèm (ảnh, tài liệu)
 - SendGrid — Gửi email thông báo
+- Agora.io — Video call theo thời gian thực (WebRTC)
 - @nestjs/schedule — Lên lịch nhắc nhở deadline
+- Socket.IO — Real-time signaling cho video call
 
 ### Frontend
 
@@ -29,6 +31,7 @@ Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJ
 - Railway — Nền tảng triển khai (Backend + Database)
 - Cloudinary — Lưu trữ file
 - SendGrid — Dịch vụ gửi email
+- Agora.io — Dịch vụ video call
 
 ## Tính năng chính
 
@@ -61,10 +64,22 @@ Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJ
 - Chỉnh sửa và xóa bình luận
 
 ### Thông báo
-- **In-app**: panel thông báo real-time (polling 30s), tabs Tất cả / Chưa đọc
-- **Email**: qua SendGrid cho các sự kiện quan trọng
-- **Cron jobs**: nhắc nhở deadline sắp tới (8h sáng VN) và task quá hạn (8h sáng VN)
-- Tùy chỉnh thông báo per-project per-user (bật/tắt từng loại)
+- In-app: panel thông báo real-time (polling 30s), tabs Tất cả / Chưa đọc
+- Email: qua SendGrid cho các sự kiện quan trọng
+- Cron jobs: nhắc nhở deadline sắp tới (8h sáng VN) và task quá hạn (8h sáng VN)
+- Tùy chỉnh thông báo (bật/tắt từng loại)
+
+### Video Call
+- Gọi video nhóm theo từng dự án sử dụng Agora.io (WebRTC)
+- Thông báo in-app real-time khi có người khởi tạo cuộc gọi (qua Socket.IO)
+- Hỗ trợ bật/tắt camera, microphone, chia sẻ màn hình, phóng to màn hình chia sẻ
+
+### Lịch & Đặt lịch họp
+- Trang Lịch hiển thị task deadline và lịch họp theo tháng
+- Đặt lịch cuộc họp: tên, nội dung, ngày, giờ, chọn thành viên tham gia
+- Thông báo in-app + email khi đặt lịch và khi hủy lịch
+- Nhắc nhở tự động 5 phút trước khi cuộc họp bắt đầu (cron job)
+- Người tạo có thể hủy lịch khi chưa tới giờ
 
 ### Cài đặt dự án
 - Quản lý trạng thái tùy chỉnh (thêm, đổi tên, sắp xếp, xóa)
@@ -86,6 +101,7 @@ Collab_PMS/
 - Tài khoản Google Cloud (OAuth)
 - Tài khoản SendGrid (email)
 - Tài khoản Cloudinary (file storage)
+- Tài khoản Agora.io (video call)
 
 ## Clone repository
 ```bash
