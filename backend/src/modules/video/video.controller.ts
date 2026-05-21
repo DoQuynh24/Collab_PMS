@@ -19,7 +19,7 @@ export class VideoController {
   @Post('start')
   startCall(@Body() dto: StartCallDto, @Req() req: any) {
     const { user_id, name, picture } = req.user;
-    return this.videoService.startCall(dto.project_id, user_id, name, picture);
+    return this.videoService.startCall(dto.project_id, user_id, name, picture, dto.meeting_id);
   }
 
   @Post('join')

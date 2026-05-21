@@ -14,6 +14,7 @@ import { VideoGateway } from './video.gateway';
 import { NotificationService } from '../notification/notification.service';
 import { ProjectMemberService } from '../project-member/project-member.service';
 import { Project } from '../project/entities/project.entity';
+import { MeetingSchedule } from '../meeting/entities/meeting-schedule.entity';
 
 const TOKEN_EXPIRE_SECONDS = 3600;
 
@@ -26,6 +27,9 @@ export class VideoService {
     @InjectRepository(Project)
     private projectRepo: Repository<Project>,
 
+    @InjectRepository(MeetingSchedule)
+    private meetingRepo: Repository<MeetingSchedule>,
+
     private readonly config: ConfigService,
     private readonly gateway: VideoGateway,
     private readonly notificationService: NotificationService,
@@ -37,6 +41,7 @@ export class VideoService {
     hostId: number,
     hostName: string,
     hostPicture: string | undefined,
+    meetingId?: number,
   ) {
     const existing = await this.roomRepo.findOne({
       where: { project_id: projectId, status: 'active' },
@@ -45,7 +50,7 @@ export class VideoService {
       throw new BadRequestException('A call is already active in this project');
     }
 
-    const channelName = `project_${projectId}_${Date.now()}`;
+    const channelName = meetingId ? `meeting_${meetingId}` : `project_${projectId}_${Date.now()}`;
 
     const room = this.roomRepo.create({
       channel_name: channelName,
@@ -96,17 +101,12 @@ export class VideoService {
       throw new NotFoundException('Call not found or already ended');
     }
 
-    // Tăng participant count
     await this.roomRepo.increment({ id: room.id }, 'participant_count', 1);
 
     const token = this.generateToken(channelName, userId);
     return { room, token, channelName, appId: this.getAppId() };
   }
 
-  /**
-   * User rời phòng — giảm participant count.
-   * Nếu count về 0 thì tự end room.
-   */
   async leaveCall(roomId: number) {
     const room = await this.roomRepo.findOne({ where: { id: roomId } });
     if (!room || room.status === 'ended') return { message: 'Room not active' };
@@ -115,11 +115,11 @@ export class VideoService {
     room.participant_count = newCount;
 
     if (newCount === 0) {
-      // Người cuối cùng rời → end room
       room.status = 'ended';
       await this.roomRepo.save(room);
       const members = await this.memberService.findByProject(room.project_id);
       this.gateway.sendCallEnded(members.map((m) => m.user_id), room.channel_name);
+      await this.completeMeetingIfLinked(room.channel_name);
       return { message: 'Room ended — last participant left' };
     }
 
@@ -141,6 +141,7 @@ export class VideoService {
     const members = await this.memberService.findByProject(room.project_id);
     const memberIds = members.map((m) => m.user_id);
     this.gateway.sendCallEnded(memberIds, room.channel_name);
+    await this.completeMeetingIfLinked(room.channel_name);
 
     return { message: 'Call ended' };
   }
@@ -167,6 +168,16 @@ export class VideoService {
       const members = await this.memberService.findByProject(room.project_id);
       this.gateway.sendCallEnded(members.map((m) => m.user_id), room.channel_name);
     }
+  }
+
+  private async completeMeetingIfLinked(channelName: string) {
+    const match = channelName.match(/^meeting_(\d+)$/);
+    if (!match) return;
+    const meetingId = Number(match[1]);
+    await this.meetingRepo.update(
+      { id: meetingId, status: 'scheduled' },
+      { status: 'completed' },
+    );
   }
 
   private generateToken(channelName: string, userId: number): string {

@@ -21,6 +21,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { DeadlineReminderModule } from './modules/deadline-reminder/deadline-reminder.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
 import { VideoModule } from './modules/video/video.module';
+import { MeetingModule } from './modules/meeting/meeting.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { VideoModule } from './modules/video/video.module';
     DeadlineReminderModule,
     AttachmentModule,
     VideoModule,
+    MeetingModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseSeed],

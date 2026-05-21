@@ -9,10 +9,11 @@ import { NotificationModule } from '../notification/notification.module';
 import { ProjectMemberModule } from '../project-member/project-member.module';
 import { AuthModule } from '../auth/auth.module';
 import { Project } from '../project/entities/project.entity';
+import { MeetingSchedule } from '../meeting/entities/meeting-schedule.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([VideoRoom, Project]),
+    TypeOrmModule.forFeature([VideoRoom, Project, MeetingSchedule]),
     ConfigModule,
     NotificationModule,
     ProjectMemberModule,

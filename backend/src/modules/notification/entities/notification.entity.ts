@@ -11,7 +11,10 @@ export type NotificationType =
   | 'status_changed'
   | 'deadline_upcoming'
   | 'deadline_overdue'
-  | 'video_call_started';
+  | 'video_call_started'
+  | 'meeting_scheduled'
+  | 'meeting_cancelled'
+  | 'meeting_reminder';
 
 @Entity('notifications')
 export class Notification {
