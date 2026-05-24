@@ -35,3 +35,14 @@ export interface CreateMeetingPayload {
 }
 
 export type CreateMeetingData = CreateMeetingPayload;
+
+export interface CheckMeetingConflictsPayload {
+  project_id: string;
+  start_time: string;
+  participant_ids: number[];
+}
+
+export interface ParticipantMeetingConflict {
+  user_id: number;
+  has_conflict: boolean;
+}

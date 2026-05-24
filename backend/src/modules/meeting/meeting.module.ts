@@ -9,10 +9,11 @@ import { ProjectMemberModule } from '../project-member/project-member.module';
 import { MailModule } from '../project-invitation/mail/mail.module';
 import { AuthModule } from '../auth/auth.module';
 import { User } from '../auth/entities/user.entity';
+import { Project } from '../project/entities/project.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([MeetingSchedule, MeetingParticipant, User]),
+    TypeOrmModule.forFeature([MeetingSchedule, MeetingParticipant, User, Project]),
     ConfigModule,
     NotificationModule,
     ProjectMemberModule,

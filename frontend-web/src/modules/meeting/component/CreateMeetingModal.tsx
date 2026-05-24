@@ -10,8 +10,12 @@ import EventIcon from '@mui/icons-material/Event';
 import PeopleIcon from '@mui/icons-material/People';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import { useCreateMeeting } from '../api/create-meeting';
 import { ToastContext } from '../../../components/notification/NotifiProvider';
+import { useCheckMeetingConflicts } from '../api/check-meeting-conflicts';
+import type { ParticipantMeetingConflict } from '../types';
 
 interface Member {
   user_id: number;
@@ -27,6 +31,13 @@ interface Props {
   ownerId?: number;
 }
 
+interface FormErrors {
+  title?: string;
+  date?: string;
+  time?: string;
+  participants?: string;
+}
+
 export function CreateMeetingModal({ open, onClose, projectId, projectMembers, ownerId }: Props) {
   const { mutate: createMeeting, isPending } = useCreateMeeting();
   const { showToast } = useContext(ToastContext)!;
@@ -38,6 +49,7 @@ export function CreateMeetingModal({ open, onClose, projectId, projectMembers, o
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [search, setSearch] = useState('');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const allMemberIds = projectMembers.map((m) => m.user_id);
   const isAllSelected = selectedIds.length === allMemberIds.length;
@@ -46,8 +58,20 @@ export function CreateMeetingModal({ open, onClose, projectId, projectMembers, o
     if (open) {
       setSelectedIds(projectMembers.map((m) => m.user_id));
       setDate(new Date().toISOString().slice(0, 10));
+      setErrors({});
     }
   }, [open]);
+
+  const startTime = date && time ? new Date(`${date}T${time}:00`).toISOString() : null;
+  const shouldCheckConflicts = open && Boolean(startTime) && selectedIds.length > 0;
+  const { data: conflicts = [], isFetching: isCheckingConflicts } = useCheckMeetingConflicts(
+    startTime ? { project_id: projectId, start_time: startTime, participant_ids: selectedIds } : null,
+    shouldCheckConflicts,
+  );
+
+  const conflictMap = new Map<number, ParticipantMeetingConflict>(
+    conflicts.map((conflict) => [conflict.user_id, conflict]),
+  );
 
   const filteredMembers = projectMembers.filter((m) =>
     m.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -58,20 +82,28 @@ export function CreateMeetingModal({ open, onClose, projectId, projectMembers, o
     setSelectedIds((prev) =>
       prev.includes(uid) ? prev.filter((id) => id !== uid) : [...prev, uid],
     );
+    setErrors((prev) => ({ ...prev, participants: undefined }));
   };
 
   const toggleAll = () => {
     setSelectedIds(isAllSelected ? [] : [...allMemberIds]);
+    setErrors((prev) => ({ ...prev, participants: undefined }));
   };
 
   const handleSubmit = () => {
-    if (!title.trim()) { showToast('Vui lòng nhập tên cuộc họp', 'error'); return; }
-    if (!date || !time) { showToast('Vui lòng chọn ngày và giờ', 'error'); return; }
-    if (selectedIds.length === 0) { showToast('Vui lòng chọn ít nhất 1 người tham gia', 'error'); return; }
+    const nextErrors: FormErrors = {};
 
-    const startTime = new Date(`${date}T${time}:00`).toISOString();
+    if (!title.trim()) nextErrors.title = 'Vui lòng nhập tên cuộc họp';
+    if (!date) nextErrors.date = 'Vui lòng chọn ngày';
+    if (!time) nextErrors.time = 'Vui lòng chọn giờ';
+    if (selectedIds.length === 0) nextErrors.participants = 'Vui lòng chọn ít nhất 1 người tham gia';
+
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) return;
+
     createMeeting(
-      { project_id: projectId, title: title.trim(), description: description.trim() || undefined, start_time: startTime, participant_ids: selectedIds },
+      { project_id: projectId, title: title.trim(), description: description.trim() || undefined, start_time: startTime!, participant_ids: selectedIds },
       {
         onSuccess: () => { showToast('Đã đặt lịch cuộc họp', 'success'); handleClose(); },
         onError: (err: any) => showToast(err?.response?.data?.message || 'Đặt lịch thất bại', 'error'),
@@ -81,7 +113,7 @@ export function CreateMeetingModal({ open, onClose, projectId, projectMembers, o
 
   const handleClose = () => {
     setTitle(''); setDescription(''); setDate(''); setTime('');
-    setSelectedIds([]); setSearch(''); setAnchorEl(null);
+    setSelectedIds([]); setSearch(''); setAnchorEl(null); setErrors({});
     onClose();
   };
 
@@ -113,10 +145,17 @@ export function CreateMeetingModal({ open, onClose, projectId, projectMembers, o
         <TextField
           label="Tên cuộc họp *"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (errors.title) {
+              setErrors((prev) => ({ ...prev, title: undefined }));
+            }
+          }}
           fullWidth size="small"
           placeholder="VD: Họp review sprint tuần này"
           autoFocus
+          error={!!errors.title}
+          helperText={errors.title}
         />
 
         <TextField
@@ -130,17 +169,30 @@ export function CreateMeetingModal({ open, onClose, projectId, projectMembers, o
         <Box sx={{ display: 'flex', gap: 2 }}>
           <TextField
             label="Ngày *" type="date" value={date}
-            onChange={(e) => { setDate(e.target.value); setTime(''); }}
+            onChange={(e) => {
+              setDate(e.target.value);
+              setTime('');
+              setErrors((prev) => ({ ...prev, date: undefined, time: undefined }));
+            }}
             size="small" sx={{ flex: 1.4 }}
             inputProps={{ min: minDate }}
             InputLabelProps={{ shrink: true }}
+            error={!!errors.date}
+            helperText={errors.date}
           />
           <TextField
             label="Giờ bắt đầu *" type="time" value={time}
-            onChange={(e) => setTime(e.target.value)}
+            onChange={(e) => {
+              setTime(e.target.value);
+              if (errors.time) {
+                setErrors((prev) => ({ ...prev, time: undefined }));
+              }
+            }}
             size="small" sx={{ flex: 1 }}
             inputProps={{ min: minTime, lang: 'vi' }}
             InputLabelProps={{ shrink: true }}
+            error={!!errors.time}
+            helperText={errors.time}
           />
         </Box>
 
@@ -164,25 +216,116 @@ export function CreateMeetingModal({ open, onClose, projectId, projectMembers, o
               Thêm
             </Button>
           </Box>
+          {errors.participants && (
+            <Typography fontSize={12} color="error" sx={{ mb: 1.5 }}>
+              {errors.participants}
+            </Typography>
+          )}
 
           {selectedIds.length === 0 ? (
             <Typography fontSize={13} color="#9ca3af" sx={{ py: 1 }}>Chưa chọn ai — nhấn Thêm để chọn</Typography>
           ) : (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {selectedIds.map((uid) => {
-                const m = projectMembers.find((x) => x.user_id === uid);
-                if (!m?.user) return null;
-                return (
-                  <Chip
-                    key={uid}
-                    avatar={<Avatar src={m.user.picture} sx={{ width: 20, height: 20 }}>{m.user.name.charAt(0)}</Avatar>}
-                    label={m.user.name}
-                    onDelete={() => toggleMember(uid)}
-                    size="small"
-                    sx={{ bgcolor: '#f4f5f7', fontSize: 12 }}
-                  />
-                );
-              })}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {selectedIds.map((uid) => {
+                  const m = projectMembers.find((x) => x.user_id === uid);
+                  if (!m?.user) return null;
+                  return (
+                    <Chip
+                      key={uid}
+                      avatar={<Avatar src={m.user.picture} sx={{ width: 20, height: 20 }}>{m.user.name.charAt(0)}</Avatar>}
+                      label={m.user.name}
+                      onDelete={() => toggleMember(uid)}
+                      size="small"
+                      sx={{ bgcolor: '#f4f5f7', fontSize: 12 }}
+                    />
+                  );
+                })}
+              </Box>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {selectedIds.map((uid) => {
+                  const member = projectMembers.find((item) => item.user_id === uid);
+                  if (!member?.user) return null;
+
+                  const conflict = conflictMap.get(uid);
+                  const hasConflict = conflict?.has_conflict ?? false;
+
+                  return (
+                    <Box
+                      key={`selected-${uid}`}
+                      sx={{
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 2,
+                        px: 1.5,
+                        py: 1.25,
+                        bgcolor: '#fff',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}>
+                        <Avatar src={member.user.picture} sx={{ width: 32, height: 32, fontSize: 13 }}>
+                          {member.user.name.charAt(0)}
+                        </Avatar>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography fontSize={13} fontWeight={600} color="#111827">
+                            {member.user.name}
+                            {uid === ownerId ? ' 👑' : ''}
+                          </Typography>
+                          <Typography fontSize={11} color="#9ca3af">
+                            {member.user.email}
+                          </Typography>
+
+                          {!startTime && (
+                            <Typography fontSize={12} color="#9ca3af" sx={{ mt: 0.75 }}>
+                              Chọn ngày và giờ để kiểm tra lịch của thành viên.
+                            </Typography>
+                          )}
+
+                          {startTime && isCheckingConflicts && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.9 }}>
+                              <CircularProgress size={12} sx={{ color: '#5663ee' }} />
+                              <Typography fontSize={12} color="#6b7280">
+                                Đang kiểm tra lịch...
+                              </Typography>
+                            </Box>
+                          )}
+
+                          {startTime && !isCheckingConflicts && hasConflict && (
+                            <Box
+                              sx={{
+                                mt: 1,
+                                borderRadius: 1.5,
+                                border: '1px solid #fdba74',
+                                bgcolor: '#fff7ed',
+                                px: 1.25,
+                                py: 1,
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                <WarningAmberRoundedIcon sx={{ fontSize: 16, color: '#ea580c', mt: 0.1 }} />
+                                <Box>
+                                  <Typography fontSize={12} color="#9a3412" sx={{ lineHeight: 1.5 }}>
+                                    Bận vào thời gian này.
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                          )}
+
+                          {startTime && !isCheckingConflicts && !hasConflict && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1 }}>
+                              <CheckCircleRoundedIcon sx={{ fontSize: 16, color: '#16a34a' }} />
+                              <Typography fontSize={12} color="#15803d" fontWeight={500}>
+                                Rảnh vào thời gian này
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
             </Box>
           )}
         </Box>

@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { MeetingService } from './meeting.service';
-import { CreateMeetingDto } from './dto/meeting.dto';
+import { CreateMeetingDto, CheckMeetingConflictsDto } from './dto/meeting.dto';
 
 @Controller('meetings')
 @UseGuards(AuthGuard('jwt'))
@@ -13,6 +13,11 @@ export class MeetingController {
   @Post()
   create(@Body() dto: CreateMeetingDto, @Req() req: any) {
     return this.meetingService.create(dto, req.user.user_id);
+  }
+
+  @Post('conflicts/check')
+  checkConflicts(@Body() dto: CheckMeetingConflictsDto, @Req() req: any) {
+    return this.meetingService.checkConflicts(dto, req.user.user_id);
   }
 
   @Get('project/:projectId')

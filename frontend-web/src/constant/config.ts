@@ -18,3 +18,5 @@ export const URL_API_GET_COMMENT = `${COLLAB_URL}/comments`;
 export const URL_API_NOTIFICATIONS = `${COLLAB_URL}/notifications`;
 //Attachments
 export const URL_API_ATTACHMENTS = `${COLLAB_URL}/attachments`;
+//Meetings
+export const URL_API_MEETINGS = `${COLLAB_URL}/meetings`;

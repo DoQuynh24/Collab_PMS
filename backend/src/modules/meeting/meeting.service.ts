@@ -7,11 +7,17 @@ import {
 } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { MeetingSchedule, MeetingParticipant } from './entities/meeting-schedule.entity';
-import { CreateMeetingDto } from './dto/meeting.dto';
+import { CreateMeetingDto, CheckMeetingConflictsDto } from './dto/meeting.dto';
 import { NotificationService } from '../notification/notification.service';
 import { MailService } from '../project-invitation/mail/mail.service';
 import { ProjectMemberService } from '../project-member/project-member.service';
 import { User } from '../auth/entities/user.entity';
+import { Project } from '../project/entities/project.entity';
+
+export interface ParticipantConflictSummary {
+  user_id: number;
+  has_conflict: boolean;
+}
 
 @Injectable()
 export class MeetingService {
@@ -27,12 +33,16 @@ export class MeetingService {
     @InjectRepository(User)
     private userRepo: Repository<User>,
 
+    @InjectRepository(Project)
+    private projectRepo: Repository<Project>,
+
     private notificationService: NotificationService,
     private mailService: MailService,
     private memberService: ProjectMemberService,
   ) {}
 
   async create(dto: CreateMeetingDto, creatorId: number) {
+    const project = await this.assertProjectAccess(dto.project_id, creatorId);
     const startTime = new Date(dto.start_time);
     if (startTime <= new Date()) {
       throw new BadRequestException('Start time must be in the future');
@@ -48,10 +58,16 @@ export class MeetingService {
     });
     await this.meetingRepo.save(meeting);
 
-    let participantIds = dto.participant_ids;
+    let participantIds = Array.from(new Set(dto.participant_ids));
     if (!participantIds || participantIds.length === 0) {
       const members = await this.memberService.findByProject(dto.project_id);
       participantIds = members.map((m) => m.user_id);
+    }
+
+    participantIds = this.filterProjectParticipantIds(project, participantIds);
+
+    if (participantIds.length === 0) {
+      throw new BadRequestException('No valid participants selected');
     }
 
     const participants = participantIds.map((uid) =>
@@ -87,6 +103,43 @@ export class MeetingService {
     }
 
     return this.findOne(meeting.id);
+  }
+
+  async checkConflicts(dto: CheckMeetingConflictsDto, requesterId: number): Promise<ParticipantConflictSummary[]> {
+    const project = await this.assertProjectAccess(dto.project_id, requesterId);
+    const startTime = new Date(dto.start_time);
+
+    if (Number.isNaN(startTime.getTime())) {
+      throw new BadRequestException('Invalid start time');
+    }
+
+    const participantIds = this.filterProjectParticipantIds(
+      project,
+      Array.from(new Set(dto.participant_ids)),
+    );
+
+    if (participantIds.length === 0) {
+      return [];
+    }
+
+    const conflicts = await this.participantRepo
+      .createQueryBuilder('participant')
+      .innerJoin('participant.meeting', 'meeting')
+      .select('participant.user_id', 'user_id')
+      .where('participant.user_id IN (:...participantIds)', { participantIds })
+      .andWhere('meeting.status = :status', { status: 'scheduled' })
+      .andWhere('meeting.start_time = :startTime', { startTime })
+      .groupBy('participant.user_id')
+      .getRawMany<{ user_id: string }>();
+
+    const conflictUserIds = new Set(conflicts.map((item) => Number(item.user_id)));
+
+    return participantIds
+      .sort((a, b) => a - b)
+      .map((participantId) => ({
+        user_id: participantId,
+        has_conflict: conflictUserIds.has(participantId),
+      }));
   }
 
   async findByProject(projectId: string, status?: string) {
@@ -200,5 +253,32 @@ export class MeetingService {
       hour: '2-digit', minute: '2-digit',
       timeZone: 'Asia/Ho_Chi_Minh',
     });
+  }
+
+  private async assertProjectAccess(projectId: string, userId: number): Promise<Project> {
+    const project = await this.projectRepo.findOne({
+      where: { project_id: projectId },
+      relations: ['project_members'],
+    });
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    const isOwner = project.owner_id === userId;
+    const isMember = project.project_members.some((member) => member.user_id === userId);
+
+    if (!isOwner && !isMember) {
+      throw new ForbiddenException('You do not have access to this project');
+    }
+
+    return project;
+  }
+
+  private filterProjectParticipantIds(project: Project, participantIds: number[]): number[] {
+    const allowedIds = new Set(project.project_members.map((member) => member.user_id));
+    allowedIds.add(project.owner_id);
+
+    return participantIds.filter((participantId) => allowedIds.has(participantId));
   }
 }

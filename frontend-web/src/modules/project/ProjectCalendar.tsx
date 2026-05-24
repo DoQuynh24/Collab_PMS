@@ -50,8 +50,6 @@ export default function ProjectCalendar() {
   const [openCreateMeeting, setOpenCreateMeeting] = useState(false);
   const [meetingPopover, setMeetingPopover] = useState<{ meeting: MeetingSchedule; anchor: HTMLElement } | null>(null);
 
-  if (isLoading) return <LoadingPage />;
-
   const members = project?.project_members ?? [];
 
   useEffect(() => {
@@ -143,6 +141,8 @@ export default function ProjectCalendar() {
       },
     );
   };
+
+  if (isLoading) return <LoadingPage />;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', minWidth: 0 }}>
