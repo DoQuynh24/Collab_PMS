@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   preview: {
-    allowedHosts: ['all'],
+    allowedHosts: ['collabpms-production-2026.up.railway.app'],
   },
   resolve: {
     alias: [{ find: "@", replacement: "/src" }],
