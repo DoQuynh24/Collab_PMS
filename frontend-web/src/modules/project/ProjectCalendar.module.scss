@@ -17,6 +17,7 @@
 
 .dayCell {
   min-height: 100px;
+  height: 120px;
   border-right: 1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;
   padding: 4px;
@@ -26,6 +27,8 @@
   flex-direction: column;
   gap: 2px;
   transition: background-color 0.15s;
+  min-width: 0;
+  overflow: hidden;
 
   &:hover {
     background-color: #f9fafb;
@@ -56,6 +59,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-height: 0;
+  min-width: 0;
 }
 
 .taskChip {
@@ -69,6 +74,12 @@
   background: #f5f5ff;
   transition: background-color 0.15s;
   font-size: 11px;
+  min-height: 22px;
+  max-height: 22px;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 
   &:hover {
     background: #eaeaff;
@@ -156,4 +167,64 @@
 .upcomingTime {
   color: #7c3aed;
   font-weight: 600;
+}
+
+.mobileAgenda {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobileDayCard {
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(148, 163, 184, 0.12);
+  padding: 14px;
+}
+
+.mobileDayHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.mobileMeetingItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid #c7d2fe;
+  border-radius: 14px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.mobileTaskItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 4px solid #5663ee;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.mobileEmptyState {
+  border-radius: 18px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  padding: 20px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (min-width: 901px) {
+  .taskList > :global(*) {
+    flex-shrink: 0;
+  }
 }

@@ -17,7 +17,7 @@ import { useGetUnreadCount } from '../modules/notification/api/get-unread-count'
 import { useGetCurrentUser } from '../modules/login/api/auth';
 import { useTheme } from '../contexts/ThemeContext';
 
-export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
+export function Header({ onToggleSidebar, isMobile = false }: { onToggleSidebar: () => void; isMobile?: boolean }) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -64,37 +64,54 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 
   return (
     <>
-    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#5663ee', height: '60px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.57)' }}>
-      <Toolbar sx={{ minHeight: '60px !important', alignItems: 'center !important', gap: 1 }}>
+    <AppBar
+      position="fixed"
+      sx={{
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        backgroundColor: '#5663ee',
+        backgroundImage: 'linear-gradient(90deg, #5663ee 0%, #4f5ee6 100%)',
+        height: { xs: '56px', sm: '60px' },
+        boxShadow: '0 8px 24px rgba(86, 99, 238, 0.22)',
+      }}
+    >
+      <Toolbar sx={{ minHeight: { xs: '56px !important', sm: '60px !important' }, alignItems: 'center !important', gap: { xs: 0.5, sm: 1 }, px: { xs: 1, sm: 2 } }}>
         <IconButton color="inherit" edge="start" onClick={onToggleSidebar}>
           <MenuIcon />
         </IconButton>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, pl: 1.5 }}>
-          <Typography variant="h5" sx={{ letterSpacing: 0.5 }}>
-            COLLAB
-          </Typography>
-          <HeaderMenu />
+        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, pl: { xs: 0.5, sm: 1.5 }, minWidth: 0 }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h5" sx={{ letterSpacing: 0.5, fontSize: { xs: 18, sm: 24 }, whiteSpace: 'nowrap', fontWeight: 800, lineHeight: 1.1 }}>
+              COLLAB
+            </Typography>
+            {isMobile && (
+              <Typography fontSize={10} color="rgba(255,255,255,0.74)" sx={{ letterSpacing: 0.6 }}>
+                Quản lý dự án trên điện thoại
+              </Typography>
+            )}
+          </Box>
+          {!isMobile && <HeaderMenu />}
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.5 } }}>
           <Tooltip title="Thông báo">
-            <IconButton color="inherit" onClick={() => setNotiOpen(true)}>
+            <IconButton color="inherit" onClick={() => setNotiOpen(true)} size={isMobile ? 'small' : 'medium'}>
               <Badge badgeContent={unreadCount || 0} color="error" sx={{ '& .MuiBadge-badge': { fontSize: 10, height: 16, minWidth: 16 } }}>
                 <NotificationsOutlinedIcon fontSize="medium" />
               </Badge>
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Trợ giúp">
-            <IconButton color="inherit" onClick={() => setHelpOpen(true)}>
-              <HelpOutlineIcon fontSize="medium" />
-            </IconButton>
-          </Tooltip>
-
+        
+            <Tooltip title="Trợ giúp">
+              <IconButton color="inherit" onClick={() => setHelpOpen(true)} size="medium">
+                <HelpOutlineIcon fontSize="medium" />
+              </IconButton>
+            </Tooltip>
+         
           <Avatar
             src={user?.picture}
-            sx={{ width: 32, height: 32, bgcolor: '#fff', color: '#5663ee', cursor: 'pointer', ml: 1 }}
+            sx={{ width: { xs: 30, sm: 32 }, height: { xs: 30, sm: 32 }, bgcolor: '#fff', color: '#5663ee', cursor: 'pointer', ml: { xs: 0.5, sm: 1 } }}
             onClick={handleAvatarClick}
           >
             {!user?.picture && <AccountCircleIcon />}
@@ -109,7 +126,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           slotProps={{
             paper: {
-              sx: { borderRadius: '12px', mt: 0.5, width: 280, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
+              sx: { borderRadius: '12px', mt: 0.5, width: { xs: 240, sm: 280 }, maxWidth: 'calc(100vw - 24px)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
             },
           }}
         >

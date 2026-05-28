@@ -2,6 +2,7 @@ import { useRef, useCallback, useContext, useState } from 'react';
 import {
   Box, Typography, IconButton, Tooltip, Avatar,
   CircularProgress, Button,
+  useMediaQuery,
 } from '@mui/material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -63,6 +64,7 @@ function openFile(url: string) {
 }
 
 export default function TaskAttachments({ taskId, taskCreatedBy, projectMembers, projectOwnerId }: Props) {
+  const isMobile = useMediaQuery('(max-width:900px)');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -176,10 +178,12 @@ export default function TaskAttachments({ taskId, taskCreatedBy, projectMembers,
         onDragLeave={() => setIsDragOver(false)}
         onClick={() => fileInputRef.current?.click()}
         sx={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.25,
+          flexDirection: isMobile ? 'column' : 'row',
+          textAlign: isMobile ? 'center' : 'left',
           border: `1.5px dashed ${isDragOver ? '#5663ee' : '#d1d5db'}`,
-          borderRadius: '8px',
-          px: 2, py: 1.5,
+          borderRadius: isMobile ? '14px' : '8px',
+          px: 2, py: isMobile ? 1.75 : 1.5,
           cursor: 'pointer',
           bgcolor: isDragOver ? '#eef0ff' : 'transparent',
           transition: 'all 0.15s',
@@ -190,7 +194,7 @@ export default function TaskAttachments({ taskId, taskCreatedBy, projectMembers,
         <AttachFileIcon sx={{ fontSize: 18, color: '#9ca3af', flexShrink: 0 }} />
         <Box>
           <Typography fontSize={13} color="#6b7280">
-            Kéo thả, click để chọn hoặc <strong>Ctrl+V</strong> để dán ảnh
+            Kéo thả, chạm để chọn hoặc <strong>{isMobile ? 'dán ảnh' : 'Ctrl+V'}</strong> {isMobile ? 'từ bàn phím' : 'để dán ảnh'}
           </Typography>
           <Typography fontSize={11} color="#9ca3af">
             Ảnh, PDF, Word, Excel, PowerPoint, ZIP · Tối đa 20MB
@@ -208,6 +212,8 @@ export default function TaskAttachments({ taskId, taskCreatedBy, projectMembers,
         <Box sx={{ border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', mb: 1.5 }}>
           <Box sx={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? 1 : 0,
             px: 2, py: 1, bgcolor: '#f9fafb', borderBottom: '1px solid #e5e7eb',
           }}>
             <Typography fontSize={12} fontWeight={600} color="#374151">
@@ -278,48 +284,52 @@ export default function TaskAttachments({ taskId, taskCreatedBy, projectMembers,
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
           {attachments.map((att) => (
             <Box key={att.id} sx={{
-              display: 'flex', alignItems: 'center', gap: 1.5,
+              display: 'flex', gap: 1.5,
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'stretch' : 'center',
               px: 1.5, py: 1, border: '1px solid #e5e7eb', borderRadius: '8px',
               '&:hover': { bgcolor: '#f9fafb' },
             }}>
-              {att.file_type === 'image' ? (
-                <Box component="img" src={att.file_url} alt={att.file_name}
-                  sx={{ width: 36, height: 36, objectFit: 'cover', borderRadius: '4px', flexShrink: 0, cursor: 'pointer' }}
-                  onClick={() => window.open(att.file_url, '_blank')} />
-              ) : (
-                <Box sx={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f3f4f6', borderRadius: '4px', flexShrink: 0, cursor: 'pointer' }}
-                  onClick={() => openFile(att.file_url)}>
-                  <FileIcon mimeType={att.mime_type} />
-                </Box>
-              )}
+              <Box sx={{ display: 'flex', gap: 1.25, alignItems: 'center', minWidth: 0 }}>
+                {att.file_type === 'image' ? (
+                  <Box component="img" src={att.file_url} alt={att.file_name}
+                    sx={{ width: 36, height: 36, objectFit: 'cover', borderRadius: '4px', flexShrink: 0, cursor: 'pointer' }}
+                    onClick={() => window.open(att.file_url, '_blank')} />
+                ) : (
+                  <Box sx={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f3f4f6', borderRadius: '4px', flexShrink: 0, cursor: 'pointer' }}
+                    onClick={() => openFile(att.file_url)}>
+                    <FileIcon mimeType={att.mime_type} />
+                  </Box>
+                )}
 
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography fontSize={13} fontWeight={500} color="#111827" noWrap
-                  sx={{ cursor: 'pointer', '&:hover': { color: '#5663ee', textDecoration: 'underline' } }}
-                  onClick={() => openFile(att.file_url)}>
-                  {att.file_name}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
-                  <Typography fontSize={11} color="#9ca3af">{formatBytes(att.file_size)}</Typography>
-                  {att.uploader && (
-                    <>
-                      <Typography fontSize={11} color="#e5e7eb">·</Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
-                        <Avatar src={att.uploader.picture} sx={{ width: 13, height: 13, fontSize: 8 }}>
-                          {att.uploader.name?.charAt(0)}
-                        </Avatar>
-                        <Typography fontSize={11} color="#9ca3af">{att.uploader.name}</Typography>
-                      </Box>
-                    </>
-                  )}
-                  <Typography fontSize={11} color="#e5e7eb">·</Typography>
-                  <Typography fontSize={11} color="#9ca3af">
-                    {formatDistanceToNow(new Date(att.created_at), { addSuffix: true, locale: vi })}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography fontSize={13} fontWeight={500} color="#111827" noWrap
+                    sx={{ cursor: 'pointer', '&:hover': { color: '#5663ee', textDecoration: 'underline' } }}
+                    onClick={() => openFile(att.file_url)}>
+                    {att.file_name}
                   </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
+                    <Typography fontSize={11} color="#9ca3af">{formatBytes(att.file_size)}</Typography>
+                    {att.uploader && (
+                      <>
+                        <Typography fontSize={11} color="#e5e7eb">·</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
+                          <Avatar src={att.uploader.picture} sx={{ width: 13, height: 13, fontSize: 8 }}>
+                            {att.uploader.name?.charAt(0)}
+                          </Avatar>
+                          <Typography fontSize={11} color="#9ca3af">{att.uploader.name}</Typography>
+                        </Box>
+                      </>
+                    )}
+                    <Typography fontSize={11} color="#e5e7eb">·</Typography>
+                    <Typography fontSize={11} color="#9ca3af">
+                      {formatDistanceToNow(new Date(att.created_at), { addSuffix: true, locale: vi })}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
 
-              <Box sx={{ display: 'flex', gap: 0.3, flexShrink: 0 }}>
+              <Box sx={{ display: 'flex', gap: 0.3, flexShrink: 0, justifyContent: isMobile ? 'flex-end' : 'flex-start' }}>
                 <Tooltip title="Tải xuống">
                   <IconButton size="small" component="a" href={att.file_url} download={att.file_name} target="_blank"
                     sx={{ color: '#9ca3af', '&:hover': { color: '#5663ee' }, p: 0.5 }}>

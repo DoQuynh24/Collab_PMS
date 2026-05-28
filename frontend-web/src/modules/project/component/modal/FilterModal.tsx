@@ -11,6 +11,7 @@ import {
   Button,
   FormControlLabel,
   IconButton,
+  useMediaQuery,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export function FilterModal({ projectMembers, statuses, onFilterChange }: Props) {
+    const isMobile = useMediaQuery("(max-width:900px)");
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [activeTab, setActiveTab] = useState("assignee");
     const [searchTerm, setSearchTerm] = useState("");
@@ -98,8 +100,8 @@ export function FilterModal({ projectMembers, statuses, onFilterChange }: Props)
             onClick={handleOpen}
             sx={{
             border: "1px solid",
-            borderRadius: "6px",
-            padding: "5px",
+            borderRadius: { xs: "12px", sm: "6px" },
+            padding: "5px 10px",
             gap: "5px",
             bgcolor: activeCount > 0 ? "#eef0ff" : "transparent",
             borderColor: activeCount > 0 ? "#5663ee" : "#d3d3d3",
@@ -119,8 +121,8 @@ export function FilterModal({ projectMembers, statuses, onFilterChange }: Props)
             transformOrigin={{ vertical: "top", horizontal: "left" }}
             PaperProps={{
             sx: {
-                width: 520,
-                height: 400,
+                width: { xs: 'calc(100vw - 20px)', sm: 520 },
+                height: { xs: 'min(78vh, 560px)', sm: 400 },
                 borderRadius: "10px",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                 display: "flex",
@@ -130,7 +132,7 @@ export function FilterModal({ projectMembers, statuses, onFilterChange }: Props)
             }}
         >
             <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
-            <Box sx={{ width: 160, borderRight: "1px solid #e5e7eb", py: 1, flexShrink: 0 }}>
+            <Box sx={{ width: isMobile ? 122 : 160, borderRight: "1px solid #e5e7eb", py: 1, flexShrink: 0 }}>
                 {FILTER_TABS.map((tab) => {
                 const count = countByTab[tab.key] ?? 0
                 return (

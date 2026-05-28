@@ -11,6 +11,7 @@ import {
   Typography,
   Divider,
   Switch,
+  useMediaQuery,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -63,21 +64,235 @@ export function ProjectToolbar({
   onToggleHideCompleted,
   onExportCsv,
 }: Props) {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [groupAnchor, setGroupAnchor] = useState<null | HTMLElement>(null);
   const [moreAnchor, setMoreAnchor] = useState<null | HTMLElement>(null);
   const currentGroupLabel = GROUP_OPTIONS.find(o => o.value === groupBy)?.label ?? 'Nhóm';
 
-  return (
-    <Box sx={{ px: 1, py: 2.5, bgcolor: "#fff" }}>
-      <Stack direction="row" alignItems="center" spacing={2} sx={{ width: "100%" }}>
+  const groupMenu = (
+    <Menu
+      anchorEl={groupAnchor}
+      open={Boolean(groupAnchor)}
+      onClose={() => setGroupAnchor(null)}
+      slotProps={{ paper: { sx: { borderRadius: '8px', minWidth: 180 } } }}
+    >
+      <Box sx={{ px: 2, py: 1 }}>
+        <Typography fontSize={11} fontWeight={600} color="#9ca3af" letterSpacing={0.5}>NHÓM THEO</Typography>
+      </Box>
+      {GROUP_OPTIONS.map(opt => (
+        <MenuItem key={opt.value}
+          onClick={() => { onGroupByChange?.(opt.value); setGroupAnchor(null); }}
+          sx={{ fontSize: 13, gap: 1.5, py: 1 }}
+        >
+          <CheckIcon sx={{ fontSize: 16, opacity: groupBy === opt.value ? 1 : 0, color: '#5663ee' }} />
+          {opt.label}
+        </MenuItem>
+      ))}
+    </Menu>
+  );
 
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ flexGrow: 1 }}>
+  const moreOptionsMenu = (
+    <Menu
+      anchorEl={moreAnchor}
+      open={Boolean(moreAnchor)}
+      onClose={() => setMoreAnchor(null)}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      slotProps={{ paper: { sx: { borderRadius: '8px', minWidth: 240, mt: 0.5 } } }}
+    >
+      <Box sx={{ px: 2, py: 1 }}>
+        <Typography fontSize={11} fontWeight={600} color="#9ca3af" letterSpacing={0.5}>TÙY CHỌN</Typography>
+      </Box>
+
+      <MenuItem
+        onClick={() => { onToggleHideCompleted?.(); setMoreAnchor(null); }}
+        sx={{ fontSize: 13, py: 1, gap: 1.5 }}
+      >
+        <VisibilityOffIcon fontSize="small" sx={{ color: hideCompleted ? "#5663ee" : "#6b7280" }} />
+        <Box sx={{ flex: 1 }}>
+          <Typography fontSize={13} color="#374151">Ẩn nhiệm vụ hoàn thành</Typography>
+          <Typography fontSize={11} color="#9ca3af">Ẩn các task ở cột cuối cùng</Typography>
+        </Box>
+        <Switch
+          size="small"
+          checked={hideCompleted}
+          onChange={() => { onToggleHideCompleted?.(); setMoreAnchor(null); }}
+          onClick={(e) => e.stopPropagation()}
+          sx={{
+            '& .MuiSwitch-switchBase.Mui-checked': { color: '#5663ee' },
+            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#5663ee' },
+          }}
+        />
+      </MenuItem>
+
+      <Divider sx={{ my: 0.5 }} />
+
+      <MenuItem
+        onClick={() => { onExportCsv?.(); setMoreAnchor(null); }}
+        sx={{ fontSize: 13, py: 1, gap: 1.5 }}
+      >
+        <DownloadIcon fontSize="small" sx={{ color: "#6b7280" }} />
+        <Box>
+          <Typography fontSize={13} color="#374151">Xuất dữ liệu Excel</Typography>
+          <Typography fontSize={11} color="#9ca3af">Tải xuống danh sách nhiệm vụ (.xlsx)</Typography>
+        </Box>
+      </MenuItem>
+    </Menu>
+  );
+
+  if (!isMobile) {
+    return (
+      <Box sx={{ px: 1, py: 2.5, bgcolor: "#fff" }}>
+        <Stack direction="row" alignItems="center" spacing={2} sx={{ width: "100%" }}>
+          <Stack direction="row" alignItems="center" spacing={2} sx={{ flexGrow: 1, minWidth: 0 }}>
+            <TextField
+              size="small"
+              placeholder="Tìm kiếm nhiệm vụ"
+              value={searchText}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              sx={{ width: 240 }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <Box component="span" sx={{ mr: 0.5, color: '#9ca3af', display: 'flex', alignItems: 'center' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                      </svg>
+                    </Box>
+                  ),
+                  endAdornment: searchText ? (
+                    <Box
+                      component="span"
+                      onClick={() => onSearchChange?.('')}
+                      sx={{ cursor: 'pointer', color: '#9ca3af', display: 'flex', alignItems: 'center', '&:hover': { color: '#374151' } }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6 6 18M6 6l12 12"/>
+                      </svg>
+                    </Box>
+                  ) : null,
+                },
+              }}
+            />
+
+            <Stack direction="row" spacing={-1} alignItems="center" sx={{ flexWrap: 'wrap', rowGap: 1 }}>
+              {projectMembers.slice(0, 5).map((member) => (
+                <Tooltip key={member.user_id} title={member.user?.name || "Member"}>
+                  <Avatar
+                    src={member.user?.picture}
+                    alt={member.user?.name}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      border: "2px solid white",
+                      boxShadow: "0 0 0 1px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    {member.user?.name?.charAt(0).toUpperCase()}
+                  </Avatar>
+                </Tooltip>
+              ))}
+              {projectMembers.length > 5 && (
+                <Tooltip title={`${projectMembers.length - 5} người khác`}>
+                  <Avatar
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      bgcolor: "#5663ee",
+                      fontSize: "0.875rem",
+                      border: "2px solid white",
+                    }}
+                  >
+                    +{projectMembers.length - 5}
+                  </Avatar>
+                </Tooltip>
+              )}
+            </Stack>
+
+            <FilterModal
+              projectMembers={projectMembers}
+              onFilterChange={onFilterChange}
+              statuses={statuses}
+            />
+          </Stack>
+
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ flexWrap: 'wrap' }}>
+            {showGroupButton && (
+              <Button
+                variant="outlined"
+                size="small"
+                endIcon={<KeyboardArrowDownIcon />}
+                onClick={(e) => setGroupAnchor(e.currentTarget)}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  borderColor: groupBy !== 'none' ? "#5663ee" : "#d1d5db",
+                  color: groupBy !== 'none' ? "#5663ee" : "#555",
+                  bgcolor: groupBy !== 'none' ? "#eef0ff" : "transparent",
+                }}
+              >
+                {groupBy !== 'none' ? currentGroupLabel : 'Nhóm'}
+              </Button>
+            )}
+            {groupMenu}
+
+            {showDisplaySettings && (
+              <DisplaySettingsPopover
+                settings={displaySettings ?? DEFAULT_DISPLAY_SETTINGS}
+                onChange={onDisplaySettingsChange ?? (() => {})}
+              />
+            )}
+
+            {showMoreOptions && (
+              <>
+                <Tooltip title="Tùy chọn">
+                  <IconButton
+                    onClick={(e) => setMoreAnchor(e.currentTarget)}
+                    sx={{
+                      borderRadius: "6px",
+                      padding: "5px",
+                      border: "1px solid",
+                      borderColor: hideCompleted ? "#5663ee" : "#d3d3d3",
+                      bgcolor: hideCompleted ? "#eef0ff" : "transparent",
+                      color: hideCompleted ? "#5663ee" : "inherit",
+                    }}
+                  >
+                    <MoreHorizIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                {moreOptionsMenu}
+              </>
+            )}
+          </Stack>
+        </Stack>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        px: { xs: 0.5, sm: 1 },
+        py: { xs: 1, sm: 2.5 },
+        bgcolor: "#fff",
+      }}
+    >
+      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'stretch', md: 'center' }} spacing={2} sx={{ width: "100%" }}>
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} spacing={1} sx={{ flexGrow: 1, minWidth: 0 }}>
           <TextField
             size="small"
             placeholder="Tìm kiếm nhiệm vụ"
             value={searchText}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            sx={{ width: 240 }}
+            sx={{
+              width: { xs: '100%', sm: 240 },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: { xs: '14px', sm: '8px' },
+                bgcolor: '#fff',
+              },
+            }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -102,160 +317,119 @@ export function ProjectToolbar({
             }}
           />
 
-          <Stack direction="row" spacing={-1} alignItems="center">
-            {projectMembers.slice(0, 5).map((member) => (
-              <Tooltip key={member.user_id} title={member.user?.name || "Member"}>
-                <Avatar
-                  src={member.user?.picture}
-                  alt={member.user?.name}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1,
+              width: { xs: '100%', sm: 'auto' },
+            }}
+          >
+            <Stack direction="row" spacing={-1} alignItems="center" sx={{ flexWrap: 'wrap', rowGap: 1, minHeight: 32 }}>
+              {projectMembers.slice(0, isMobile ? 2 : 5).map((member) => (
+                <Tooltip key={member.user_id} title={member.user?.name || "Member"}>
+                  <Avatar
+                    src={member.user?.picture}
+                    alt={member.user?.name}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      border: "2px solid white",
+                      boxShadow: "0 0 0 1px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    {member.user?.name?.charAt(0).toUpperCase()}
+                  </Avatar>
+                </Tooltip>
+              ))}
+              {projectMembers.length > (isMobile ? 2 : 5) && (
+                <Tooltip title={`${projectMembers.length - (isMobile ? 2 : 5)} người khác`}>
+                  <Avatar
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      bgcolor: "#5663ee",
+                      fontSize: "0.875rem",
+                      border: "2px solid white",
+                    }}
+                  >
+                    +{projectMembers.length - (isMobile ? 2 : 5)}
+                  </Avatar>
+                </Tooltip>
+              )}
+            </Stack>
+
+            <FilterModal
+              projectMembers={projectMembers}
+              onFilterChange={onFilterChange}
+              statuses={statuses}
+            />
+          </Box>
+        </Stack>
+
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            gap: 1,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            {showGroupButton && (
+              <>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  endIcon={<KeyboardArrowDownIcon />}
+                  onClick={(e) => setGroupAnchor(e.currentTarget)}
                   sx={{
-                    width: 32,
-                    height: 32,
-                    border: "2px solid white",
-                    boxShadow: "0 0 0 1px rgba(0,0,0,0.1)",
+                    textTransform: "none",
+                    borderRadius: { xs: "12px", sm: "6px" },
+                    fontSize: "14px",
+                    borderColor: groupBy !== 'none' ? "#5663ee" : "#d1d5db",
+                    color: groupBy !== 'none' ? "#5663ee" : "#555",
+                    bgcolor: groupBy !== 'none' ? "#eef0ff" : "transparent",
+                    minWidth: { xs: 96, sm: 'auto' },
                   }}
                 >
-                  {member.user?.name?.charAt(0).toUpperCase()}
-                </Avatar>
-              </Tooltip>
-            ))}
-            {projectMembers.length > 5 && (
-              <Tooltip title={`${projectMembers.length - 5} người khác`}>
-                <Avatar
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    bgcolor: "#5663ee",
-                    fontSize: "0.875rem",
-                    border: "2px solid white",
-                  }}
-                >
-                  +{projectMembers.length - 5}
-                </Avatar>
-              </Tooltip>
+                  {groupBy !== 'none' ? currentGroupLabel : 'Nhóm'}
+                </Button>
+              </>
+            )}
+          </Box>
+          {groupMenu}
+
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+            {showDisplaySettings && (
+              <DisplaySettingsPopover
+                settings={displaySettings ?? DEFAULT_DISPLAY_SETTINGS}
+                onChange={onDisplaySettingsChange ?? (() => {})}
+              />
+            )}
+
+            {showMoreOptions && (
+              <>
+                <Tooltip title="Tùy chọn">
+                  <IconButton
+                    onClick={(e) => setMoreAnchor(e.currentTarget)}
+                    sx={{
+                      borderRadius: { xs: "12px", sm: "6px" }, padding: "5px", border: "1px solid",
+                      borderColor: hideCompleted ? "#5663ee" : "#d3d3d3",
+                      bgcolor: hideCompleted ? "#eef0ff" : "transparent",
+                      color: hideCompleted ? "#5663ee" : "inherit",
+                    }}
+                  >
+                    <MoreHorizIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </>
             )}
           </Stack>
-
-          <FilterModal
-            projectMembers={projectMembers}
-            onFilterChange={onFilterChange}
-            statuses={statuses}
-          />
-        </Stack>
-
-        <Stack direction="row" alignItems="center" spacing={1}>
-          {showGroupButton && (
-            <>
-              <Button
-                variant="outlined"
-                size="small"
-                endIcon={<KeyboardArrowDownIcon />}
-                onClick={(e) => setGroupAnchor(e.currentTarget)}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  borderColor: groupBy !== 'none' ? "#5663ee" : "#d1d5db",
-                  color: groupBy !== 'none' ? "#5663ee" : "#555",
-                  bgcolor: groupBy !== 'none' ? "#eef0ff" : "transparent",
-                }}
-              >
-                {groupBy !== 'none' ? currentGroupLabel : 'Nhóm'}
-              </Button>
-              <Menu
-                anchorEl={groupAnchor}
-                open={Boolean(groupAnchor)}
-                onClose={() => setGroupAnchor(null)}
-                slotProps={{ paper: { sx: { borderRadius: '8px', minWidth: 180 } } }}
-              >
-                <Box sx={{ px: 2, py: 1 }}>
-                  <Typography fontSize={11} fontWeight={600} color="#9ca3af" letterSpacing={0.5}>NHÓM THEO</Typography>
-                </Box>
-                {GROUP_OPTIONS.map(opt => (
-                  <MenuItem key={opt.value}
-                    onClick={() => { onGroupByChange?.(opt.value); setGroupAnchor(null); }}
-                    sx={{ fontSize: 13, gap: 1.5, py: 1 }}
-                  >
-                    <CheckIcon sx={{ fontSize: 16, opacity: groupBy === opt.value ? 1 : 0, color: '#5663ee' }} />
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </>
-          )}
-
-          {showDisplaySettings && (
-            <DisplaySettingsPopover
-              settings={displaySettings ?? DEFAULT_DISPLAY_SETTINGS}
-              onChange={onDisplaySettingsChange ?? (() => {})}
-            />
-          )}
-
-          {showMoreOptions && (
-            <>
-              <Tooltip title="Tùy chọn">
-                <IconButton
-                  onClick={(e) => setMoreAnchor(e.currentTarget)}
-                  sx={{
-                    borderRadius: "6px", padding: "5px", border: "1px solid",
-                    borderColor: hideCompleted ? "#5663ee" : "#d3d3d3",
-                    bgcolor: hideCompleted ? "#eef0ff" : "transparent",
-                    color: hideCompleted ? "#5663ee" : "inherit",
-                  }}
-                >
-                  <MoreHorizIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-
-              <Menu
-                anchorEl={moreAnchor}
-                open={Boolean(moreAnchor)}
-                onClose={() => setMoreAnchor(null)}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                slotProps={{ paper: { sx: { borderRadius: '8px', minWidth: 240, mt: 0.5 } } }}
-              >
-                <Box sx={{ px: 2, py: 1 }}>
-                  <Typography fontSize={11} fontWeight={600} color="#9ca3af" letterSpacing={0.5}>TÙY CHỌN</Typography>
-                </Box>
-
-                <MenuItem
-                  onClick={() => { onToggleHideCompleted?.(); setMoreAnchor(null); }}
-                  sx={{ fontSize: 13, py: 1, gap: 1.5 }}
-                >
-                  <VisibilityOffIcon fontSize="small" sx={{ color: hideCompleted ? "#5663ee" : "#6b7280" }} />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography fontSize={13} color="#374151">Ẩn nhiệm vụ hoàn thành</Typography>
-                    <Typography fontSize={11} color="#9ca3af">Ẩn các task ở cột cuối cùng</Typography>
-                  </Box>
-                  <Switch
-                    size="small"
-                    checked={hideCompleted}
-                    onChange={() => { onToggleHideCompleted?.(); setMoreAnchor(null); }}
-                    onClick={(e) => e.stopPropagation()}
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': { color: '#5663ee' },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#5663ee' },
-                    }}
-                  />
-                </MenuItem>
-
-                <Divider sx={{ my: 0.5 }} />
-
-                <MenuItem
-                  onClick={() => { onExportCsv?.(); setMoreAnchor(null); }}
-                  sx={{ fontSize: 13, py: 1, gap: 1.5 }}
-                >
-                  <DownloadIcon fontSize="small" sx={{ color: "#6b7280" }} />
-                  <Box>
-                    <Typography fontSize={13} color="#374151">Xuất dữ liệu Excel</Typography>
-                    <Typography fontSize={11} color="#9ca3af">Tải xuống danh sách nhiệm vụ (.xlsx)</Typography>
-                  </Box>
-                </MenuItem>
-              </Menu>
-            </>
-          )}
-        </Stack>
+        </Box>
+        {moreOptionsMenu}
       </Stack>
     </Box>
   );

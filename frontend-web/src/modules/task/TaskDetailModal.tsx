@@ -11,6 +11,8 @@ import {
   Stack,
   Chip,
   Button,
+  useMediaQuery,
+  Collapse,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
@@ -18,6 +20,8 @@ import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import ShareIcon from "@mui/icons-material/Share";
 import CheckIcon from "@mui/icons-material/Check";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { PRIORITIES } from "../../constant/index";
 import type { ITask } from "./types";
 import { useUpdateTask } from "./api/update-task";
@@ -54,6 +58,7 @@ export default function TaskDetailModal({
   projectId,
   projectOwnerId,
 }: Props) {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [title, setTitle] = useState(task.title);
   const [editingTitle, setEditingTitle] = useState(false);
   const [description, setDescription] = useState(task.description || "");
@@ -62,6 +67,7 @@ export default function TaskDetailModal({
   const [activeTab] = useState<"comments">("comments");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(!isMobile);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}${window.location.pathname}?taskId=${task.task_id}`;
@@ -101,6 +107,10 @@ export default function TaskDetailModal({
     setDescription(task.description || "");
     setDeadline(task.deadline ? new Date(task.deadline) : null);
   }, [task.task_id, task.title, task.description, task.deadline]);
+
+  useEffect(() => {
+    setDetailsOpen(!isMobile);
+  }, [task.task_id, isMobile]);
 
   const handleTitleSave = () => {
     const trimmed = title.trim();
@@ -142,17 +152,18 @@ export default function TaskDetailModal({
       open={open}
       onClose={onClose}
       maxWidth={false}
+      fullScreen={isMobile && isFullscreen}
       PaperProps={{
         sx: {
-          width: isFullscreen ? "100vw" : "90vw",
-          maxWidth: isFullscreen ? "100vw" : 1100,
-          height: isFullscreen ? "100vh" : "88vh",
-          maxHeight: isFullscreen ? "100vh" : undefined,
-          borderRadius: isFullscreen ? 0 : "12px",
+          width: isMobile ? "100vw" : (isFullscreen ? "100vw" : "90vw"),
+          maxWidth: isMobile ? "100vw" : (isFullscreen ? "100vw" : 1100),
+          height: isMobile ? "100vh" : (isFullscreen ? "100vh" : "88vh"),
+          maxHeight: isMobile ? "100vh" : (isFullscreen ? "100vh" : undefined),
+          borderRadius: isMobile || isFullscreen ? 0 : "12px",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          m: isFullscreen ? 0 : undefined,
+          m: isMobile || isFullscreen ? 0 : undefined,
           transition: "all 0.2s ease",
         },
       }}
@@ -162,8 +173,8 @@ export default function TaskDetailModal({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          px: 2,
-          py: 1,
+          px: { xs: 1.25, sm: 2 },
+          py: { xs: 0.9, sm: 1 },
           borderBottom: "1px solid #e5e7eb",
           flexShrink: 0,
         }}
@@ -192,35 +203,232 @@ export default function TaskDetailModal({
               }
             </IconButton>
           </Tooltip>
-          <Tooltip title={isFullscreen ? "Thu nhỏ" : "Mở rộng toàn màn hình"}>
-            <IconButton size="small" onClick={() => setIsFullscreen(v => !v)}>
-              {isFullscreen
-                ? <CloseFullscreenIcon fontSize="small" sx={{ color: "#6b7280" }} />
-                : <OpenInFullIcon fontSize="small" sx={{ color: "#6b7280" }} />
-              }
-            </IconButton>
-          </Tooltip>
+          {!isMobile && (
+            <Tooltip title={isFullscreen ? "Thu nhỏ" : "Mở rộng toàn màn hình"}>
+              <IconButton size="small" onClick={() => setIsFullscreen(v => !v)}>
+                {isFullscreen
+                  ? <CloseFullscreenIcon fontSize="small" sx={{ color: "#6b7280" }} />
+                  : <OpenInFullIcon fontSize="small" sx={{ color: "#6b7280" }} />
+                }
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip title="Đóng">
             <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" sx={{ color: "#6b7280" }} /></IconButton>
           </Tooltip>
         </Stack>
       </Box>
 
-      <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <Box sx={{ display: "flex", flexDirection: isMobile ? "column" : "row", flex: 1, overflow: "hidden" }}>
+
+        <Box
+          sx={{
+            width: isMobile ? "100%" : 360,
+            order: isMobile ? 0 : 1,
+            flexShrink: 0,
+            borderLeft: isMobile ? "none" : "1px solid #e5e7eb",
+            borderBottom: isMobile ? "1px solid #e5e7eb" : "none",
+            overflowY: "auto",
+            px: isMobile ? 1.25 : 2,
+            py: isMobile ? 1.25 : 2,
+            bgcolor: isMobile ? "#fafbff" : "#fff",
+            "&::-webkit-scrollbar": { width: 6 },
+            "&::-webkit-scrollbar-thumb": { bgcolor: "#d1d5db", borderRadius: 3 },
+          }}
+        >
+          <Box sx={{ mb: 1}}>
+            <ChangeStatusSelector
+              currentStatusId={task.status_id}
+              currentStatusName={task.status?.name}
+              projectId={projectId!}
+              onStatusChange={(statusId) =>
+                updateTask({
+                  taskId: task.task_id,
+                  payload: { status_id: statusId },
+                })
+              }
+            />
+          </Box>
+
+          <Box
+            sx={{
+              border: "1px solid #e5e7eb",
+              borderRadius: isMobile ? "12px" : "8px",
+              overflow: "hidden",
+              mb: isMobile ? 0 : 2,
+              bgcolor: "#fff",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                px: 1.5,
+                py: 1,
+                bgcolor: "#f9fafb",
+                borderBottom: "1px solid #e5e7eb",
+                cursor: "pointer",
+              }}
+              onClick={() => setDetailsOpen((prev) => !prev)}
+            >
+              <Typography fontWeight={600} fontSize={13} flex={1}>Chi tiết</Typography>
+              <IconButton size="small" sx={{ color: "#6b7280" }}>
+                {detailsOpen ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              </IconButton>
+            </Box>
+
+            <Collapse in={detailsOpen}>
+              <Box className={styles.detailSection} sx={{ px: isMobile ? 1.25 : 2, py: 1 }}>
+                <Box className={styles.detailRow}>
+                  <Typography className={styles.detailLabel}>Người thực hiện</Typography>
+                  <AssigneeSelector
+                    assignee={assignee}
+                    projectMembers={projectMembers}
+                    onAssigneeChange={(userId) =>
+                      updateTask({
+                        taskId: task.task_id,
+                        payload: { assignee_id: userId },
+                      })
+                    }
+                    showText={true}
+                    showUnassignedText={true}
+                  />
+                </Box>
+
+                <Box className={styles.detailRow}>
+                  <Typography className={styles.detailLabel}>Độ ưu tiên</Typography>
+                  <PrioritySelector
+                    priority={priority}
+                    onPriorityChange={(priorityId) =>
+                      updateTask({
+                        taskId: task.task_id,
+                        payload: { priority_id: priorityId },
+                      })
+                    }
+                    showText={true}
+                  />
+                </Box>
+                
+                <Box className={styles.detailRow}>
+                  <Typography className={styles.detailLabel}>Ngày tạo</Typography>
+                  <Typography fontSize={13} fontWeight={isMobile ? 600 : 400} color="#111827">
+                    {task.created_at 
+                      ? new Date(task.created_at).toLocaleDateString("vi-VN", { 
+                          day: "numeric", 
+                          month: "short", 
+                          year: "numeric",
+                        })
+                      : "—"}
+                  </Typography>
+                </Box>
+
+                <Box className={styles.detailRow} onClick={() => setOpenDatePicker(true)}>
+                  <Typography className={styles.detailLabel}>Hạn hoàn thành</Typography>
+                  
+                  {deadline ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.8,
+                        px: 1.5,
+                        py: 0.5,
+                        border: "1px solid #73a030",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        bgcolor: "#f0f7f0",
+                      }}
+                    >
+                      <CalendarTodayIcon fontSize="small" sx={{ color: "#73a030" }} />
+                      <Typography fontSize={13} color="#73a030" sx={{ pt: "2px" }}>
+                        {deadline.toLocaleDateString("vi-VN", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        sx={{ fontSize: "13px", pr:"0px"}}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeadline(null);
+                          updateTask({
+                            taskId: task.task_id,
+                            payload: { deadline: null },
+                          });
+                        }}
+                      >
+                        <CloseIcon fontSize="inherit" />
+                      </IconButton>
+                    </Box>
+                  ) : (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        color: "#9ca3af",
+                      }}
+                    >
+                      <CalendarTodayIcon fontSize="small" />
+                      <Typography fontSize={13}>Chưa có hạn</Typography>
+                    </Box>
+                  )}
+                </Box>
+
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    open={openDatePicker}
+                    onClose={() => setOpenDatePicker(false)}
+                    value={deadline}
+                    onChange={(newDate) => {
+                      setDeadline(newDate);
+                      updateTask({
+                        taskId: task.task_id,
+                        payload: { 
+                          deadline: newDate ? toDateString(newDate) : null 
+                        },
+                      });
+                    }}
+                    slotProps={{ textField: { sx: { display: "none" } } }}
+                  />
+                </LocalizationProvider>
+
+                <Box className={styles.detailRow}>
+                  <Typography className={styles.detailLabel}>Người tạo</Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    {task.creator ? (
+                      <>
+                        <Avatar src={task.creator.picture} sx={{ width: 20, height: 20, fontSize: 10 }}>
+                          {task.creator.name?.charAt(0)}
+                        </Avatar>
+                        <Typography fontSize={13} color="#111827">{task.creator.name}</Typography>
+                      </>
+                    ) : (
+                      <Typography fontSize={13} color="#9ca3af">—</Typography>
+                    )}
+                  </Stack>
+                </Box>
+              </Box>
+            </Collapse>
+          </Box>
+        </Box>
 
         <Box
           sx={{
             flex: 1,
             overflowY: "auto",
-            px: 4,
-            py: 3,
+            order: isMobile ? 1 : 0,
+            px: isMobile ? 1.25 : 4,
+            py: isMobile ? 1.5 : 3,
             "&::-webkit-scrollbar": { width: 6 },
             "&::-webkit-scrollbar-thumb": { bgcolor: "#d1d5db", borderRadius: 3 },
           }}
         >
           <Box sx={{ mb: 3 }}>
             {editingTitle ? (
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems={{ xs: "stretch", sm: "center" }}>
                 <TextField
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -230,10 +438,9 @@ export default function TaskDetailModal({
                   variant="outlined"
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      fontSize: 20,
+                      fontSize: { xs: 18, sm: 20 },
                       fontWeight: 600,
                       borderRadius: "8px",
-                      height: "40px"
                     },
                   }}
                   onKeyDown={(e) => {
@@ -248,31 +455,33 @@ export default function TaskDetailModal({
                   }}
                 />
 
-                <Tooltip title="Lưu (Enter)">
-                  <IconButton 
-                    color="success" 
-                    onClick={handleTitleSave}
-                    disabled={!title.trim() || title.trim() === task.title}
-                  >
-                    <CheckIcon />
-                  </IconButton>
-                </Tooltip>
+                <Stack direction="row" spacing={0.5} justifyContent={{ xs: "flex-end", sm: "flex-start" }}>
+                  <Tooltip title="Lưu (Enter)">
+                    <IconButton 
+                      color="success" 
+                      onClick={handleTitleSave}
+                      disabled={!title.trim() || title.trim() === task.title}
+                    >
+                      <CheckIcon />
+                    </IconButton>
+                  </Tooltip>
 
-                <Tooltip title="Hủy (Esc)">
-                  <IconButton 
-                    color="default" 
-                    onClick={() => {
-                      setTitle(task.title);
-                      setEditingTitle(false);
-                    }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </Tooltip>
+                  <Tooltip title="Hủy (Esc)">
+                    <IconButton 
+                      color="default" 
+                      onClick={() => {
+                        setTitle(task.title);
+                        setEditingTitle(false);
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
               </Stack>
             ) : (
               <Typography
-                fontSize={22}
+                fontSize={{ xs: 20, sm: 22 }}
                 fontWeight={700}
                 sx={{
                   cursor: "text",
@@ -352,7 +561,7 @@ export default function TaskDetailModal({
           <Typography fontWeight={600} fontSize={14} mb={1}>
             Tài liệu liên kết
           </Typography>
-          <Box sx={{ mb: 3 }}>
+          <Box className={isMobile ? styles.mobileSectionCard : undefined} sx={{ mb: 3, p: isMobile ? 1.25 : 0 }}>
             <TaskAttachments
               taskId={task.task_id}
               taskCreatedBy={task.created_by}
@@ -368,8 +577,8 @@ export default function TaskDetailModal({
           </Typography>
 
           {(activeTab === "comments" || activeTab === "all") && (
-            <Box>
-              <Stack direction="row" spacing={1.5} alignItems="flex-start" mb={3}>
+            <Box className={isMobile ? styles.mobileSectionCard : undefined} sx={{ p: isMobile ? 1.25 : 0 }}>
+              <Stack direction="row" spacing={1.25} alignItems="flex-start" mb={3}>
                 <Avatar 
                   src={currentUser?.picture} 
                   sx={{ width: 32, height: 32, bgcolor: "#5663ee" }}
@@ -384,7 +593,7 @@ export default function TaskDetailModal({
                     members={commentMembers}
                     minRows={2}
                   />
-                  <Stack direction="row" spacing={2} sx={{ mt: 1.5, justifyContent: "flex-end" }}>
+                  <Stack direction="row" spacing={1.5} sx={{ mt: 1.5, justifyContent: "flex-end", flexWrap: "wrap" }}>
                     <Button
                       variant="text"
                       size="small"
@@ -402,7 +611,8 @@ export default function TaskDetailModal({
                         bgcolor: "#2563eb",
                         "&:hover": { bgcolor: "#1d4ed8" },
                         textTransform: "none",
-                        px: 4,
+                        px: isMobile ? 2.25 : 4,
+                        borderRadius: isMobile ? "10px" : undefined,
                       }}
                     >
                       Bình luận
@@ -427,190 +637,6 @@ export default function TaskDetailModal({
               )}
             </Box>
           )}
-        </Box>
-        <Box
-          sx={{
-            width: 360,
-            flexShrink: 0,
-            borderLeft: "1px solid #e5e7eb",
-            overflowY: "auto",
-            px: 2,
-            py: 2,
-            "&::-webkit-scrollbar": { width: 6 },
-            "&::-webkit-scrollbar-thumb": { bgcolor: "#d1d5db", borderRadius: 3 },
-          }}
-        >
-          <Box sx={{ mb: 1}}>
-            <ChangeStatusSelector
-              currentStatusId={task.status_id}
-              currentStatusName={task.status?.name}
-              projectId={projectId!}
-              onStatusChange={(statusId) =>
-                updateTask({
-                  taskId: task.task_id,
-                  payload: { status_id: statusId },
-                })
-              }
-            />
-          </Box>
-
-          <Box
-            sx={{
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              overflow: "hidden",
-              mb: 2,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                px: 1.5,
-                py: 1,
-                bgcolor: "#f9fafb",
-                borderBottom: "1px solid #e5e7eb",
-                cursor: "pointer",
-              }}
-            >
-              <Typography fontWeight={600} fontSize={13} flex={1}>Chi tiết</Typography>
-            </Box>
-
-            <Box sx={{ px: 2, py: 1 }}>
-              <Box className={styles.detailRow}>
-                <Typography className={styles.detailLabel}>Người thực hiện</Typography>
-                <AssigneeSelector
-                  assignee={assignee}
-                  projectMembers={projectMembers}
-                  onAssigneeChange={(userId) =>
-                    updateTask({
-                      taskId: task.task_id,
-                      payload: { assignee_id: userId },
-                    })
-                  }
-                  showText={true}
-                  showUnassignedText={true}
-                />
-              </Box>
-
-              <Box className={styles.detailRow}>
-                <Typography className={styles.detailLabel}>Độ ưu tiên</Typography>
-                <PrioritySelector
-                  priority={priority}
-                  onPriorityChange={(priorityId) =>
-                    updateTask({
-                      taskId: task.task_id,
-                      payload: { priority_id: priorityId },
-                    })
-                  }
-                  showText={true}
-                />
-              </Box>
-              
-              <Box className={styles.detailRow}>
-                <Typography className={styles.detailLabel}>Ngày tạo</Typography>
-                <Typography fontSize={13} color="#111827">
-                  {task.created_at 
-                    ? new Date(task.created_at).toLocaleDateString("vi-VN", { 
-                        day: "numeric", 
-                        month: "short", 
-                        year: "numeric",
-                      })
-                    : "—"}
-                </Typography>
-              </Box>
-
-              <Box className={styles.detailRow} onClick={() => setOpenDatePicker(true)}>
-                <Typography className={styles.detailLabel}>Hạn hoàn thành</Typography>
-                
-                {deadline ? (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.8,
-                      px: 1.5,
-                      py: 0.5,
-                      border: "1px solid #73a030",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      bgcolor: "#f0f7f0",
-                    }}
-                  >
-                    <CalendarTodayIcon fontSize="small" sx={{ color: "#73a030" }} />
-                    <Typography fontSize={13} color="#73a030" sx={{ pt: "2px" }}>
-                      {deadline.toLocaleDateString("vi-VN", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </Typography>
-                    <IconButton
-                      size="small"
-                       sx={{ fontSize: "13px", pr:"0px"}}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeadline(null);
-                        updateTask({
-                          taskId: task.task_id,
-                          payload: { deadline: null },
-                        });
-                      }}
-                    >
-                      <CloseIcon fontSize="inherit" />
-                    </IconButton>
-                  </Box>
-                ) : (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      color: "#9ca3af",
-                    }}
-                  >
-                    <CalendarTodayIcon fontSize="small" />
-                    <Typography fontSize={13}>Chưa có hạn</Typography>
-                  </Box>
-                )}
-              </Box>
-
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  open={openDatePicker}
-                  onClose={() => setOpenDatePicker(false)}
-                  value={deadline}
-                  onChange={(newDate) => {
-                    setDeadline(newDate);
-                    updateTask({
-                      taskId: task.task_id,
-                      payload: { 
-                        deadline: newDate ? toDateString(newDate) : null 
-                      },
-                    });
-                  }}
-                  slotProps={{ textField: { sx: { display: "none" } } }}
-                />
-              </LocalizationProvider>
-
-              <Box className={styles.detailRow}>
-                <Typography className={styles.detailLabel}>Người tạo</Typography>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  {task.creator ? (
-                    <>
-                      <Avatar src={task.creator.picture} sx={{ width: 20, height: 20, fontSize: 10 }}>
-                        {task.creator.name?.charAt(0)}
-                      </Avatar>
-                      <Typography fontSize={13} color="#111827">{task.creator.name}</Typography>
-                    </>
-                  ) : (
-                    <Typography fontSize={13} color="#9ca3af">—</Typography>
-                  )}
-                </Stack>
-              </Box>
-            </Box>
-          </Box>
-
         </Box>
       </Box>
     </Dialog>

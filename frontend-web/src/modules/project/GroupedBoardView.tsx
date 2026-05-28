@@ -161,6 +161,7 @@ export function GroupedBoardView({ groupBy, tasks, allTasks, statuses, projectMe
                       droppableId={toDropId(group.key, status.id)}
                       displaySettings={displaySettings}
                       doneStatusId={doneStatusId}
+                      alwaysShowAddTask={status.id === statuses[0]?.id}
                     />
                   ))}
                 </Stack>

@@ -33,6 +33,7 @@ interface Props {
   displaySettings?: DisplaySettings;
   canManage?: boolean;
   doneStatusId?: number | null;
+  alwaysShowAddTask?: boolean;
 }
 
 export const toColumnSortableId = (statusId: number) => `col-${statusId}`;
@@ -50,6 +51,7 @@ export function BoardColumn({
   displaySettings,
   canManage = false,
   doneStatusId,
+  alwaysShowAddTask = false,
 }: Props) {
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: droppableId ?? status.id });
 
@@ -61,8 +63,6 @@ export function BoardColumn({
     transition,
     isDragging,
   } = useSortable({ id: toColumnSortableId(status.id), disabled: !canManage });
-
-  const isBacklog = status.name.toLowerCase() === "backlog";
 
   return (
     <div
@@ -100,7 +100,7 @@ export function BoardColumn({
           <Box className={styles.taskList}>
             {!isAddOpen && (
               <Box
-                className={`${styles.createTask} ${isBacklog ? styles.alwaysShow : ""}`}
+                className={`${styles.createTask} ${alwaysShowAddTask ? styles.alwaysShow : ""}`}
                 onClick={onOpenAdd}
               >
                 + Thêm nhiệm vụ

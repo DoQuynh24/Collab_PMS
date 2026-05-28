@@ -58,3 +58,31 @@
 
 }
 
+@media (max-width: 900px) {
+  .boardColumns {
+    align-items: stretch;
+
+    .boardColumn {
+      width: calc(100vw - 24px);
+      max-width: 100%;
+      padding: 12px;
+      max-height: calc(100vh - 290px);
+      border-radius: 16px;
+    }
+
+    .columnTitle {
+      margin-bottom: 10px;
+    }
+
+    .taskList {
+      .createTask {
+        opacity: 1;
+        border-radius: 10px;
+        background-color: #fff;
+        margin-bottom: 8px;
+        padding: 10px;
+      }
+    }
+  }
+}
+

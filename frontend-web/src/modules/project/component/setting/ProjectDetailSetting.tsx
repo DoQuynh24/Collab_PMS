@@ -11,6 +11,7 @@ import {
   IconButton,
   Select,
   MenuItem,
+  useMediaQuery,
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -23,6 +24,7 @@ import LoadingPage from "../../../../components/loading/LoadingPage";
 import { ROUTES } from "../../../../routes/urls";
 
 export function ProjectDetailSettings() {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
 
@@ -103,7 +105,7 @@ export function ProjectDetailSettings() {
         </Typography>
       </Box>
 
-      <Stack spacing={3.5} sx={{ border: "1px solid #e5e7eb", borderRadius: "12px", p: 4 }}>
+      <Stack spacing={3} sx={{ border: "1px solid #e5e7eb", borderRadius: { xs: "18px", sm: "12px" }, p: { xs: 2, sm: 4 } }}>
         <Box>
           <Typography fontWeight={600} mb={1}>Tên dự án</Typography>
           <TextField
@@ -149,7 +151,7 @@ export function ProjectDetailSettings() {
           </Select>
         </Box>
 
-        <Stack direction="row" spacing={2}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
           <Box sx={{ flex: 1 }}>
             <Typography fontWeight={600} mb={1}>Ngày bắt đầu</Typography>
             <TextField
@@ -184,11 +186,12 @@ export function ProjectDetailSettings() {
         </Stack>
 
         {canEdit && (
-          <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ mt: 4 }}>
+          <Stack direction={{ xs: "column-reverse", sm: "row" }} justifyContent="flex-end" spacing={2} sx={{ mt: 4 }}>
             <Button
               variant="outlined"
               onClick={handleCancel}
               disabled={isPending}
+              fullWidth={isMobile}
               sx={{ px: 4 }}
             >
               Hủy
@@ -197,6 +200,7 @@ export function ProjectDetailSettings() {
               variant="contained"
               onClick={handleSave}
               disabled={!hasChanges || isPending}
+              fullWidth={isMobile}
               sx={{ bgcolor: "#5663ee", "&:hover": { bgcolor: "#4451d4" }, px: 4 }}
             >
               {isPending ? "Đang lưu..." : "Lưu thay đổi"}

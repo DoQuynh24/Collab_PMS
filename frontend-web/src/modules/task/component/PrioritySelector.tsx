@@ -5,6 +5,7 @@ import {
   Popover,
   MenuItem,
   Tooltip,
+  useMediaQuery,
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
 import { PRIORITIES } from "../../../constant/index";
@@ -24,6 +25,7 @@ export default function PrioritySelector({
   showTooltip = false,
   tooltipTitle = "Độ ưu tiên",
 }: Props) {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -56,20 +58,20 @@ export default function PrioritySelector({
         alignItems: "center",
         gap: 1,
         cursor: "pointer",
-        px: 1,
-        py: 0.75,
+        px: isMobile ? 0 : 1,
+        py: isMobile ? 0 : 0.75,
         borderRadius: "6px",
-        "&:hover": { background: "transparent", transform: "scale(1.15)"  }
+        "&:hover": isMobile ? { background: "transparent" } : { background: "transparent", transform: "scale(1.15)" }
       }}
     >
       <FlagIcon
         sx={{
           color: priority ? priority.color : "#9e9e9e",
-          fontSize: 20,
+          fontSize: isMobile ? 18 : 20,
         }}
       />
       {showText && (
-        <Typography fontSize={13}>
+        <Typography fontSize={13} fontWeight={isMobile ? 600 : 400}>
           {priority ? priority.name : "Chưa chọn ưu tiên"}
         </Typography>
       )}
@@ -96,6 +98,7 @@ export default function PrioritySelector({
         slotProps={{
           paper: {
             onMouseDown: (e) => e.stopPropagation(),
+            sx: { width: isMobile ? 'calc(100vw - 32px)' : undefined, maxWidth: 260 },
           },
         }}
       >

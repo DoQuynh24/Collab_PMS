@@ -22,7 +22,7 @@ export function HeaderMenu() {
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', ml: 10, gap: 0.5 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', ml: 4, gap: 0.5 }}>
       <IconButton
         color="inherit"
         onClick={(e) => setProjectAnchor(e.currentTarget)}

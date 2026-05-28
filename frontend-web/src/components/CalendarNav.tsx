@@ -17,14 +17,14 @@ export function CalendarNav({ year, month, onPrev, onNext, onToday }: Props) {
   const isCurrentView = year === today.getFullYear() && month === today.getMonth();
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ display: 'flex', alignItems: { xs: 'stretch', sm: 'center' }, gap: 1, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
       <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
         <Tooltip title="Tháng trước">
           <IconButton size="small" onClick={onPrev} sx={{ borderRadius: 0, borderRight: '1px solid #e5e7eb', px: 1.2 }}>
             <ChevronLeftIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Typography fontSize={14} fontWeight={600} color="#111827" sx={{ px: 2.5, minWidth: 140, textAlign: 'center' }}>
+        <Typography fontSize={14} fontWeight={600} color="#111827" sx={{ px: { xs: 1.5, sm: 2.5 }, minWidth: { xs: 120, sm: 140 }, textAlign: 'center' }}>
           {MONTHS[month]} {year}
         </Typography>
         <Tooltip title="Tháng sau">
@@ -43,6 +43,7 @@ export function CalendarNav({ year, month, onPrev, onNext, onToday }: Props) {
             borderColor: isCurrentView ? '#5663ee' : '#e5e7eb',
             borderRadius: '6px', px: 1.5, gap: 0.5,
             bgcolor: isCurrentView ? '#eef0ff' : 'transparent',
+            flexShrink: 0,
           }}
         >
           <TodayIcon fontSize="small" sx={{ color: isCurrentView ? '#5663ee' : 'inherit' }} />

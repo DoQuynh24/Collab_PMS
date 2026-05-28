@@ -9,6 +9,7 @@ import {
   ListItemText,
   Avatar,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import type { ICommentUser } from "../type/index";
 
@@ -29,6 +30,7 @@ export default function MentionInput({
   minRows = 2,
   size = "medium",
 }: Props) {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionStart, setMentionStart] = useState<number>(-1);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -130,7 +132,7 @@ export default function MentionInput({
             bottom: "100%",
             left: 0,
             mb: 0.5,
-            width: 260,
+            width: isMobile ? "100%" : 260,
             zIndex: 1300,
             borderRadius: "8px",
             overflow: "hidden",

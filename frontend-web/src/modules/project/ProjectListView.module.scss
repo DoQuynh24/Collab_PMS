@@ -159,6 +159,37 @@
   }
 }
 
+@media (max-width: 700px) {
+  .table {
+    min-width: 920px;
+  }
+
+  .footer {
+    padding: 10px 12px;
+
+    .footerActions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .countInfo {
+      text-align: center;
+    }
+  }
+
+  .actionBar {
+    width: calc(100vw - 24px);
+    left: 12px;
+    right: 12px;
+    transform: none;
+    bottom: 16px;
+    padding: 10px 12px;
+    gap: 10px;
+    overflow-x: auto;
+  }
+}
+
 
 .actionBar {
   position: fixed;

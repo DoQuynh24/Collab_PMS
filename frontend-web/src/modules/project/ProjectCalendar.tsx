@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Box, Typography, Tooltip, Avatar, Button } from '@mui/material';
+import { Box, Typography, Tooltip, Avatar, Button, useMediaQuery } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { CalendarNav } from '../../components/CalendarNav';
 import { useGetProjectById } from './api/get-project-id';
@@ -34,6 +34,7 @@ export default function ProjectCalendar() {
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams] = useSearchParams();
   const meetingIdFromUrl = searchParams.get('meetingId');
+  const isMobile = useMediaQuery('(max-width:900px)');
   const { data: project, isLoading } = useGetProjectById(projectId!);
   const { data: tasks = [] } = useGetTasksByProject(projectId!);
   const { data: statusData } = useGetProjectTaskStatuses(projectId!);
@@ -144,13 +145,24 @@ export default function ProjectCalendar() {
 
   if (isLoading) return <LoadingPage />;
 
+  const monthDays = Array.from({ length: daysInMonth }, (_, index) => index + 1);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', minWidth: 0 }}>
       <ProjectHeader projectName={project?.name} projectId={projectId} />
       <ProjectNav projectId={projectId} />
 
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', px: { xs: 0.5, sm: 2, md: 3 }, py: { xs: 1.25, sm: 3 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'stretch', md: 'center' },
+            justifyContent: 'space-between',
+            gap: 1.5,
+            mb: 2,
+          }}
+        >
           <CalendarNav
             year={currentYear}
             month={currentMonth}
@@ -158,11 +170,17 @@ export default function ProjectCalendar() {
             onNext={nextMonth}
             onToday={goToday}
           />
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'space-between', sm: 'flex-start' } }}>
             <Button
               variant="outlined" size="small" startIcon={<AddIcon />}
               onClick={() => setOpenCreateMeeting(true)}
-              sx={{ textTransform: 'none', borderColor: '#5663ee', color: '#5663ee', '&:hover': { bgcolor: '#eef0ff' } }}
+              sx={{
+                textTransform: 'none',
+                borderColor: '#5663ee',
+                color: '#5663ee',
+                borderRadius: { xs: '12px', sm: '8px' },
+                '&:hover': { bgcolor: '#eef0ff' },
+              }}
             >
               Đặt lịch họp
             </Button>
@@ -174,105 +192,239 @@ export default function ProjectCalendar() {
           </Box>
         </Box>
 
-        <Box className={styles.grid}>
-          {WEEKDAYS.map(d => (
-            <Box key={d} className={styles.weekdayHeader}>
-              <Typography fontSize={12} fontWeight={600} color="#6b7280">{d}</Typography>
-            </Box>
-          ))}
+        {isMobile ? (
+          <Box className={styles.mobileAgenda}>
+            {monthDays
+              .filter((day) => {
+                const key = dateKey(day);
+                return day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()
+                  ? true
+                  : (tasksByDate[key]?.length ?? 0) > 0 || (meetingsByDate[key]?.length ?? 0) > 0;
+              })
+              .map((day) => {
+                const key = dateKey(day);
+                const dayTasks = tasksByDate[key] ?? [];
+                const dayMeetings = meetingsByDate[key] ?? [];
+                const dayDate = new Date(currentYear, currentMonth, day);
+                const isCurrentDay = isToday(day);
 
-          {cells.map((day, idx) => {
-            if (!day) return <Box key={`empty-${idx}`} className={styles.emptyCell} />;
+                return (
+                  <Box key={`mobile-${key}`} className={styles.mobileDayCard}>
+                    <Box className={styles.mobileDayHeader}>
+                      <Box>
+                        <Typography fontSize={12} fontWeight={700} color="#64748b" sx={{ textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                          {WEEKDAYS[dayDate.getDay()]}
+                        </Typography>
+                        <Typography fontSize={18} fontWeight={800} color="#111827">
+                          {day}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          px: 1.1,
+                          py: 0.45,
+                          borderRadius: '999px',
+                          bgcolor: isCurrentDay ? '#5663ee' : '#f8fafc',
+                          color: isCurrentDay ? '#fff' : '#64748b',
+                          fontSize: 11,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {isCurrentDay ? 'Hôm nay' : `${dayMeetings.length + dayTasks.length} mục`}
+                      </Box>
+                    </Box>
 
-            const key = dateKey(day);
-            const dayTasks = tasksByDate[key] ?? [];
-            const dayMeetings = meetingsByDate[key] ?? [];
-            const isCurrentDay = isToday(day);
-            const isPast = new Date(currentYear, currentMonth, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      {dayMeetings.map((meeting) => {
+                        const startTime = new Date(meeting.start_time);
+                        const isNow = startTime <= new Date();
+                        const isCancelled = meeting.status === 'cancelled';
+                        const isCompleted = meeting.status === 'completed';
+                        const chipBg = isCancelled ? '#fef2f2' : isCompleted ? '#f3f4f6' : isNow ? '#f0fdf4' : '#eef0ff';
+                        const chipBorder = isCancelled ? '#fca5a5' : isCompleted ? '#d1d5db' : isNow ? '#86efac' : '#c7d2fe';
+                        const dotColor = isCancelled ? '#ef4444' : isCompleted ? '#9ca3af' : isNow ? '#16a34a' : '#5663ee';
+                        const textColor = isCancelled ? '#dc2626' : isCompleted ? '#6b7280' : isNow ? '#15803d' : '#4338ca';
 
-            return (
-              <Box key={key} className={`${styles.dayCell} ${isPast && !isCurrentDay ? styles.pastDay : ''}`}>
-                <Box className={styles.dayNumber}>
-                  <Box
-                    sx={{
-                      width: 26, height: 26, borderRadius: '50%',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      bgcolor: isCurrentDay ? '#5663ee' : 'transparent',
-                      color: isCurrentDay ? '#fff' : isPast ? '#9ca3af' : '#111827',
-                      fontWeight: isCurrentDay ? 700 : 400,
-                      fontSize: 13,
-                    }}
-                  >
-                    {day}
+                        return (
+                          <Box
+                            key={`mobile-meeting-${meeting.id}`}
+                            className={styles.mobileMeetingItem}
+                            sx={{ bgcolor: chipBg, borderColor: chipBorder }}
+                            onClick={(e) => setMeetingPopover({ meeting, anchor: e.currentTarget })}
+                          >
+                            <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: dotColor, flexShrink: 0, mt: 0.65 }} />
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <Typography fontSize={13} fontWeight={700} color={textColor} noWrap>
+                                {startTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - {meeting.title}
+                              </Typography>
+                              <Typography fontSize={11} color={textColor} sx={{ opacity: 0.9 }}>
+                                {isCancelled ? 'Đã hủy' : isCompleted ? 'Đã kết thúc' : isNow ? 'Đang diễn ra' : 'Lịch họp'}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        );
+                      })}
+
+                      {dayTasks.map((task) => {
+                        const priority = PRIORITIES.find((p) => p.id === task.priority_id);
+                        const assignee = members.find((m: any) => m.user_id === task.assignee_id);
+
+                        return (
+                          <Box
+                            key={`mobile-task-${task.task_id}`}
+                            className={styles.mobileTaskItem}
+                            sx={{ borderLeftColor: priority?.color ?? '#5663ee' }}
+                            onClick={() => setSelectedTask(task)}
+                          >
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <Typography fontSize={13} fontWeight={700} color="#111827" noWrap>
+                                {task.title}
+                              </Typography>
+                              <Typography fontSize={11} color="#64748b">
+                                TASK-{task.task_id}
+                              </Typography>
+                            </Box>
+                            {assignee && (
+                              <Avatar src={(assignee as any).user?.picture} sx={{ width: 24, height: 24, fontSize: 10, flexShrink: 0 }}>
+                                {(assignee as any).user?.name?.charAt(0).toUpperCase()}
+                              </Avatar>
+                            )}
+                          </Box>
+                        );
+                      })}
+
+                      {dayMeetings.length === 0 && dayTasks.length === 0 && (
+                        <Typography fontSize={12} color="#94a3b8">
+                          Không có lịch hay nhiệm vụ trong ngày này.
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
-                </Box>
+                );
+              })}
 
-                <Box className={styles.taskList}>
-                  {dayMeetings.map(meeting => {
-                    const startTime = new Date(meeting.start_time);
-                    const isNow = startTime <= new Date();
-                    const isCancelled = meeting.status === 'cancelled';
-                    const isCompleted = meeting.status === 'completed';
-                    const chipBg = isCancelled ? '#fef2f2' : isCompleted ? '#f3f4f6' : isNow ? '#f0fdf4' : '#eef0ff';
-                    const chipBorder = isCancelled ? '#fca5a5' : isCompleted ? '#d1d5db' : isNow ? '#86efac' : '#c7d2fe';
-                    const dotColor = isCancelled ? '#ef4444' : isCompleted ? '#9ca3af' : isNow ? '#16a34a' : '#5663ee';
-                    const textColor = isCancelled ? '#dc2626' : isCompleted ? '#6b7280' : isNow ? '#15803d' : '#4338ca';
-                    const statusLabel = isCancelled ? '❌ Đã hủy' : isCompleted ? '✓ Đã kết thúc' : isNow ? '🟢 Đang diễn ra' : '';
-                    const tooltipTitle = `📅 ${meeting.title} — ${startTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}${statusLabel ? ` (${statusLabel})` : ''}`;
-                    return (
-                      <Tooltip key={`m-${meeting.id}`} title={tooltipTitle} placement="top">
-                        <Box
-                          onClick={(e) => setMeetingPopover({ meeting, anchor: e.currentTarget })}
+            {monthDays.every((day) => {
+              const key = dateKey(day);
+              const isCurrentDay = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+              return !isCurrentDay && (tasksByDate[key]?.length ?? 0) === 0 && (meetingsByDate[key]?.length ?? 0) === 0;
+            }) && (
+              <Box className={styles.mobileEmptyState}>
+                <Typography fontSize={14} fontWeight={700} color="#111827">
+                  Tháng này chưa có nội dung
+                </Typography>
+                <Typography fontSize={12} color="#64748b">
+                  Hãy tạo lịch họp hoặc thêm nhiệm vụ để theo dõi tại đây.
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        ) : (
+          <Box className={styles.grid}>
+            {WEEKDAYS.map(d => (
+              <Box key={d} className={styles.weekdayHeader}>
+                <Typography fontSize={12} fontWeight={600} color="#6b7280">{d}</Typography>
+              </Box>
+            ))}
+
+            {cells.map((day, idx) => {
+              if (!day) return <Box key={`empty-${idx}`} className={styles.emptyCell} />;
+
+              const key = dateKey(day);
+              const dayTasks = tasksByDate[key] ?? [];
+              const dayMeetings = meetingsByDate[key] ?? [];
+              const isCurrentDay = isToday(day);
+              const isPast = new Date(currentYear, currentMonth, day) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+              return (
+                <Box key={key} className={`${styles.dayCell} ${isPast && !isCurrentDay ? styles.pastDay : ''}`}>
+                  <Box className={styles.dayNumber}>
+                    <Box
+                      sx={{
+                        width: 26, height: 26, borderRadius: '50%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        bgcolor: isCurrentDay ? '#5663ee' : 'transparent',
+                        color: isCurrentDay ? '#fff' : isPast ? '#9ca3af' : '#111827',
+                        fontWeight: isCurrentDay ? 700 : 400,
+                        fontSize: 13,
+                      }}
+                    >
+                      {day}
+                    </Box>
+                  </Box>
+
+                  <Box className={styles.taskList}>
+                    {dayMeetings.map(meeting => {
+                      const startTime = new Date(meeting.start_time);
+                      const isNow = startTime <= new Date();
+                      const isCancelled = meeting.status === 'cancelled';
+                      const isCompleted = meeting.status === 'completed';
+                      const chipBg = isCancelled ? '#fef2f2' : isCompleted ? '#f3f4f6' : isNow ? '#f0fdf4' : '#eef0ff';
+                      const chipBorder = isCancelled ? '#fca5a5' : isCompleted ? '#d1d5db' : isNow ? '#86efac' : '#c7d2fe';
+                      const dotColor = isCancelled ? '#ef4444' : isCompleted ? '#9ca3af' : isNow ? '#16a34a' : '#5663ee';
+                      const textColor = isCancelled ? '#dc2626' : isCompleted ? '#6b7280' : isNow ? '#15803d' : '#4338ca';
+                      const statusLabel = isCancelled ? '❌ Đã hủy' : isCompleted ? '✓ Đã kết thúc' : isNow ? '🟢 Đang diễn ra' : '';
+                      const tooltipTitle = `📅 ${meeting.title} — ${startTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}${statusLabel ? ` (${statusLabel})` : ''}`;
+                      return (
+                        <Tooltip key={`m-${meeting.id}`} title={tooltipTitle} placement="top">
+                          <Box
+                            onClick={(e) => setMeetingPopover({ meeting, anchor: e.currentTarget })}
                           sx={{
                             display: 'flex', alignItems: 'center', gap: 0.5,
                             px: 0.8, py: 0.3, borderRadius: '4px', cursor: 'pointer',
                             bgcolor: chipBg, border: `1px solid ${chipBorder}`,
                             '&:hover': { opacity: 0.85 }, mb: 0.3,
+                            minHeight: 22,
+                            maxHeight: 22,
+                            overflow: 'hidden',
+                            minWidth: 0,
+                            width: '100%',
+                            boxSizing: 'border-box',
                             textDecoration: isCancelled ? 'line-through' : 'none',
                             opacity: isCancelled || isCompleted ? 0.75 : 1,
                           }}
-                        >
-                          <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: dotColor, flexShrink: 0 }} />
-                          <Typography fontSize={11} fontWeight={500} color={textColor} noWrap sx={{ flex: 1 }}>
-                            {startTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} {meeting.title}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-                    );
-                  })}
+                          >
+                            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: dotColor, flexShrink: 0 }} />
+                            <Typography fontSize={11} fontWeight={500} color={textColor} noWrap sx={{ flex: 1 }}>
+                              {startTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} {meeting.title}
+                            </Typography>
+                          </Box>
+                        </Tooltip>
+                      );
+                    })}
 
-                  {dayTasks.slice(0, 3).map(task => {
-                    const priority = PRIORITIES.find(p => p.id === task.priority_id);
-                    const assignee = members.find((m: any) => m.user_id === task.assignee_id);
-                    return (
-                      <Tooltip key={task.task_id} title={task.title} placement="top">
-                        <Box
-                          className={styles.taskChip}
-                          onClick={() => setSelectedTask(task)}
-                          sx={{ borderLeft: `3px solid ${priority?.color ?? '#5663ee'}`, '&:hover': { bgcolor: '#f0f0ff' } }}
-                        >
-                          <Typography fontSize={11} fontWeight={500} color="#111827" noWrap sx={{ flex: 1 }}>
-                            {task.title}
-                          </Typography>
-                          {assignee && (
-                            <Avatar src={(assignee as any).user?.picture} sx={{ width: 16, height: 16, fontSize: 8, flexShrink: 0 }}>
-                              {(assignee as any).user?.name?.charAt(0).toUpperCase()}
-                            </Avatar>
-                          )}
-                        </Box>
-                      </Tooltip>
-                    );
-                  })}
-                  {dayTasks.length > 3 && (
-                    <Typography fontSize={11} color="#6b7280" sx={{ pl: 0.5 }}>
-                      +{dayTasks.length - 3} nhiệm vụ
-                    </Typography>
-                  )}
+                    {dayTasks.slice(0, 3).map(task => {
+                      const priority = PRIORITIES.find(p => p.id === task.priority_id);
+                      const assignee = members.find((m: any) => m.user_id === task.assignee_id);
+                      return (
+                        <Tooltip key={task.task_id} title={task.title} placement="top">
+                          <Box
+                            className={styles.taskChip}
+                            onClick={() => setSelectedTask(task)}
+                            sx={{ borderLeft: `3px solid ${priority?.color ?? '#5663ee'}`, '&:hover': { bgcolor: '#f0f0ff' } }}
+                          >
+                            <Typography fontSize={11} fontWeight={500} color="#111827" noWrap sx={{ flex: 1 }}>
+                              {task.title}
+                            </Typography>
+                            {assignee && (
+                              <Avatar src={(assignee as any).user?.picture} sx={{ width: 16, height: 16, fontSize: 8, flexShrink: 0 }}>
+                                {(assignee as any).user?.name?.charAt(0).toUpperCase()}
+                              </Avatar>
+                            )}
+                          </Box>
+                        </Tooltip>
+                      );
+                    })}
+                    {dayTasks.length > 3 && (
+                      <Typography fontSize={11} color="#6b7280" sx={{ pl: 0.5 }}>
+                        +{dayTasks.length - 3} nhiệm vụ
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            );
-          })}
-        </Box>
+              );
+            })}
+          </Box>
+        )}
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mt: 2, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

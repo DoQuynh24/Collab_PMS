@@ -3,7 +3,12 @@ import {
   Box,
   Typography,
   Stack,
+  Button,
+  IconButton,
+  useMediaQuery,
 } from "@mui/material";
+import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import { useParams, useSearchParams } from "react-router-dom";
 import {
   closestCenter,
@@ -47,6 +52,7 @@ import styles from "./ProjectBoardView.module.scss";
 export function ProjectBoardView() {
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMobile = useMediaQuery("(max-width:900px)");
   const { data: project, isLoading } = useGetProjectById(projectId!);
   const { data: currentUser } = useGetCurrentUser();
   const { data: statusData } = useGetProjectTaskStatuses(projectId!);
@@ -59,6 +65,7 @@ export function ProjectBoardView() {
   const [openAdd, setOpenAdd] = useState<number | null>(null);
   const [activeColumnId, setActiveColumnId] = useState<number | null>(null);
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
+  const [mobileStatusId, setMobileStatusId] = useState<number | null>(null);
 
   const [hideCompleted, setHideCompleted] = useState(() =>
     localStorage.getItem(`hide-completed-${projectId}`) === 'true'
@@ -76,13 +83,19 @@ export function ProjectBoardView() {
 
   const { filters, setFilters, filterTasks, filteredTasks, searchText, setSearchText } = useTaskFilter(tasks);
   const { exportCsv } = useExportTasksCsv();
+  const statuses = localStatuses;
 
   useEffect(() => {
     if (statusData?.data)
       setLocalStatuses(statusData.data);
     }, [statusData]);
 
-  const statuses = localStatuses;
+  useEffect(() => {
+    if (!statuses.length) return;
+    setMobileStatusId((prev) => (
+      prev && statuses.some((status) => status.id === prev) ? prev : statuses[0].id
+    ));
+  }, [statuses]);
 
   const urlTaskId = searchParams.get('taskId');
   const taskFromUrl = urlTaskId ? tasks.find(t => t.task_id === Number(urlTaskId)) : null;
@@ -130,6 +143,10 @@ export function ProjectBoardView() {
   };
 
   const isFilterActive = filters.assignees.length > 0 || filters.priorities.length > 0 || filters.statuses.length > 0;
+  const mobileStatusIndex = statuses.findIndex((status) => status.id === mobileStatusId);
+  const visibleStatuses = isMobile && groupBy === 'none'
+    ? statuses.filter((status) => status.id === mobileStatusId)
+    : statuses;
 
   const handleExportCsv = () => {
     if (isFilterActive) {
@@ -239,7 +256,7 @@ export function ProjectBoardView() {
         onFilterChange={setFilters}
         searchText={searchText}
         onSearchChange={setSearchText}
-        showGroupButton
+        showGroupButton={!isMobile}
         groupBy={groupBy}
         onGroupByChange={setGroupBy}
         showDisplaySettings
@@ -251,7 +268,76 @@ export function ProjectBoardView() {
         onExportCsv={handleExportCsv}
       />
 
-      <Box sx={{ flex: 1, overflowX: groupBy === 'none' ? "auto" : "hidden", overflowY: "hidden", minHeight: 0, px: 2, pb: 2, scrollbarWidth: "none" }}>
+      {isMobile && groupBy === 'none' && statuses.length > 0 && mobileStatusId && (
+        <Box
+          sx={{
+            px: 0.5,
+            pb: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
+          <IconButton
+            size="small"
+            onClick={() => mobileStatusIndex > 0 && setMobileStatusId(statuses[mobileStatusIndex - 1].id)}
+            disabled={mobileStatusIndex <= 0}
+            sx={{ border: '1px solid #dbe3f0', borderRadius: '12px', bgcolor: '#fff' }}
+          >
+            <ChevronLeftRoundedIcon fontSize="small" />
+          </IconButton>
+
+          <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', scrollbarWidth: 'none', flex: 1 }}>
+            {statuses.map((status) => {
+              const isActive = status.id === mobileStatusId;
+              const count = filterTasks(status.id).filter(t => !(hideCompleted && isDoneStatus(t.status_id))).length;
+              return (
+                <Button
+                  key={status.id}
+                  onClick={() => setMobileStatusId(status.id)}
+                  sx={{
+                    flexShrink: 0,
+                    minWidth: 'fit-content',
+                    px: 1.5,
+                    py: 0.9,
+                    borderRadius: '999px',
+                    border: '1px solid',
+                    borderColor: isActive ? '#c7d2fe' : '#e5e7eb',
+                    bgcolor: isActive ? '#eef2ff' : '#fff',
+                    color: isActive ? '#5663ee' : '#475569',
+                    textTransform: 'none',
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  {status.name} ({count})
+                </Button>
+              );
+            })}
+          </Box>
+
+          <IconButton
+            size="small"
+            onClick={() => mobileStatusIndex < statuses.length - 1 && setMobileStatusId(statuses[mobileStatusIndex + 1].id)}
+            disabled={mobileStatusIndex === -1 || mobileStatusIndex >= statuses.length - 1}
+            sx={{ border: '1px solid #dbe3f0', borderRadius: '12px', bgcolor: '#fff' }}
+          >
+            <ChevronRightRoundedIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      )}
+
+      <Box
+        sx={{
+          flex: 1,
+          overflowX: groupBy === 'none' ? "auto" : "hidden",
+          overflowY: "hidden",
+          minHeight: 0,
+          px: { xs: 0.5, sm: 1.5, md: 2 },
+          pb: { xs: 1.5, sm: 2 },
+          scrollbarWidth: "none",
+        }}
+      >
         {groupBy === 'none' ? (
           <DndContext
             sensors={sensors}
@@ -263,8 +349,18 @@ export function ProjectBoardView() {
               items={statuses.map(s => toColumnSortableId(s.id))}
               strategy={horizontalListSortingStrategy}
             >
-              <Stack direction="row" spacing={2} className={styles.boardColumns}>
-                {statuses.map(status => (
+              <Stack
+                direction="row"
+                spacing={isMobile ? 1.25 : 2}
+                className={styles.boardColumns}
+                sx={{
+                  minHeight: '100%',
+                  px: { xs: 0.5, sm: 0 },
+                  justifyContent: isMobile ? 'stretch' : 'flex-start',
+                  scrollSnapType: { xs: 'none', md: 'none' },
+                }}
+              >
+                {visibleStatuses.map(status => (
                   <BoardColumn
                     key={status.id}
                     status={status}
@@ -278,10 +374,11 @@ export function ProjectBoardView() {
                     displaySettings={displaySettings}
                     canManage={canManage}
                     doneStatusId={doneStatusId}
+                    alwaysShowAddTask={status.id === visibleStatuses[0]?.id}
                   />
                 )
                 )}
-                {canManage && <AddStatusColumn projectId={projectId!} />}
+                {canManage && !isMobile && <AddStatusColumn projectId={projectId!} />}
               </Stack>
             </SortableContext>
 

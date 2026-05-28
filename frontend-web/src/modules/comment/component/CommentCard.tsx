@@ -6,7 +6,8 @@ import {
   IconButton, 
   Tooltip, 
   Button, 
-  Stack 
+  Stack,
+  useMediaQuery,
 } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import RepeatIcon from '@mui/icons-material/Repeat';
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function CommentCard({ comment, taskId, projectMembers = [] }: Props) {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [openConfirm, setOpenConfirm] = useState(false);
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
@@ -79,7 +81,7 @@ export default function CommentCard({ comment, taskId, projectMembers = [] }: Pr
           display: "flex", 
           gap: 1.5, 
           mb: 2,
-          pl: comment.parent_id ? 7 : 0,     
+          pl: comment.parent_id ? (isMobile ? 2 : 7) : 0,     
         }}
       >
         <Avatar
@@ -90,49 +92,55 @@ export default function CommentCard({ comment, taskId, projectMembers = [] }: Pr
         </Avatar>
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <Typography fontSize={13} fontWeight={600} color="#111827">
-              {comment.user?.name}
-            </Typography>
-
-            {comment.parent && comment.parent.user && (
-              <Typography fontSize={13} color="#6b7280">
-                đã trả lời @{comment.parent.user.name}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mb: 0.5 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+              <Typography fontSize={13} fontWeight={600} color="#111827">
+                {comment.user?.name}
               </Typography>
-            )}
 
-            <Typography fontSize={12} color="#9ca3af" sx={{ ml: "auto" }}>
-              {formatDate(comment.created_at)}
-            </Typography>
+              {comment.parent && comment.parent.user && (
+                <Typography fontSize={12} color="#6b7280">
+                  đã trả lời @{comment.parent.user.name}
+                </Typography>
+              )}
+            </Box>
 
-            <Tooltip title="Trả lời">
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (!showReply) {
-                    setReplyContent(`@${comment.user?.name}\u200B `);
-                  } else {
-                    setReplyContent("");
-                  }
-                  setShowReply(!showReply);
-                }}
-                sx={{ color: "#2563eb" }}
-              >
-                <RepeatIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+              <Typography fontSize={12} color="#9ca3af">
+                {formatDate(comment.created_at)}
+              </Typography>
 
-            {isOwner && (
-              <Tooltip title="Xóa bình luận">
-                <IconButton
-                  size="small"
-                  onClick={handleDeleteClick}
-                  sx={{ color: "#e53935" }}
-                >
-                  <DeleteOutlineIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+                <Tooltip title="Trả lời">
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (!showReply) {
+                        setReplyContent(`@${comment.user?.name}\u200B `);
+                      } else {
+                        setReplyContent("");
+                      }
+                      setShowReply(!showReply);
+                    }}
+                    sx={{ color: "#2563eb" }}
+                  >
+                    <RepeatIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+
+                {isOwner && (
+                  <Tooltip title="Xóa bình luận">
+                    <IconButton
+                      size="small"
+                      onClick={handleDeleteClick}
+                      sx={{ color: "#e53935" }}
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
+            </Box>
           </Box>
 
           <Box
@@ -149,7 +157,7 @@ export default function CommentCard({ comment, taskId, projectMembers = [] }: Pr
 
           {showReply && (
             <Box sx={{ mt: 2, }}>
-              <Stack direction="row" spacing={1.5} alignItems="flex-start">
+              <Stack direction="row" spacing={1.25} alignItems="flex-start">
                 <Avatar 
                   src={currentUser?.picture} 
                   sx={{ width: 32, height: 32 }}
@@ -166,7 +174,7 @@ export default function CommentCard({ comment, taskId, projectMembers = [] }: Pr
                     minRows={1}
                     size="small"
                   />
-                  <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: "wrap" }}>
                     <Button
                       variant="contained"
                       size="small"
@@ -176,7 +184,8 @@ export default function CommentCard({ comment, taskId, projectMembers = [] }: Pr
                         bgcolor: "#2563eb",
                         "&:hover": { bgcolor: "#1d4ed8" },
                         textTransform: "none",
-                        px: 4,
+                        px: isMobile ? 2.25 : 4,
+                        borderRadius: isMobile ? "10px" : undefined,
                       }}
                     >
                       Trả lời

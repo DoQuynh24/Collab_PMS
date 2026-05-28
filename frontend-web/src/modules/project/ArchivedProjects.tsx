@@ -3,6 +3,7 @@ import {
   Box, Typography, Avatar, Chip, CircularProgress,
   Paper, Table, TableBody, TableCell, TableHead, TableRow,
   TextField, Tooltip, Stack, InputAdornment,
+  useMediaQuery,
 } from "@mui/material";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import SearchIcon from "@mui/icons-material/Search";
@@ -18,6 +19,7 @@ import { ArchivedProjectActionMenu } from "./component/ArchivedProjectActionMenu
 import styles from "./ArchivedProjects.module.scss";
 
 export default function ArchivedProjects() {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const { data: projects = [], isLoading } = useGetArchivedProjects();
   const { data: currentUser } = useGetCurrentUser();
   const { mutate: restore } = useRestoreProject();
@@ -64,7 +66,7 @@ export default function ArchivedProjects() {
           placeholder="Tìm kiếm dự án..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          sx={{ width: 320 }}
+          sx={{ width: { xs: '100%', sm: 320 } }}
           slotProps={{
             input: {
               startAdornment: (
@@ -87,6 +89,70 @@ export default function ArchivedProjects() {
           <Typography fontSize={14}>
             {search ? "Không tìm thấy dự án phù hợp" : "Kho lưu trữ trống"}
           </Typography>
+        </Box>
+      ) : isMobile ? (
+        <Box className={styles.mobileList}>
+          {filtered.map((project) => {
+            const color = getProjectColor(project.project_id);
+            const isOwner = project.owner_id === currentUser?.user_id;
+            const isAdmin = project.project_members?.some(
+              (m) => m.user_id === currentUser?.user_id && m.role === "admin"
+            );
+            const canRestore = isOwner || !!isAdmin;
+            const accessOption = PROJECT_ACCESS_OPTIONS.find((o) => o.value === project.access);
+
+            return (
+              <Paper key={project.project_id} elevation={0} className={styles.mobileCard}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}>
+                  <Avatar
+                    variant="rounded"
+                    className={styles.projectAvatar}
+                    sx={{ bgcolor: color.bg, color: color.text }}
+                  >
+                    {project.name.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, mb: 0.25 }}>
+                      <Typography className={styles.projectName}>{project.name}</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
+                        <Chip
+                          label={`${accessOption?.icon} ${accessOption?.label}`}
+                          size="small"
+                          className={styles.accessChip}
+                          sx={{
+                            bgcolor: project.access === "private" ? "#f3f4f6" : "#ecfdf5",
+                            color: project.access === "private" ? "#6b7280" : "#059669",
+                          }}
+                        />
+                        <Chip
+                          label={`${project.project_members?.length ?? 0} thành viên`}
+                          size="small"
+                          sx={{ fontSize: 11, height: 22, bgcolor: '#eff6ff', color: '#2563eb' }}
+                        />
+                      </Box>
+                    </Box>
+                    {project.description && (
+                      <Typography sx={{ fontSize: 12, color: '#6b7280', mt: 0.25 }}>
+                        {project.description}
+                      </Typography>
+                    )}
+                    <Typography fontSize={12} color="#9ca3af" sx={{ mt: 1 }}>
+                      Tạo ngày {new Date(project.created_at).toLocaleDateString("vi-VN", {
+                        day: "numeric", month: "short", year: "numeric",
+                      })}
+                    </Typography>
+                  </Box>
+                  <ArchivedProjectActionMenu
+                    project={project}
+                    canRestore={canRestore}
+                    isOwner={isOwner}
+                    onRestore={() => handleRestore(project)}
+                    onDelete={() => handleDelete(project)}
+                  />
+                </Box>
+              </Paper>
+            );
+          })}
         </Box>
       ) : (
         <Paper elevation={0} className={styles.table}>

@@ -10,6 +10,7 @@ import {
   Typography,
   Avatar,
   Tooltip,
+  useMediaQuery,
 } from "@mui/material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import SearchIcon from "@mui/icons-material/Search";
@@ -34,6 +35,7 @@ export default function AssigneeSelector({
   showTooltip = false,
   tooltipTitle = "Phân công",
 }: Props) {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const { data: currentUser } = useGetCurrentUser();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [search, setSearch] = useState("");
@@ -67,27 +69,27 @@ export default function AssigneeSelector({
         alignItems: "center",
         gap: 1,
         cursor: "pointer",
-        px: 1,
-        py: 0.75,
+        px: isMobile ? 0 : 1,
+        py: isMobile ? 0 : 0.75,
         borderRadius: "6px",
-        "&:hover": { background: "transparent", transform: "scale(1.15)"  }
+        "&:hover": isMobile ? { background: "transparent" } : { background: "transparent", transform: "scale(1.15)" }
       }}
     >
       {assignee ? (
         <>
-          <Avatar src={assignee.picture} sx={{ width: 22, height: 22 }}>
+          <Avatar src={assignee.picture} sx={{ width: isMobile ? 28 : 22, height: isMobile ? 28 : 22 }}>
             {assignee.name?.charAt(0)}
           </Avatar>
-          {showText && <Typography fontSize={13}>{assignee.name}</Typography>}
+          {showText && <Typography fontSize={13} fontWeight={isMobile ? 600 : 400}>{assignee.name}</Typography>}
         </>
       ) : (
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Avatar sx={{ width: 22, height: 22, bgcolor: "#e0e0e0" }}>
+            <Avatar sx={{ width: isMobile ? 28 : 22, height: isMobile ? 28 : 22, bgcolor: "#e0e0e0" }}>
               <PersonOutlineIcon fontSize="small" />
             </Avatar>
             {showUnassignedText && (
-              <Typography fontSize={13} color="#9ca3af">Chưa phân công</Typography>
+              <Typography fontSize={13} color="#9ca3af" fontWeight={isMobile ? 500 : 400}>Chưa phân công</Typography>
             )}
           </Box>
           {showUnassignedText && (
@@ -129,6 +131,7 @@ export default function AssigneeSelector({
         slotProps={{
           paper: {
             onMouseDown: (e) => e.stopPropagation(),
+            sx: { width: isMobile ? 'calc(100vw - 32px)' : undefined, maxWidth: 360 },
           },
         }}
       >

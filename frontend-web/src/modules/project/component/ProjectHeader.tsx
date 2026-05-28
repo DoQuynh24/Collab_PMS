@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, Tooltip, Avatar, Button, TextField, InputAdornment, MenuItem, Select, Popover } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip, Avatar, Button, TextField, InputAdornment, MenuItem, Select, Popover, useMediaQuery } from '@mui/material';
 import { Settings as SettingsIcon, PersonAdd as PersonAddIcon } from '@mui/icons-material';
 import { useContext, useState } from 'react';
 import LockIcon from '@mui/icons-material/Lock';
@@ -23,6 +23,7 @@ interface Props {
 }
 
 export function ProjectHeader({ projectName, projectId }: Props) {
+  const isMobile = useMediaQuery('(max-width:900px)');
   const [openAddMember, setOpenAddMember] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
@@ -61,52 +62,158 @@ export function ProjectHeader({ projectName, projectId }: Props) {
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid #e0e0e0', paddingTop: '0px' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: { xs: 'flex-start', md: 'center' },
+        justifyContent: 'space-between',
+        gap: { xs: 1.25, md: 2 },
+        py: { xs: 1.25, md: 1.5 },
+        px: { xs: 0.5, sm: 0 },
+        borderBottom: '1px solid #e0e0e0',
+        paddingTop: '0px',
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25, minWidth: 0, flex: 1 }}>
         <Avatar
           variant="rounded"
           sx={{
-            width: 32, height: 32,
-            fontSize: 14, fontWeight: 700,
+            width: { xs: 40, md: 32 }, height: { xs: 40, md: 32 },
+            fontSize: { xs: 16, md: 14 }, fontWeight: 700,
             bgcolor: getProjectColor(projectId ?? '').bg,
             color: getProjectColor(projectId ?? '').text,
-            borderRadius: '6px',
+            borderRadius: { xs: '12px', md: '6px' },
+            mt: { xs: 0.15, md: 0 },
+            flexShrink: 0,
           }}
         >
           {projectName?.charAt(0).toUpperCase() ?? 'P'}
         </Avatar>
 
-        <Typography fontWeight={600} fontSize={20}>{projectName}</Typography>
-
-        <Tooltip title={copiedId ? 'Đã sao chép!' : 'Mã dự án — Sao chép'}>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
           <Box
-            onClick={() => {
-              if (projectId) {
-                navigator.clipboard.writeText(projectId);
-                setCopiedId(true);
-                setTimeout(() => setCopiedId(false), 2000);
-              }
-            }}
             sx={{
-              display: 'flex', alignItems: 'center', gap: 0.5,
-              px: 1, py: 0.3, borderRadius: '4px',
-              bgcolor: '#f3f4f6', cursor: 'pointer',
-              '&:hover': { bgcolor: '#e5e7eb' },
-              transition: 'background 0.15s',
+              display: 'flex',
+              alignItems: { xs: 'center', md: 'center' },
+              justifyContent: 'space-between',
+              gap: 1,
             }}
           >
-            <Typography fontSize={11} color="#6b7280" sx={{ letterSpacing: 0.5 }}>
-              {projectId}
-            </Typography>
-            {copiedId
-              ? <CheckIcon sx={{ fontSize: 12, color: '#059669' }} />
-              : <ContentCopyIcon sx={{ fontSize: 12, color: '#9ca3af' }} />
-            }
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: { xs: 'flex-start', md: 'center' },
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 0.35, md: 1 },
+                minWidth: 0,
+                flex: 1,
+                justifyContent: { xs: 'center', md: 'flex-start' },
+                minHeight: { xs: 40, md: 'auto' },
+              }}
+            >
+              <Typography fontWeight={700} fontSize={{ xs: 16, md: 20 }} lineHeight={1.15} sx={{ minWidth: 0, pr: { xs: 0.5, md: 0 } }}>
+                {projectName}
+              </Typography>
+
+              {isMobile && (
+                <Tooltip title={copiedId ? 'Đã sao chép!' : 'Mã dự án — Sao chép'}>
+                  <Box
+                    onClick={() => {
+                      if (projectId) {
+                        navigator.clipboard.writeText(projectId);
+                        setCopiedId(true);
+                        setTimeout(() => setCopiedId(false), 2000);
+                      }
+                    }}
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.45,
+                      maxWidth: '100%',
+                      cursor: 'pointer',
+                      color: '#6b7280',
+                    }}
+                  >
+                    <Typography fontSize={11} color="#6b7280" sx={{ letterSpacing: 0.4 }} noWrap>
+                      {projectId}
+                    </Typography>
+                    {copiedId
+                      ? <CheckIcon sx={{ fontSize: 12, color: '#059669' }} />
+                      : <ContentCopyIcon sx={{ fontSize: 11, color: '#9ca3af' }} />
+                    }
+                  </Box>
+                </Tooltip>
+              )}
+
+              {!isMobile && (
+                <Tooltip title={copiedId ? 'Đã sao chép!' : 'Mã dự án — Sao chép'}>
+                  <Box
+                    onClick={() => {
+                      if (projectId) {
+                        navigator.clipboard.writeText(projectId);
+                        setCopiedId(true);
+                        setTimeout(() => setCopiedId(false), 2000);
+                      }
+                    }}
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      maxWidth: '100%',
+                      px: 1,
+                      py: 0.45,
+                      borderRadius: '999px',
+                      bgcolor: '#f3f4f6',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: '#e5e7eb' },
+                      transition: 'background 0.15s',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Typography fontSize={11} color="#6b7280" sx={{ letterSpacing: 0.5 }} noWrap>
+                      {projectId}
+                    </Typography>
+                    {copiedId
+                      ? <CheckIcon sx={{ fontSize: 12, color: '#059669' }} />
+                      : <ContentCopyIcon sx={{ fontSize: 12, color: '#9ca3af' }} />
+                    }
+                  </Box>
+                </Tooltip>
+              )}
+            </Box>
+
+            {isMobile && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                <StartCallButton projectId={projectId!} />
+
+                <Tooltip title="Thêm thành viên">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => canManage ? setOpenAddMember(true) : setInviteAnchorEl(e.currentTarget)}
+                    sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#5663ee' }}
+                  >
+                    <PersonAddIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+
+                <Tooltip title="Cài đặt dự án">
+                  <IconButton
+                    size="small"
+                    sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#626469' }}
+                    onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
+                  >
+                    <SettingsIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
           </Box>
-        </Tooltip>
+
+        </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box sx={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
         <StartCallButton projectId={projectId!} />
 
         <Tooltip title="Thêm thành viên">
@@ -126,7 +233,7 @@ export function ProjectHeader({ projectName, projectId }: Props) {
             onClose={() => setInviteAnchorEl(null)}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            slotProps={{ paper: { sx: { width: 400, borderRadius: '8px', p: 2 } } }}
+            slotProps={{ paper: { sx: { width: { xs: 'calc(100vw - 24px)', sm: 400 }, borderRadius: '12px', p: 2 } } }}
           >
             <Typography fontWeight={600} fontSize={15} mb={1.5}>Mời thành viên</Typography>
 

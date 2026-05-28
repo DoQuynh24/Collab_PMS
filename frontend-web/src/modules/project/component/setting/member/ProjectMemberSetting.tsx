@@ -49,7 +49,7 @@ export function ProjectMemberSettings() {
         <Typography variant="h5" fontWeight={600}>Quyền truy cập</Typography>
       </Box>
 
-      <Box sx={{ display: "flex", borderBottom: "1px solid #e5e7eb", mb: 3 }}>
+      <Box sx={{ display: "flex", borderBottom: "1px solid #e5e7eb", mb: 3, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {([
           { key: "members", label: "Thành viên", icon: <PeopleOutlinedIcon fontSize="small" />, badge: members.length },
           ...(canManage ? [{ key: "requests", label: "Yêu cầu tham gia", icon: <GroupAddOutlinedIcon fontSize="small" />, badge: pendingCount }] : []),
@@ -64,7 +64,8 @@ export function ProjectMemberSettings() {
               color: activeTab === tab.key ? "#5663ee" : "#6b7280",
               borderBottom: activeTab === tab.key ? "2px solid #5663ee" : "2px solid transparent",
               borderRadius: 0,
-              px: 2, py: 1.2,
+              px: { xs: 1.5, sm: 2 }, py: 1.2,
+              whiteSpace: 'nowrap',
               "&:hover": { bgcolor: "#f5f5f5", color: "#5663ee" },
             }}
           >

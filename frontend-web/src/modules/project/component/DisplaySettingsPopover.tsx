@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Box, Typography, IconButton, Popover, Switch, Divider, Tooltip,
+  Box, Typography, IconButton, Popover, Switch, Divider, Tooltip, useMediaQuery,
 } from "@mui/material";
 import TuneIcon from "@mui/icons-material/Tune";
 
@@ -31,6 +31,7 @@ const FIELDS: { key: keyof DisplaySettings; label: string; desc: string }[] = [
 ];
 
 export function DisplaySettingsPopover({ settings, onChange }: Props) {
+  const isMobile = useMediaQuery("(max-width:900px)");
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
 
   const activeCount = Object.values(settings).filter(Boolean).length;
@@ -42,7 +43,7 @@ export function DisplaySettingsPopover({ settings, onChange }: Props) {
         <IconButton
           onClick={(e) => setAnchor(e.currentTarget)}
           sx={{
-            borderRadius: "6px", padding: "5px",
+            borderRadius: isMobile ? "12px" : "6px", padding: "5px",
             border: "1px solid",
             borderColor: isCustomized ? "#5663ee" : "#d3d3d3",
             bgcolor: isCustomized ? "#eef0ff" : "transparent",

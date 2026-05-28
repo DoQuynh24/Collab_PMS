@@ -69,18 +69,18 @@ export function Account() {
 
   return (
     <Box>
-      <Paper elevation={0} sx={{ border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', mb: 3 }}>
-        <Box sx={{ height: 100, bgcolor: '#5663ee', background: 'linear-gradient(135deg, #5663ee 0%, #818cf8 100%)', display: 'flex', alignItems: 'flex-end', px: 3, pb: 1.5 }}>
-          <Typography fontSize={13} fontWeight={600} color="rgba(255,255,255,0.85)" letterSpacing={8} marginLeft={10}>
+      <Paper elevation={0} sx={{ border: '1px solid #e5e7eb', borderRadius: { xs: '18px', sm: '12px' }, overflow: 'hidden', mb: 3 }}>
+        <Box sx={{ height: { xs: 88, sm: 100 }, bgcolor: '#5663ee', background: 'linear-gradient(135deg, #5663ee 0%, #818cf8 100%)', display: 'flex', alignItems: 'flex-end', px: { xs: 2, sm: 3 }, pb: 1.5 }}>
+          <Typography fontSize={{ xs: 11, sm: 13 }} fontWeight={600} color="rgba(255,255,255,0.85)" letterSpacing={{ xs: 4, sm: 8 }} marginLeft={{ xs: 7, sm: 10 }}>
             TÀI KHOẢN CỦA TÔI
           </Typography>
         </Box>
 
-        <Box sx={{ px: 3, pb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 2, mt: -5, mb: 2 }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 2, mt: { xs: -4.5, sm: -5 }, mb: 2 }}>
             <Avatar
               src={user?.picture ? user.picture.replace('=s96-c', '=s200-c') : undefined}
-              sx={{ width: 80, height: 80, border: '4px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
+              sx={{ width: { xs: 72, sm: 80 }, height: { xs: 72, sm: 80 }, border: '4px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
             >
               {user?.name?.charAt(0).toUpperCase()}
             </Avatar>
@@ -94,16 +94,16 @@ export function Account() {
 
           <Divider sx={{ mb: 0 }} />
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', py: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'flex-end' }, py: 1 }}>
             <Typography fontSize={12} color="#9ca3af">Ai có thể thấy được nội dung này?</Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, py: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'flex-start' }, gap: 2, py: 2 }}>
             <Box sx={{ flex: 1 }}>
               <Typography fontSize={13} color="#374151" mb={0.8}>Họ tên</Typography>
               {editingName ? (
-                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-                  <TextField size="small" value={name} autoFocus sx={{ width: 280 }}
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, alignItems: { xs: 'stretch', sm: 'center' } }}>
+                  <TextField size="small" value={name} autoFocus sx={{ width: { xs: '100%', sm: 280 } }}
                     onChange={e => setName(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
                   />
@@ -126,11 +126,12 @@ export function Account() {
                 </Box>
               )}
             </Box>
-            <VisibilitySelect value={nameVisibility} onChange={setNameVisibility} />
+            <Box sx={{ alignSelf: { xs: 'flex-start', sm: 'auto' } }}>
+              <VisibilitySelect value={nameVisibility} onChange={setNameVisibility} />
+            </Box>
           </Box>
 
-          {/* Email */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, py: 2, borderTop: '1px solid #f3f4f6' }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'flex-start' }, gap: 2, py: 2, borderTop: '1px solid #f3f4f6' }}>
             <Box sx={{ flex: 1 }}>
               <Typography fontSize={13} fontWeight={500} color="#374151" mb={0.8}>Email</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -138,7 +139,9 @@ export function Account() {
                 <Typography fontSize={14} color="#374151">{user?.email}</Typography>
               </Box>
             </Box>
-            <VisibilitySelect value={emailVisibility} onChange={setEmailVisibility} />
+            <Box sx={{ alignSelf: { xs: 'flex-start', sm: 'auto' } }}>
+              <VisibilitySelect value={emailVisibility} onChange={setEmailVisibility} />
+            </Box>
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 2, borderTop: '1px solid #f3f4f6' }}>
@@ -156,11 +159,11 @@ export function Account() {
       </Paper>
 
       {projects.length > 0 && (
-        <Paper elevation={0} sx={{ border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden' }}>
-          <Box sx={{ px: 3, py: 2, borderBottom: '1px solid #f3f4f6' }}>
+        <Paper elevation={0} sx={{ border: '1px solid #e5e7eb', borderRadius: { xs: '18px', sm: '12px' }, overflow: 'hidden' }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, borderBottom: '1px solid #f3f4f6' }}>
             <Typography fontSize={15} fontWeight={600} color="#111827">Dự án đang tham gia</Typography>
           </Box>
-          <Box sx={{ p: 2, display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+          <Box sx={{ p: 2, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(auto-fit, minmax(180px, 1fr))' }, gap: 1.5 }}>
             {projects.map((project) => {
               const color = getProjectColor(project.project_id);
               return (
@@ -172,7 +175,7 @@ export function Account() {
                       px: 2, py: 1.2, border: '1px solid #e5e7eb', borderRadius: '8px',
                       cursor: 'pointer', bgcolor: '#fff',
                       '&:hover': { bgcolor: '#f8fafc', borderColor: '#5663ee' },
-                      transition: 'all 0.15s', minWidth: 180,
+                      transition: 'all 0.15s', minWidth: 0,
                     }}
                   >
                     <Avatar variant="rounded"
