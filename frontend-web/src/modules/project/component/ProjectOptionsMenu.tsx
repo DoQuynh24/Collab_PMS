@@ -1,5 +1,5 @@
 import { Menu, MenuItem, Divider } from '@mui/material';
-import { PersonAdd as PersonAddIcon, Star as StarIcon, Delete as DeleteIcon,
+import { PersonAdd as PersonAddIcon, Delete as DeleteIcon,
   Settings as SettingsIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import { AddMemberModal } from '../../project-member/component/AddMemberFormModal';
 import { useContext, useState } from 'react';
@@ -97,10 +97,6 @@ export function ProjectOptionsMenu({ anchorEl, onClose, projectId, projectName, 
         projectName={projectName}
         projectId={projectId}
         />
-
-      <MenuItem onClick={onClose} sx={{ py: 1.2 }}>
-        <StarIcon fontSize="small" sx={{ mr: 1.5 }} /> Thêm vào yêu thích
-      </MenuItem>
 
       <MenuItem onClick={handleSettingsClick} sx={{ py: 1.2 }}>
         <SettingsIcon fontSize="small" sx={{ mr: 1.5 }} /> Cài đặt dự án

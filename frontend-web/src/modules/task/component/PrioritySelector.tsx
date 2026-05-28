@@ -31,8 +31,6 @@ export default function PrioritySelector({
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
-    // Dùng preventDefault để ngăn mousedown bubble lên document
-    // (quan trọng với AddTaskInline dùng mousedown listener)
     event.preventDefault();
     setAnchorEl(event.currentTarget);
   };

@@ -187,15 +187,17 @@ export function ProjectHeader({ projectName, projectId }: Props) {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
                 <StartCallButton projectId={projectId!} />
 
-                <Tooltip title="Thêm thành viên">
-                  <IconButton
-                    size="small"
-                    onClick={(e) => canManage ? setOpenAddMember(true) : setInviteAnchorEl(e.currentTarget)}
-                    sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#5663ee' }}
-                  >
-                    <PersonAddIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                {canManage && (
+                  <Tooltip title="Thêm thành viên">
+                    <IconButton
+                      size="small"
+                      onClick={() => setOpenAddMember(true)}
+                      sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#5663ee' }}
+                    >
+                      <PersonAddIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
 
                 <Tooltip title="Cài đặt dự án">
                   <IconButton
@@ -216,15 +218,17 @@ export function ProjectHeader({ projectName, projectId }: Props) {
       <Box sx={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
         <StartCallButton projectId={projectId!} />
 
-        <Tooltip title="Thêm thành viên">
-          <IconButton
-            size="small"
-            onClick={(e) => canManage ? setOpenAddMember(true) : setInviteAnchorEl(e.currentTarget)}
-            sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#5663ee' }}
-          >
-            <PersonAddIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        {canManage && (
+          <Tooltip title="Thêm thành viên">
+            <IconButton
+              size="small"
+              onClick={() => setOpenAddMember(true)}
+              sx={{ border: '1px solid #d3d3d3', borderRadius: '6px', p: '5px', color: '#5663ee' }}
+            >
+              <PersonAddIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
 
         {canManage && (
           <Popover
