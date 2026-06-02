@@ -34,6 +34,8 @@ export default function TaskRow({
   const assigneeMember = projectMembers.find((m) => m.user_id === task.assignee_id);
   const assignee = assigneeMember?.user; 
   const currentStatus = statuses.find((s) => s.id === task.status_id);
+  const doneStatusId = statuses.length > 0 ? statuses[statuses.length - 1].id : null;
+  const isDone = doneStatusId != null && task.status_id === doneStatusId;
 
   return (
     <>
@@ -91,7 +93,7 @@ export default function TaskRow({
 
         <td>
           {task.deadline
-            ? <DeadlineChip deadline={task.deadline} />
+            ? <DeadlineChip deadline={task.deadline} isDone={isDone} />
             : <span style={{ fontSize: 13, color: "#9ca3af" }}>Chưa có hạn</span>
           }
         </td>

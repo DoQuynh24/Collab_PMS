@@ -30,14 +30,12 @@ export class DeadlineReminderService {
   async handleDeadlineReminder() {
     this.logger.log('Running deadline reminder cron job...');
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStart = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
-    const tomorrowEnd = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate() + 1);
+    const todayStr = this.getLocalDateString(0);
+    const tomorrowStr = this.getLocalDateString(1);
 
     const tasks = await this.taskRepo.find({
       where: {
-        deadline: Between(tomorrowStart, tomorrowEnd) as any,
+        deadline: tomorrowStr as any,
         is_archived: false,
         deadline_reminded: false,
       },
@@ -63,9 +61,7 @@ export class DeadlineReminderService {
       }
     }
 
-    const deadlineStr = tomorrowStart.toLocaleDateString('vi-VN', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-    });
+    const deadlineStr = this.formatDateForDisplay(tomorrowStr);
 
     let sentCount = 0;
 
@@ -113,12 +109,11 @@ export class DeadlineReminderService {
   async handleOverdueReminder() {
     this.logger.log('Running overdue task reminder cron job...');
 
-    const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayStr = this.getLocalDateString(0);
 
     const tasks = await this.taskRepo.find({
       where: {
-        deadline: LessThan(todayStart) as any,
+        deadline: LessThan(todayStr) as any,
         is_archived: false,
         overdue_notified: false,
       },
@@ -165,9 +160,7 @@ export class DeadlineReminderService {
       }
 
       const projectName = task.project?.name ?? 'dự án';
-      const deadlineFormatted = new Date(task.deadline!).toLocaleDateString('vi-VN', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-      });
+      const deadlineFormatted = this.formatDateForDisplay(task.deadline as any);
 
       await this.notificationService.create({
         user_id: task.assignee_id,
@@ -196,5 +189,26 @@ export class DeadlineReminderService {
     }
 
     this.logger.log(`Overdue reminder sent for ${sentCount} tasks.`);
+  }
+
+  private getLocalDateString(offsetDays: number) {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+    const vietnamMs = utcMs + 7 * 60 * 60 * 1000;
+    const target = new Date(vietnamMs);
+    target.setUTCDate(target.getUTCDate() + offsetDays);
+    const year = target.getUTCFullYear();
+    const month = String(target.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(target.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private formatDateForDisplay(dateValue: string | Date) {
+    const raw = typeof dateValue === 'string'
+      ? dateValue
+      : `${dateValue.getFullYear()}-${String(dateValue.getMonth() + 1).padStart(2, '0')}-${String(dateValue.getDate()).padStart(2, '0')}`;
+
+    const [year, month, day] = raw.split('-');
+    return `${day}/${month}/${year}`;
   }
 }

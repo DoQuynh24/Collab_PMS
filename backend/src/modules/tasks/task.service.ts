@@ -69,9 +69,7 @@ export class TaskService {
 
     const task = this.taskRepo.create({
       ...dto,
-      deadline: dto.deadline
-        ? new Date(dto.deadline)
-        : undefined,
+      deadline: dto.deadline || undefined,
       created_by: userId,
       order_index: orderIndex,
     });
@@ -140,7 +138,10 @@ export class TaskService {
     const prevStatus = await this.statusRepo.findOne({ where: { id: prevStatusId } });
     const prevStatusName = prevStatus?.name ?? '';
 
-    Object.assign(task, dto);    if (dto.deadline) task.deadline = new Date(dto.deadline);
+    Object.assign(task, dto);
+    if (dto.deadline !== undefined) {
+      task.deadline = dto.deadline ? (dto.deadline as any) : undefined;
+    }
 
     const saved = await this.taskRepo.save(task);
 
