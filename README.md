@@ -1,4 +1,4 @@
-# Collab PMS — Project Management System
+<img width="1907" height="1030" alt="image" src="https://github.com/user-attachments/assets/74f1cd9a-2aee-4f13-b6b5-f787dae7c664" /># Collab PMS — Project Management System
 
 Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJS (backend) và React + Vite (frontend).
 
@@ -40,6 +40,7 @@ Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJ
 - Phân quyền 3 cấp: **Chủ sở hữu** (toàn quyền), **Admin** (quản lý thành viên, trạng thái, cài đặt), **Thành viên** (tạo và chỉnh sửa task)
 - Dự án **Riêng tư** hoặc **Công khai**
 - Mời thành viên qua email hoặc chia sẻ mã dự án
+<img width="1907" height="1030" alt="image" src="https://github.com/user-attachments/assets/00c8e57c-91c0-4bb4-bc53-3430d8337a9c" />
 
 ### Quản lý nhiệm vụ (Task)
 - Bảng Kanban với kéo thả (drag & drop) — thay đổi trạng thái và sắp xếp cột
@@ -51,12 +52,14 @@ Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJ
 - Ẩn task đã hoàn thành
 - Lưu trữ (archive) và khôi phục task
 - Xuất dữ liệu Excel với định dạng đầy đủ
+<img width="1917" height="1020" alt="image" src="https://github.com/user-attachments/assets/7fecb833-c733-431c-bbd8-1bccf23343e7" />
 
 ### Tài liệu đính kèm
 - Upload ảnh, PDF, Word, Excel, PowerPoint, ZIP lên Cloudinary
 - Kéo thả, click chọn hoặc Ctrl+V để dán ảnh
 - Preview trước khi upload, xóa file với confirm modal
 - Phân quyền xóa: người tải lên, người tạo task, Admin, Chủ sở hữu
+<img width="1911" height="1017" alt="image" src="https://github.com/user-attachments/assets/a040a5d7-eb98-4d75-a035-65d3dc2c6d3b" />
 
 ### Bình luận & @mention
 - Bình luận trên task với hỗ trợ @mention thành viên
@@ -68,6 +71,9 @@ Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJ
 - Email: qua SendGrid cho các sự kiện quan trọng
 - Cron jobs: nhắc nhở deadline sắp tới (8h sáng VN) và task quá hạn (8h sáng VN)
 - Tùy chỉnh thông báo (bật/tắt từng loại)
+- <img width="1917" height="1028" alt="image" src="https://github.com/user-attachments/assets/646c101b-a1a7-4560-bc00-7a01f1cc0f57" />
+
+<img width="1918" height="1032" alt="image" src="https://github.com/user-attachments/assets/fef5b35e-9897-40c9-920c-262855a38d7b" />
 
 ### Video Call
 - Gọi video nhóm theo từng dự án sử dụng Agora.io (WebRTC)
@@ -80,11 +86,13 @@ Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJ
 - Thông báo in-app + email khi đặt lịch và khi hủy lịch
 - Nhắc nhở tự động 5 phút trước khi cuộc họp bắt đầu (cron job)
 - Người tạo có thể hủy lịch khi chưa tới giờ
+<img width="1918" height="1031" alt="image" src="https://github.com/user-attachments/assets/c9c99cc9-686b-4525-95bc-d4ccf9f4aa79" />
 
 ### Cài đặt dự án
 - Quản lý trạng thái tùy chỉnh (thêm, đổi tên, sắp xếp, xóa)
 - Cài đặt thông báo riêng cho từng dự án
 - Quản lý thành viên và phân quyền
+<img width="1915" height="1031" alt="image" src="https://github.com/user-attachments/assets/f4a5694b-dec1-4de0-8563-5ba4c1f71bc5" />
 
 ## Cấu trúc dự án
 
