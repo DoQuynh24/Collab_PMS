@@ -1,5 +1,3 @@
-<img width="1907" height="1030" alt="image" src="https://github.com/user-attachments/assets/74f1cd9a-2aee-4f13-b6b5-f787dae7c664" /># Collab PMS — Project Management System
-
 Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJS (backend) và React + Vite (frontend).
 
 ## Công nghệ sử dụng
