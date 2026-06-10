@@ -1,4 +1,4 @@
-Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJS (backend) và React + Vite (frontend).
+## Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJS (backend) và React + Vite (frontend).
 
 ## Công nghệ sử dụng
 
@@ -69,14 +69,15 @@ Hệ thống quản lý dự án và công việc nhóm, xây dựng với NestJ
 - Email: qua SendGrid cho các sự kiện quan trọng
 - Cron jobs: nhắc nhở deadline sắp tới (8h sáng VN) và task quá hạn (8h sáng VN)
 - Tùy chỉnh thông báo (bật/tắt từng loại)
-- <img width="1917" height="1028" alt="image" src="https://github.com/user-attachments/assets/646c101b-a1a7-4560-bc00-7a01f1cc0f57" />
-
+<img width="1917" height="1028" alt="image" src="https://github.com/user-attachments/assets/646c101b-a1a7-4560-bc00-7a01f1cc0f57" />
 <img width="1918" height="1032" alt="image" src="https://github.com/user-attachments/assets/fef5b35e-9897-40c9-920c-262855a38d7b" />
 
 ### Video Call
 - Gọi video nhóm theo từng dự án sử dụng Agora.io (WebRTC)
 - Thông báo in-app real-time khi có người khởi tạo cuộc gọi (qua Socket.IO)
 - Hỗ trợ bật/tắt camera, microphone, chia sẻ màn hình, phóng to màn hình chia sẻ
+<img width="1913" height="1032" alt="image" src="https://github.com/user-attachments/assets/392a272e-899f-4314-b064-4be2ec4d56f1" />
+
 
 ### Lịch & Đặt lịch họp
 - Trang Lịch hiển thị task deadline và lịch họp theo tháng
